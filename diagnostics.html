@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>فلوسي — الفحوصات</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="فلوسي">
+<meta name="theme-color" content="#0f5f5a">
+<style>
+:root{--bg:#eef2f1;--ink:#16282a;--mute:#5a6e70;--line:#c9d6d4;--acc:#0f5f5a;--ok:#1f7a3d;--bad:#b3261e;--wait:#8a5a00;--btn:#0f5f5a;--btnt:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#10191a;--ink:#e6efee;--mute:#93a6a8;--line:#2b3b3d;--acc:#5fc4bb;--ok:#6fd08a;--bad:#ff8a80;--wait:#e0b050;--btn:#5fc4bb;--btnt:#0b1415}}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0 auto;max-width:560px;padding:calc(env(safe-area-inset-top,0px) + 18px) 18px calc(env(safe-area-inset-bottom,0px) + 40px);font:16px/1.65 -apple-system,"SF Arabic","Geeza Pro",system-ui,sans-serif;color:var(--ink)}
+h1{font-size:1.6rem;margin:0 0 4px}
+p{margin:0 0 8px}.mute{color:var(--mute);font-size:.9rem}
+section{border-top:1px solid var(--line);padding:14px 0}
+h2{font-size:1.05rem;margin:0 0 4px}
+.st{font-weight:600}.ok{color:var(--ok)}.bad{color:var(--bad)}.wait{color:var(--wait)}
+button,.btn{font:inherit;background:var(--btn);color:var(--btnt);border:0;border-radius:8px;padding:9px 14px;margin:6px 0 0 8px;min-height:44px}
+button.alt{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+input[type=text]{font:inherit;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);direction:ltr;text-align:left}
+input[type=file]{display:none}
+.key{direction:ltr;text-align:left;font:600 1.1rem ui-monospace,Menlo,monospace;letter-spacing:.05em;padding:10px;border:1px dashed var(--acc);border-radius:8px;margin:6px 0}
+ol{margin:6px 0 0;padding-inline-start:20px}li{font-size:.9rem;color:var(--mute)}li.f{color:var(--bad)}
+textarea{width:100%;height:150px;direction:ltr;font:12px ui-monospace,Menlo,monospace;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+</style>
+</head>
+<body>
+<h1>فلوسي — الفحوصات</h1>
+<p><a href="./">رجوع إلى التطبيق</a></p>
+<p class="mute">لا أرقام حقيقية هنا بعد. الإصدار <span id="ver"></span></p>
+<div id="upd" class="st wait" hidden></div>
+
+<section><h2>المرحلة 1 — الاختبار الذاتي للمحرك</h2>
+<div id="s-p1" class="st wait">لم يُشغَّل بعد</div>
+<button id="b-p1">شغّل الاختبارات</button><button id="b-p1c" class="alt">انسخ النتائج</button>
+<ol id="p1list"></ol></section>
+
+<section><h2>١. التثبيت</h2><div id="s-install" class="st wait">…</div></section>
+
+<section><h2>٢. بقاء البيانات</h2>
+<div id="s-data" class="st wait">…</div>
+<button id="b-start">ابدأ الاختبار</button><button id="b-key" class="alt">أظهر مفتاح الاسترداد</button>
+<div id="keybox" class="key" hidden></div>
+<ol id="log"></ol></section>
+
+<section><h2>٣. العمل دون إنترنت</h2>
+<div id="s-off" class="st wait">…</div>
+<p class="mute">فعّل وضع الطيران، أغلق التطبيق تماماً، ثم افتحه من الأيقونة.</p></section>
+
+<section><h2>٤. التخزين الدائم</h2><div id="s-persist" class="st wait">…</div></section>
+
+<section><h2>٥. النسخ الاحتياطي والاستعادة</h2>
+<div id="s-bk" class="st wait">…</div>
+<button id="b-prep">جهّز نسخة مشفّرة</button><button id="b-save" class="alt" hidden>احفظ النسخة</button>
+<button id="b-wipe" class="alt">امسح بيانات الاختبار</button>
+<p class="mute" style="margin-top:10px">للاستعادة: اكتب المفتاح ثم اختر الملف.</p>
+<input type="text" id="rkey" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off">
+<label class="btn" for="rfile" style="display:inline-block">استعد من ملف</label><input type="file" id="rfile" accept="*/*">
+<button id="b-tamper" class="alt">اختبر رفض الملف التالف</button>
+<div id="s-rs" class="st wait" style="margin-top:6px"></div></section>
+
+<section><h2>٦. القفل ببصمة الوجه</h2>
+<div id="s-pk" class="st wait">…</div>
+<button id="b-pk">اختبر بصمة الوجه</button>
+<p class="mute">ينشئ مفتاح مرور تجريبياً ثم يتحقق منه. لا يحتوي أي بيانات.</p></section>
+
+<section><h2>التقرير</h2>
+<p class="mute">اضغط «انسخ التقرير» ثم الصقه لي في المحادثة.</p>
+<button id="b-rep">انسخ التقرير</button>
+<textarea id="rep" readonly hidden></textarea></section>
+
+<script src="core.js"></script>
+<script src="engine.js"></script>
+<script src="selftest.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const db = new Promise((res, rej) => { const r = indexedDB.open('flousi-p0', 1);
+  r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('meta'); d.createObjectStore('records', { keyPath: 'id' }); d.createObjectStore('log', { autoIncrement: true }); };
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+// كل عملية كتابة تنتظر اكتمال المعاملة (oncomplete) قبل اعتبارها محفوظة
+const tx = (names, mode, fn) => db.then(d => new Promise((res, rej) => {
+  const t = d.transaction(names, mode); const r = fn(t);
+  t.oncomplete = () => res(r && 'result' in r ? r.result : undefined); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); }));
+const get = k => tx('meta', 'readonly', t => t.objectStore('meta').get(k));
+const put = (k, v) => tx('meta', 'readwrite', t => { t.objectStore('meta').put(v, k); });
+const all = n => tx(n, 'readonly', t => t.objectStore(n).getAll());
+const fmt = ms => new Date(ms).toLocaleString('ar-IQ-u-nu-latn', { dateStyle: 'short', timeStyle: 'short' });
+const set = (id, cls, txt) => { const e = $(id); e.className = 'st ' + cls; e.textContent = txt; };
+const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+let ready = null, lastBytes = null;
+
+async function refresh() {
+  set('#s-install', standalone() ? 'ok' : 'bad', standalone() ? '✓ مفتوح من الشاشة الرئيسية' : '✗ مفتوح في Safari: أضِفه إلى الشاشة الرئيسية ثم افتحه من الأيقونة');
+  const can = await get('canary'), recs = await all('records');
+  if (!can) set('#s-data', 'wait', 'لم يبدأ الاختبار بعد');
+  else { const fp = await FLS.fingerprint(recs), same = fp === await get('fp');
+    const n = (await all('log')).length;
+    set('#s-data', same && recs.length === 300 ? 'ok' : 'bad', `${same && recs.length === 300 ? '✓' : '✗'} بدأ ${fmt(can.created)} · فُتح التطبيق ${n} مرة · ${recs.length} سجلاً · البصمة ${same ? 'مطابقة' : 'مختلفة'}`); }
+  const logs = (await all('log')).slice(-8).reverse();
+  $('#log').innerHTML = logs.map(l => `<li>${fmt(l.t)} — ${l.online ? 'متصل' : 'بلا إنترنت'} — ${l.sa ? 'من الأيقونة' : 'من Safari'}</li>`).join('');
+  const ctl = !!navigator.serviceWorker && !!navigator.serviceWorker.controller;
+  set('#s-off', ctl ? 'ok' : 'wait', `${ctl ? '✓ ملفات التطبيق محفوظة على الهاتف' : '… لم تُحفظ الملفات بعد، أعد فتح التطبيق مرة'} · الحالة الآن: ${navigator.onLine ? 'متصل' : 'بلا إنترنت'}`);
+  const pr = await get('persist'), est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null;
+  set('#s-persist', pr && pr.now ? 'ok' : 'wait', pr ? `${pr.now ? '✓ ثابت' : '… غير مضمون'} (قبل الطلب: ${pr.before ? 'ثابت' : 'غير ثابت'}) · المستخدم ${est ? Math.round(est.usage / 1024) + ' ك.ب' : '؟'}` : '…');
+  const bk = await get('lastBackup');
+  set('#s-bk', bk ? 'ok' : 'wait', bk ? `✓ آخر نسخة ${fmt(bk.t)} · ${bk.how} · ${bk.size} بايت` : 'لا توجد نسخة بعد');
+  const rs = await get('lastRestore'); if (rs) set('#s-rs', rs.ok ? 'ok' : 'bad', rs.msg);
+  const pk = await get('passkey'); if (pk) set('#s-pk', pk.ok ? 'ok' : 'bad', pk.msg); else set('#s-pk', 'wait', 'لم يُجرَّب بعد');
+}
+async function showKey() { const k = await get('key'); const b = $('#keybox'); b.hidden = !k; if (k) b.textContent = FLS.fmtKey(k); }
+
+$('#b-start').onclick = async () => {
+  if (!(await get('canary'))) await put('canary', { id: crypto.randomUUID(), created: Date.now() });
+  if (!(await get('key'))) await put('key', FLS.newKey());
+  const recs = Array.from({ length: 300 }, (_, i) => ({ id: 'r' + String(i + 1).padStart(4, '0'), d: '2026-11-' + String(1 + i % 28).padStart(2, '0'), iqd: String((i % 3 ? 1 : -1) * 1000 * (i + 1)), note: 'اختبار ' + (i + 1) }));
+  await tx('records', 'readwrite', t => { recs.forEach(r => t.objectStore('records').put(r)); });
+  await put('fp', await FLS.fingerprint(recs)); await showKey(); await refresh();
+};
+$('#b-key').onclick = async () => { $('#keybox').hidden = !$('#keybox').hidden; await showKey(); if ($('#keybox').textContent === '') $('#keybox').textContent = 'ابدأ الاختبار أولاً'; $('#keybox').hidden = false; };
+$('#b-prep').onclick = async () => {
+  const key = await get('key'); if (!key) { set('#s-bk', 'bad', 'ابدأ الاختبار أولاً'); return; }
+  set('#s-bk', 'wait', '… جارٍ التشفير');
+  const recs = await all('records');
+  lastBytes = await FLS.encrypt({ v: 1, created: Date.now(), canary: await get('canary'), fp: await FLS.fingerprint(recs), records: recs }, key);
+  ready = new File([lastBytes], 'flousi-test-' + new Date().toISOString().slice(0, 10) + '.flousibak', { type: 'application/octet-stream' });
+  $('#b-save').hidden = false; set('#s-bk', 'wait', 'النسخة جاهزة، اضغط «احفظ النسخة»');
+};
+$('#b-save').onclick = async () => {
+  let how = 'تنزيل';
+  try { if (navigator.canShare && navigator.canShare({ files: [ready] })) { await navigator.share({ files: [ready] }); how = 'مشاركة'; } else throw 0; }
+  catch (e) { if (e && e.name === 'AbortError') how = 'أُلغيت'; else { const a = document.createElement('a'); a.href = URL.createObjectURL(ready); a.download = ready.name; a.click(); how = 'تنزيل'; } }
+  await put('lastBackup', { t: Date.now(), how, size: lastBytes.length }); await refresh();
+};
+$('#b-wipe').onclick = async () => {
+  await tx(['records', 'meta'], 'readwrite', t => { t.objectStore('records').clear(); t.objectStore('meta').clear(); });
+  $('#keybox').hidden = true; await refresh(); set('#s-rs', 'wait', 'مُسحت بيانات الاختبار (سجل الفتح باقٍ)');
+};
+$('#rfile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return; e.target.value = '';
+  try {
+    const p = await FLS.decrypt(new Uint8Array(await f.arrayBuffer()), $('#rkey').value);
+    if (await FLS.fingerprint(p.records) !== p.fp) throw new Error('fp');
+    await tx(['records', 'meta'], 'readwrite', t => { const r = t.objectStore('records'), m = t.objectStore('meta'); r.clear(); p.records.forEach(x => r.put(x)); m.put(p.canary, 'canary'); m.put(p.fp, 'fp'); m.put(FLS.normKey($('#rkey').value), 'key'); });
+    await put('lastRestore', { ok: true, msg: `✓ استُعيد ${p.records.length} سجلاً والبصمة مطابقة` });
+  } catch (err) { await put('lastRestore', { ok: false, msg: '✗ ' + (err.message === 'auth' ? 'المفتاح خاطئ أو الملف تالف' : err.message === 'format' ? 'ملف غير صالح' : 'فشلت الاستعادة: ' + err.message) }); }
+  await showKey(); await refresh();
+};
+$('#b-tamper').onclick = async () => {
+  if (!lastBytes) { set('#s-rs', 'bad', 'جهّز نسخة أولاً'); return; }
+  const key = await get('key'), bad = lastBytes.slice(); bad[bad.length - 20] ^= 1; const r = [];
+  for (const [n, fn] of [['ملف معدَّل بايتاً', () => FLS.decrypt(bad, key)], ['مفتاح خاطئ', () => FLS.decrypt(lastBytes, FLS.newKey())]]) { try { await fn(); r.push(n + ': قُبل ✗'); } catch (e) { r.push(n + ': رُفض ✓'); } }
+  set('#s-rs', r.every(x => x.endsWith('✓')) ? 'ok' : 'bad', r.join(' · '));
+};
+$('#b-pk').onclick = async () => {
+  const rnd = n => crypto.getRandomValues(new Uint8Array(n)), id = location.hostname;
+  try {
+    const c = await navigator.credentials.create({ publicKey: { challenge: rnd(32), rp: { name: 'Flousi', id }, user: { id: rnd(16), name: 'flousi-test', displayName: 'Flousi test' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' }, timeout: 60000 } });
+    await navigator.credentials.get({ publicKey: { challenge: rnd(32), rpId: id, allowCredentials: [{ type: 'public-key', id: c.rawId }], userVerification: 'required', timeout: 60000 } });
+    await put('passkey', { ok: true, msg: '✓ نجح التحقق ببصمة الوجه' });
+  } catch (e) { await put('passkey', { ok: false, msg: '✗ ' + e.name + ': ' + String(e.message).slice(0, 80) }); }
+  await refresh();
+};
+$('#b-rep').onclick = async () => {
+  await refresh(); const t = ['p0-v1 ' + new Date().toISOString(), 'المثبت: ' + $('#s-install').textContent, 'البيانات: ' + $('#s-data').textContent, 'دون إنترنت: ' + $('#s-off').textContent, 'التخزين: ' + $('#s-persist').textContent, 'النسخ: ' + $('#s-bk').textContent, 'الاستعادة: ' + $('#s-rs').textContent, 'البصمة: ' + $('#s-pk').textContent, 'آخر فتحات:', ...[...$('#log').children].map(li => ' ' + li.textContent)].join('\n');
+  const a = $('#rep'); a.hidden = false; a.value = t; a.select();
+  try { await navigator.clipboard.writeText(t); } catch (e) {}
+};
+
+(async () => {
+  await tx('log', 'readwrite', t => { t.objectStore('log').add({ t: Date.now(), online: navigator.onLine, sa: standalone() }); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').then(() => navigator.serviceWorker.ready).then(refresh).catch(() => {});
+  if (navigator.storage && navigator.storage.persist) { const before = await navigator.storage.persisted(); const now = before || await navigator.storage.persist(); await put('persist', { before, now }); }
+  await showKey(); await refresh();
+})();
+addEventListener('online', refresh); addEventListener('offline', refresh);
+</script>
+<script>
+'use strict';
+const VER = 'p1-v2'; // ارفع هذا الرقم مع V في sw.js عند كل إصدار
+$('#ver').textContent = VER;
+function runP1() {
+  const r = FSelfTest.run(); window._p1 = r; const ok = r.passed === r.total;
+  set('#s-p1', ok ? 'ok' : 'bad', `${ok ? '✓' : '✗'} نجح ${r.passed} من ${r.total}`);
+  $('#p1list').innerHTML = r.results.map(x => `<li class="${x.ok ? '' : 'f'}">${x.ok ? '✓' : '✗'} ${x.id} ${x.name}${x.ok ? '' : ' — ' + x.msg}</li>`).join('');
+}
+$('#b-p1').onclick = runP1;
+$('#b-p1c').onclick = async () => { if (!window._p1) runP1(); const t = VER + '\n' + FSelfTest.report(window._p1);
+  try { await navigator.clipboard.writeText(t); } catch (e) {} const a = $('#rep'); a.hidden = false; a.value = t; };
+// تحديث تلقائي: يفحص الإصدار الجديد عند كل عودة للتطبيق، ويعرض رسالة بعد تنزيله
+if ('serviceWorker' in navigator) {
+  const had = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!had) return; const u = $('#upd'); u.hidden = false;
+    u.innerHTML = 'تم تنزيل إصدار جديد. <button id="b-upd">أعد التشغيل الآن</button>'; $('#b-upd').onclick = () => location.reload(); });
+  const chk = () => navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) chk(); }); chk();
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
-const C = 'flousi-p0-v1', F = ['./', './index.html', './core.js', './manifest.webmanifest', './apple-touch-icon.png', './icon-512.png'];
-self.addEventListener('install', e => e.waitUntil(caches.open(C).then(c => c.addAll(F)).then(() => self.skipWaiting())));
-self.addEventListener('activate', e => e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== C).map(x => caches.delete(x)))).then(() => self.clients.claim())));
+const V = 'f1-v1', C = 'flousi-' + V; // ارفع V مع VER في index.html عند كل إصدار
+const F = ['./', './index.html', './core.js', './engine.js', './logic.js', './store.js', './backup.js', './selftest.js', './selftest2.js', './app.js', './diagnostics.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-512.png'];
+// reload: يتجاوز مخزن المتصفح المؤقت فلا يُخزَّن ملف قديم. لا بيانات للمستخدم هنا إطلاقاً (هي في IndexedDB).
+self.addEventListener('install', e => e.waitUntil(caches.open(C).then(c => c.addAll(F.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())));
+self.addEventListener('activate', e => e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x.startsWith('flousi-') && x !== C).map(x => caches.delete(x)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(r => r || fetch(e.request).catch(() => caches.match('./index.html'))));
