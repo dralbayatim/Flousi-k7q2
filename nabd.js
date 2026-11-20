@@ -16,7 +16,7 @@ const FN = (() => {
     if (pending) return pending;
     if (!force && M && nowImpl() - at < TTL) return M;
     pending = (async () => {
-      try { const r = await fetchImpl(SRC, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); M = validate(await r.json()); at = nowImpl(); err = null; }
+      try { const r = await fetchImpl(force ? SRC + '?t=' + nowImpl() : SRC, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); M = validate(await r.json()); at = nowImpl(); err = null; }
       catch (e) { err = (e && e.message) || String(e); }
       finally { pending = null; }
       return M;
@@ -50,7 +50,7 @@ const FN = (() => {
   const AUX = { series: null, history: null, ref: null, err: null, at: 0 }; let auxPending = null;
   async function loadAux(force) {
     if (auxPending) return auxPending; if (!force && AUX.at && nowImpl() - AUX.at < TTL) return AUX;
-    auxPending = (async () => { const get = async (u, schema) => { try { const r = await fetchImpl(u, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); if (!j || j.schema !== schema) throw new Error('صيغة'); return j; } catch (e) { AUX.err = u + ': ' + e.message; return null; } };
+    auxPending = (async () => { const get = async (u, schema) => { try { const r = await fetchImpl(force ? u + '?t=' + nowImpl() : u, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); if (!j || j.schema !== schema) throw new Error('صيغة'); return j; } catch (e) { AUX.err = u + ': ' + e.message; return null; } };
       const [sr, hi, rf] = await Promise.all([get('./data/series.json', 'nabd-series/1'), get('./data/history.json', 'nabd-history/1'), AUX.ref ? AUX.ref : get('./data/ref-metals.json', 'nabd-ref/1')]);
       if (sr) AUX.series = sr; if (hi) AUX.history = hi; if (rf) AUX.ref = rf; AUX.at = nowImpl(); auxPending = null; return AUX; })();
     return auxPending;
@@ -146,8 +146,8 @@ const pctChange = (ser, days) => { if (ser.length < 2) return null; const last =
       else if (g.value >= hi * 0.997) push(`الذهب عند أعلى مستوى في سنة (${fx(g.value)}$)`, g.data_time, 'Gold-API', 'warn'); }
     if (s && s.live === 'current') { const d1 = pctChange(ss, 1); if (d1 != null && Math.abs(d1) >= 1.5) push(`${d1 > 0 ? '🔺 الفضة ترتفع' : '🔻 الفضة تهبط'} ${r1(Math.abs(d1))}% إلى ${fx(s.value)}$`, s.data_time, 'Gold-API'); }
     const p = ind('usd_iqd_parallel'); if (p && p.value) { const ps = (((AUX.history || {}).intraday || {}).usd_iqd_parallel || []).map(([t, v]) => [iso(t), v]), d = ps.length > 1 ? ps[ps.length - 1][1] - ps[ps.length - 2][1] : null;
-      push(`💵 الدولار المحلي ${p.value.toLocaleString('en-US')} لكل 100$` + (d ? ` (${d > 0 ? '+' : ''}${d.toLocaleString('en-US')} عن القراءة السابقة)` : ''), p.data_time, 'مسح شفق نيوز', p.live === 'current' ? 'info' : 'old'); }
-    const nh = ind('gold21_mithqal_nahr'), mk = der('gold_expected_with_making'); if (nh && nh.value) push(`🏅 مثقال 21 في شارع النهر ${nh.value.sell.toLocaleString('en-US')}` + (mk && mk.value ? ` (المتوقع مع المصنعية ${mk.value.mithqal21.toLocaleString('en-US')})` : ''), nh.data_time, 'مسح شفق نيوز', nh.live === 'current' ? 'info' : 'old');
+      push(`💵 الدولار المحلي ${p.value.toLocaleString('en-US')} لكل 100$` + (d ? ` (${d > 0 ? '+' : ''}${d.toLocaleString('en-US')} عن القراءة السابقة)` : ''), p.data_time, 'مسح السوق المحلي', p.live === 'current' ? 'info' : 'old'); }
+    const nh = ind('gold21_mithqal_nahr'), mk = der('gold_expected_with_making'); if (nh && nh.value) push(`🏅 مثقال 21 في شارع النهر ${nh.value.sell.toLocaleString('en-US')}` + (mk && mk.value ? ` (المتوقع مع المصنعية ${mk.value.mithqal21.toLocaleString('en-US')})` : ''), nh.data_time, 'مسح السوق المحلي', nh.live === 'current' ? 'info' : 'old');
     const of = ind('usd_iqd_official'); if (of && of.value) push(`🏦 الدولار الرسمي ${of.value.toLocaleString('en-US')} دينار`, of.fetched_ok_at, 'البنك المركزي العراقي', 'info');
     const ft = fredS('FEDTARU'); for (let i = Math.max(1, ft.length - 3); i < ft.length; i++) if (ft[i][1] !== ft[i - 1][1] && nowImpl() - tOf(ft[i][0]) < 21 * DAY) push(`🇺🇸 الفدرالي ${ft[i][1] > ft[i - 1][1] ? 'يرفع' : 'يخفض'} الفائدة إلى ${ft[i][1]}% (الحد الأعلى)`, ft[i][0], 'FRED', 'warn');
     const cpi = fredS('CPI_YOY'); if (cpi.length > 1) push(`📊 التضخم الأمريكي ${cpi[cpi.length - 1][1]}% (${cpi[cpi.length - 1][0].slice(0, 7)}) — السابق ${cpi[cpi.length - 2][1]}%`, cpi[cpi.length - 1][0], 'FRED');

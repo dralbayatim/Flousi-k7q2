@@ -4,10 +4,10 @@ const $ = s => document.querySelector(s);
 const h = (t, a, ...k) => { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (n === 'class') e.className = v; else if (n.startsWith('on')) e[n] = v; else if (v !== false && v != null) e.setAttribute(n, v === true ? '' : v); }
   k.flat(9).forEach(c => { if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(c)); }); return e; };
 // إن نقص ملف أو تلف فلا يتوقف هذا الملف هنا؛ الإقلاع في الأسفل يكشف ذلك ويعرض شاشة خطأ بدل «…»
-const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v3.1'; // ارفع VER مع V في sw.js عند كل إصدار
+const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.1'; // ارفع VER مع V في sw.js عند كل إصدار
 let S, BE, view = { tab: 'home', sub: null, p: {} }, sessionDismiss = false, integ = [], persist = null; // persist: نتيجة طلب التخزين الدائم (8.1): true مثبّت، false مرفوض، 'na' غير مدعوم، null لم يُعرف بعد // integ: نتيجة فحوصات السلامة (4.4) عند الفتح
 const money = n => L.fmt(n) + ' د.ع';
-const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, bad ? 5000 : 2200); };
+const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, bad ? 5000 : Math.max(2200, m.length * 70)); };
 const go = (tab, sub, p) => { view = { tab, sub: sub || null, p: p || {} }; render(); window.scrollTo(0, 0); };
 // البند 9.2: لا عملية بتاريخ في المستقبل. يوم واحد سماحاً لفروق التوقيت. يُفحص داخل المعاملة فيُلغى كل شيء إن فشل
 const futureLim = () => L.iso(new Date(Date.now() + 864e5));
@@ -23,6 +23,58 @@ const sect = (title, ...k) => h('section', {}, title ? h('h2', {}, title) : null
 const pubEl = e => { e.classList.add('pub'); return e; }, privEl = e => { e.classList.add('priv'); return e; }, pubSect = (...a) => pubEl(sect(...a)); // pub: أسعار سوق عامة لا تُخفى
 const fold = (title, open, ...k) => h('details', { class: 'fold', open: open ? true : null }, h('summary', {}, title), ...k);
 const btn = (t, f, cls) => h('button', { class: cls || '', onclick: f }, t);
+// ===== f1-v3.2: شرح المصطلحات (ⓘ)، النسخ بضغطة، واعتماد سعر نبض السوق =====
+// GLOSS: شرح مختصر لكل مصطلح. لإضافة مصطلح جديد: أضفه هنا ثم استعمل ti('العنوان', 'المفتاح')
+const GLOSS = {
+  'المتاح للصرف': 'المال السائل عندك (نقد وبنك وفيزا) بعد طرح ما خصّصته للأهداف. هذا ما تستطيع صرفه دون أن تمس أهدافك.',
+  'السائل': 'مجموع ما يمكنك استعماله فوراً: النقد والحسابات المصرفية والفيزا والدولار بقيمته بالدينار. لا يشمل الذهب والعقار.',
+  'صافي الثروة': 'كل ما تملكه (نقد، دولار، ذهب، فضة، عقار...) ناقص ما عليك من التزامات وديون. يرتفع بالادخار وبارتفاع قيمة أصولك.',
+  'غير محقق': 'ربح أو خسارة على الورق بسبب تغيّر الأسعار، ولا يصبح حقيقياً إلا عند البيع.',
+  'محقق': 'ربح أو خسارة صار فعلياً لأنك بعت أو صرفت فعلاً بسعر مختلف عن سعر الشراء.',
+  'متوسط التكلفة': 'متوسط السعر الذي اشتريت به دولارك عبر كل مرات الشراء. يُقارن بسعر اليوم لمعرفة ربحك أو خسارتك.',
+  'القيمة المعدنية النظرية': 'قيمة المعدن الخالص في القطعة حسب سعر الأونصة وسعر الصرف، بلا مصنعية. ما يدفعه لك الصائغ عند البيع يكون عادة أقل منها قليلاً.',
+  'جسر صافي الثروة': 'يفسّر لماذا تغيّرت ثروتك خلال الشهر: ما ادخرته، وما ربحته أو خسرته فعلياً، وفروقات العدّ، وتغيّر الأسعار.',
+  'المطابقة': 'حين تعدّ نقدك فتجده مختلفاً عن المسجّل، تسجّل «مطابقة» فيُصحَّح الرصيد ويظهر الفرق هنا.',
+  'التخصيص': 'حجز مبلغ لهدف دون تحريكه من حسابك. يقلّ «المتاح للصرف» ولا تقلّ ثروتك.',
+  'الجمعية': 'الجمعية المعروفة: تدفع قسطاً شهرياً وتقبض المبلغ كاملاً في دورك. قبل دورك هي مال لك عند الجمعية، وبعد القبض تصبح الأقساط الباقية التزاماً عليك.',
+  'العوامل المؤثرة': 'سبعة عوامل معروفة تؤثر في الذهب على المدى المتوسط. لكل عامل إشارة (داعم، محايد، ضاغط) ووزن، ومنها تُبنى الخلاصة. لا تتنبأ بالسعر.',
+  'نسبة الادخار': 'كم بقي من دخلك بعد المصروف، كنسبة مئوية. 20% فما فوق جيدة، وأقل من 10% تحتاج مراجعة.',
+  'توزيع الأصول': 'كيف تتوزع ثروتك بين النقد والدولار والذهب والفضة والعقار. التركّز الكبير في نوع واحد يزيد أثر أي هبوط فيه.',
+  'نسبة الذهب إلى الفضة': 'كم أونصة فضة تساوي أونصة ذهب واحدة. فوق 80 تكون الفضة رخيصة نسبياً، وتحت 60 تكون غالية نسبياً.',
+  'التحويل الحسابي': 'سعر الذهب والفضة محوّلاً بالحساب من السعر العالمي بسعر الدولار المحلي، دون مصنعية ولا ربح للصائغ.',
+  'المتوقع مع المصنعية': 'السعر المحسوب مضافاً إليه مصنعية ثابتة للغرام، ليقارب ما ستدفعه عند الشراء من الصائغ.',
+  'الفجوة بين الرسمي والمحلي': 'الفرق بين سعر الدولار في البنك المركزي وسعره في السوق. اتساعها علامة ضغط على الدينار.',
+  'DXY': 'مؤشر يقيس قوة الدولار الأمريكي أمام العملات الكبرى. ارتفاعه يضغط عادة على سعر الذهب.',
+  'الفائدة الأمريكية': 'الفائدة التي يحددها الفدرالي الأمريكي. رفعها يضغط عادة على الذهب، وخفضها يدعمه.',
+  'التضخم CPI': 'نسبة ارتفاع الأسعار في أمريكا خلال سنة. التضخم المرتفع يدعم الذهب عادة كمخزن للقيمة.',
+  'البطالة': 'نسبة العاطلين عن العمل في أمريكا. ارتفاعها قد يدفع الفدرالي لخفض الفائدة.',
+  'الفائدة الفعلية': 'متوسط الفائدة التي تتعامل بها البنوك الأمريكية فعلاً خلال الشهر، وتكون قريبة من النطاق الرسمي.',
+  'الدولار الموسّع': 'مؤشر للفدرالي يقيس الدولار أمام عدد أكبر من العملات من DXY.',
+  'عائد السندات': 'الفائدة السنوية على سندات الحكومة الأمريكية. ارتفاعها يجعل الذهب (الذي لا يعطي فائدة) أقل جاذبية.',
+  'العائد الحقيقي': 'عائد السندات بعد طرح التضخم المتوقع. من أقوى العوامل المؤثرة في الذهب: ارتفاعه يضغط عليه.',
+  'توقعات التضخم': 'التضخم الذي تتوقعه الأسواق لعشر سنوات قادمة.',
+  'COT': 'تقرير أسبوعي أمريكي يبيّن صافي مراكز المضاربين في عقود الذهب والفضة. الارتفاع يعني شهية أكبر للشراء.',
+  'تحويل العملات': 'حاسبة بين الدينار والدولار. اختر السعر المعتمد في التطبيق أو اكتب سعراً لهذه العملية فقط. لا يُحفظ شيء إلا إذا سجّلتها عملية أو اعتمدت السعر بنفسك.',
+  'خصوصية الاستشارات': 'خيار مستقل عن إخفاء الثروة: يخفي بطاقات المستشار كلها أو يظهرها.'
+};
+const ti = (label, key) => { const k = key || label; return GLOSS[k] ? h('span', { class: 'ti' }, label, h('button', { class: 'ib', type: 'button', 'aria-label': 'شرح: ' + k, onclick: e => { e.stopPropagation(); showTip(k); } }, 'ⓘ')) : label; };
+function showTip(k) { let t = $('#tipbox'); if (!t) { t = h('div', { id: 'tipbox', role: 'dialog' }); t.onclick = () => { t.hidden = true; }; document.body.append(t); }
+  t.replaceChildren(h('b', {}, k), h('p', {}, GLOSS[k]), h('small', {}, 'اضغط للإغلاق')); t.hidden = false; }
+async function copyText(t, ok) { try { await navigator.clipboard.writeText(t); toast(ok || 'نُسخ'); return true; } catch (e) { toast('تعذّر النسخ التلقائي: اضغط على النص مطولاً وانسخه', true); return false; } }
+// اعتماد سعر نبض السوق: يعرض السعر ووقته ومصدره أولاً، ولا يُحفظ شيء إلا بعد تأكيدك. لا يتغير السعر المحفوظ تلقائياً أبداً
+function nabdRateBtn(apply, okLabel) { const box = h('div', { class: 'nrate pub' });
+  const show = () => { const p = FN.ind('usd_iqd_parallel');
+    if (!p || p.value == null) return box.replaceChildren(h('p', { class: 'bad' }, FN.err() ? 'سعر نبض السوق غير متاح الآن (لا اتصال). سعرك المحفوظ لم يتغير.' : 'سعر نبض السوق غير متاح الآن. سعرك المحفوظ لم يتغير.'), btn('إغلاق', () => box.replaceChildren(b0), 'alt mini'));
+    box.replaceChildren(h('div', { class: 'card' }, h('b', {}, 'سعر الدولار المحلي (السوق السوداء) في نبض السوق'),
+      row('100 دولار', nI(p.value) + ' دينار'), row('آخر تحديث', nWhen(nT(p)) || '—'), row('المصدر', srcName(p) || '—'), h('div', {}, nChip(p.live, nT(p), nF(p))),
+      p.live !== 'current' ? h('p', { class: 'bad' }, 'تنبيه: هذا السعر قديم، تأكد منه قبل اعتماده.') : null,
+      h('p', { class: 'mut' }, 'يُعتمد بتاريخ اليوم (' + L.today() + '). لن يتغير سعرك تلقائياً عند تحديث السوق لاحقاً.'),
+      btn(okLabel || 'أكّد', () => { box.replaceChildren(b0); apply(p.value); }), btn('إلغاء', () => { box.replaceChildren(b0); toast('لم يتغير شيء'); }, 'alt'))); };
+  const b0 = btn('اعتمد سعر نبض السوق', async () => { b0.disabled = true; try { await FN.load(); } finally { b0.disabled = false; } show(); }, 'alt mini');
+  box.append(b0); return box; }
+const saveNabdRate = v => act(() => L.setRate(S, L.today(), v * 100), 'حُفظ سعر الصرف: ' + nI(v) + ' لكل 100$');
+const advHiddenNote = () => S.x.set.hideAdvice ? h('p', { class: 'mut' }, 'الاستشارات مخفية بطلبك. لإظهارها: ⚙ ← الإعدادات ← الخصوصية.') : null;
+
 const row = (a, b, cls) => h('div', { class: 'r ' + (cls || '') }, h('span', {}, a), h('b', {}, b));
 // نموذج عام: fields = [{k,l,t:'text|num|date|select',opts,v,ph,req,show(vals),dyn(ctl,vals)}]
 function buildForm(fields, submit, label) {
@@ -75,7 +127,7 @@ function txList(n = 40) {
     : h('p', { class: 'mut' }, 'لا عمليات بعد.'));
 }
 SCREENS.ops = (sub, p) => { const kind = view.p.kind || 'expense';
-  return h('div', {}, h('h1', {}, 'عملية جديدة'), seg([['expense', 'مصروف'], ['income', 'دخل'], ['transfer', 'تحويل'], ['reconcile', 'مطابقة نقد']], kind, k => go('ops', null, { kind: k })), opsForm(kind), txList()); };
+  return h('div', {}, h('h1', {}, 'عملية جديدة'), seg([['expense', 'مصروف'], ['income', 'دخل'], ['transfer', 'تحويل'], ['reconcile', 'مطابقة نقد'], ['fx', 'تحويل العملات']], kind, k => go('ops', null, { kind: k })), kind === 'fx' ? fxForm() : opsForm(kind), txList()); };
 
 function openingWizard() {
   const rows = h('div', {}), lab = (t, c) => h('label', { class: 'f' }, h('span', {}, t), c), mk = (pre = {}) => { const r = h('div', { class: 'orow card' }); const f = {};
@@ -83,12 +135,12 @@ function openingWizard() {
     f.cur = h('select', {}, [['IQD', 'دينار عراقي'], ['USD', 'دولار']].map(([k, t]) => h('option', { value: k }, t))); if (pre.cur) f.cur.value = pre.cur; f.amount = h('input', { placeholder: 'اتركه فارغاً إن لم يوجد', inputmode: 'decimal' });
     f.rate = h('input', { placeholder: 'مثال: 150000', inputmode: 'decimal' }); const rl = lab('متوسط سعر شرائه: دينار لكل 100 دولار (اختياري)', f.rate);
     const sync = () => { rl.hidden = f.cur.value !== 'USD'; }; f.cur.onchange = sync; sync(); r._f = f;
-    r.append(lab('اسم الحساب', f.name), lab('النوع', f.type), lab('العملة', f.cur), lab('كم فيه الآن؟', f.amount), rl, btn('حذف هذا الحساب', () => r.remove(), 'mini alt')); rows.append(r); };
+    r.append(lab('اسم الحساب', f.name), lab('النوع', f.type), lab('العملة', f.cur), lab('كم فيه الآن؟', f.amount), rl, btn('حذف هذا السطر', () => { if (confirm('حذف هذا السطر من النموذج؟\nلم يُحفظ بعد، فلن يُحذف أي حساب أو بيانات محفوظة.')) r.remove(); }, 'mini alt')); rows.append(r); };
   mk({ name: 'نقد', type: 'asset_cash' }); mk({ name: 'فيزا', type: 'visa' }); mk({ name: 'دولار', type: 'asset_cash', cur: 'USD' });
   const date = h('input', { type: 'date', value: L.today(), max: L.today() }), rate = h('input', { placeholder: 'مثال: 150000', inputmode: 'decimal' });
   return h('div', {}, sect('الخطوة 1: ما تملكه اليوم', h('p', { class: 'mut' }, 'اكتب كم عندك الآن في كل حساب. لا يُحسب دخلاً. اترك الحساب الذي لا تملكه فارغاً. الذهب والفضة والراتب يأتيان بعد هذه الخطوة.'),
       lab('تاريخ البدء', date)), rows, btn('+ إضافة حساب آخر (بنك، عقار، التزام...)', () => mk(), 'alt'),
-    sect('', lab('سعر الصرف اليوم: كم دينار يساوي 100 دولار (مطلوب إن أدخلت دولاراً)', rate),
+    sect('', lab('سعر الصرف اليوم: كم دينار يساوي 100 دولار (مطلوب إن أدخلت دولاراً)', rate), nabdRateBtn(v => { rate.value = String(v); toast('وُضع السعر في الخانة، ويُحفظ مع «سجّل وابدأ»'); }, 'ضعه في الخانة'),
     btn('سجّل وابدأ', () => { try {
       const data = [...rows.children].map(r => { const f = r._f, cur = f.cur.value, kind = L.TYPES[f.type.value][1]; if (!f.amount.value.trim()) return null;
         if (cur === 'USD' && kind === 'liab') throw new Error('الالتزام بالدولار غير مدعوم'); return { name: f.name.value, type: f.type.value, cur, amount: L.parseAmount(f.amount.value, cur === 'USD' ? 2 : 0), r: cur === 'USD' ? (f.rate.value.trim() || rate.value.trim() ? L.parseAmount(f.rate.value || rate.value, 2) : (() => { throw new Error('اكتب سعر الصرف اليوم (كم دينار يساوي 100 دولار): مطلوب لحساب «' + f.name.value + '»'); })()) : null }; }).filter(Boolean);
@@ -123,14 +175,10 @@ function openingFixBlock() { if (!S.x.openDate) return null; const A = accOpts()
 const nwUsd = n => S.x.rates.length ? L.fmtUsd(Number(E.rd(BigInt(n) * 1000000n, BigInt(S.rate)))) : '— (أدخل سعر الصرف)';
 function nwBlock() {
   const p = L.panel(S), mask = v => v, d = v => v == null ? '—' : (v > 0 ? '+' : '') + L.fmt(v) + ' د.ع';
-  return sect('صافي الثروة', h('div', { class: 'big', onclick: () => privHidden() ? privReveal() : null }, mask(money(p.nw))), privOn() ? h('p', { class: 'mut' }, 'الأرقام مخفية: اضغط 👁 أو الرقم لإظهارها 5 ثوانٍ') : null,
+  return sect(ti('صافي الثروة'), h('div', { class: 'big', onclick: () => privHidden() ? privReveal() : null }, mask(money(p.nw))), privOn() ? h('p', { class: 'mut' }, 'الأرقام مخفية: اضغط 👁 أو الرقم لإظهارها 5 ثوانٍ') : null,
     row('بالدولار', mask(nwUsd(p.nw))), row('الأصول', mask(money(p.cur.assets))), row('الالتزامات', mask(money(p.cur.liab))), row('التغير هذا الشهر', mask(d(p.dMonth))), row('التغير منذ بداية السنة', mask(d(p.dYear))),
-    S.x.set.valuation === 'cost' ? null : row('أرباح/خسائر غير محققة', mask(d(p.U))));
+    S.x.set.valuation === 'cost' ? null : row(ti('أرباح/خسائر غير محققة', 'غير محقق'), mask(d(p.U))));
 }
-SCREENS.home = () => {
-  if (!S.x.openDate) return h('div', {}, h('h1', {}, 'فلوسي'), sect('', h('p', {}, 'مرحباً. ابدأ بتسجيل الرصيد الافتتاحي لتبدأ التقارير بأرقام صحيحة.'), btn('ابدأ الرصيد الافتتاحي', () => go('accts', 'open'))));
-  const s = E.snap(S); return h('div', {}, h('h1', {}, 'فلوسي'), sect('المتاح للصرف', h('div', { class: 'big' }, money(s.avail)), row('السائل', money(s.liq))), nwBlock(), acctList());
-};
 // ===== المرحلة 3: القفل، النسخ الاحتياطي والاستعادة، التصدير، شريط التذكير =====
 const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u))), unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 let hiddenAt = 0, unlocked = false;
@@ -189,17 +237,30 @@ async function oneTapBackup() { if (!pending || pendSig !== bakSig()) { toast('�
   const how = await shareFile(pending); if (how) await act(() => { S.x.backup = { t: Date.now(), tx: S.tx.length, how }; }, 'سُجّلت النسخة: ' + BAK_NAME); }
 // قسم الاستعادة ظاهر دائماً (f1-v3.1)، حتى على جهاز جديد فارغ لم يُنشأ عليه مفتاح بعد: اختر الملف واكتب مفتاحك القديم
 function restoreSect() {
-  const key = h('input', { placeholder: 'مفتاح الاسترداد', autocomplete: 'off' }), file = h('input', { type: 'file', accept: '*/*', hidden: true });
-  file.onchange = async () => { const f = file.files[0]; file.value = ''; if (!f) return; try { const bytes = new Uint8Array(await f.arrayBuffer()), { payload } = await FB.open(bytes, key.value);
-      const m = payload.manifest; if (!confirm(`استعادة ${m.txCount} عملية، صافي الثروة ${L.fmt(m.nw)} د.ع؟ ستستبدل بياناتك الحالية (وتُحفظ لقطة منها 30 يوماً).`)) return;
-      await FB.restore(BE, S, bytes, key.value); S = await FStore.load(BE); integ = L.integrity(S); toast('تمت الاستعادة: ' + m.txCount + ' عملية'); go('home'); } catch (e) { toast(e.message === 'auth' ? 'المفتاح خاطئ أو الملف تالف' : e.message === 'format' ? 'ملف غير صالح' : e.message, true); } };
+  const key = h('input', { placeholder: 'مفتاح الاسترداد', autocomplete: 'off' }), file = h('input', { type: 'file', accept: '*/*', hidden: true }), sum = h('div', {});
+  // f1-v4: فحص كامل للنسخة (التشفير والبصمة والأرصدة) ثم ملخص محتوياتها، ولا تبدأ الاستعادة إلا بعد ضغطك «استعد»؛ والنسخة الأقدم من بياناتك تحتاج تأكيداً إضافياً
+  file.onchange = async () => { const f = file.files[0]; file.value = ''; if (!f) return; sum.replaceChildren(h('p', { class: 'mut' }, 'جارٍ فحص النسخة…'));
+    try { const bytes = new Uint8Array(await f.arrayBuffer()), kv = key.value, { payload } = await FB.open(bytes, kv), m = payload.manifest, d = payload.dump || {};
+      const lastB = (d.tx || []).filter(t => t.type !== 'opening').map(t => t.date).sort().pop() || '—', lastC = S.tx.filter(t => t.type !== 'opening').map(t => t.date).sort().pop() || null;
+      const older = S.tx.length > 0 && (m.txCount < S.tx.length || (lastC && lastB !== '—' && lastB < lastC));
+      const n = k => Array.isArray(d[k]) ? d[k].length : d[k] && typeof d[k] === 'object' ? Object.keys(d[k]).length : 0, x = d.x || {};
+      sum.replaceChildren(h('div', { class: 'card' + (older ? ' warnb' : '') }, h('b', {}, '✓ النسخة سليمة — ملخص محتوياتها'),
+        row('تاريخ إنشاء النسخة', payload.created ? new Date(payload.created).toLocaleString('en-GB') : '—'), row('عدد العمليات', String(m.txCount)), row('آخر عملية فيها', lastB), row('الحسابات', String(m.accounts)),
+        row('الأهداف', String((x.goalsDef || []).length)), row('قطع الذهب والفضة', String(n('pieces'))), row('صافي الثروة فيها', money(m.nw)),
+        h('div', { class: 'r' }, h('span', {}, 'بياناتك الحالية'), h('b', {}, S.tx.length ? S.tx.length + ' عملية' + (lastC ? '، آخرها ' + lastC : '') : 'فارغة')),
+        older ? h('p', { class: 'bad' }, '⚠ هذه النسخة أقدم من بياناتك الحالية: ستفقد ما سجّلته بعدها. تأكد أنها النسخة الصحيحة.') : null,
+        h('p', { class: 'mut' }, 'الاستعادة تستبدل بياناتك الحالية، وتُحفظ لقطة منها 30 يوماً يمكن التراجع إليها.'),
+        btn('استعد هذه النسخة', async () => { if (older && !confirm('النسخة أقدم من بياناتك الحالية (' + m.txCount + ' عملية مقابل ' + S.tx.length + '). هل أنت متأكد من استبدال بياناتك بها؟')) return;
+          try { await FB.restore(BE, S, bytes, kv); S = await FStore.load(BE); integ = L.integrity(S); toast('تمت الاستعادة: ' + m.txCount + ' عملية'); go('home'); } catch (e) { toast('تعذّرت الاستعادة: ' + (e.message || e), true); } }, 'prim'),
+        btn('إلغاء', () => { sum.replaceChildren(); toast('لم يتغير شيء'); }, 'alt'))); }
+    catch (e) { sum.replaceChildren(); toast(e.message === 'auth' ? 'المفتاح خاطئ أو الملف تالف' : e.message === 'format' ? 'ملف غير صالح' : e.message, true); } };
   return sect('استعادة نسخة', h('p', { class: 'mut' }, 'اكتب مفتاح الاسترداد الخاص بالنسخة (القديم) ثم اختر الملف. بعد الاستعادة يصبح هذا المفتاح مفتاحك على هذا الجهاز.'), key, h('label', { class: 'btn', onclick: () => file.click() }, 'اختر ملف النسخة'), file,
-    btn('التراجع عن آخر استعادة', async () => { try { await FB.undoRestore(BE, S); S = await FStore.load(BE); integ = L.integrity(S); toast('تم الرجوع'); go('home'); } catch (e) { toast(e.message, true); } }, 'alt mini')); }
+    sum, btn('التراجع عن آخر استعادة', async () => { try { await FB.undoRestore(BE, S); S = await FStore.load(BE); integ = L.integrity(S); toast('تم الرجوع'); go('home'); } catch (e) { toast(e.message, true); } }, 'alt mini')); }
 MORE.push(['backup', 'النسخ الاحتياطي والتصدير', () => { const b = FB.status(S), box = h('div', {});
   const stat = sect('الحالة', row('آخر نسخة', S.x.backup ? new Date(S.x.backup.t).toLocaleDateString('en-GB') + ' (' + b.days + ' يوماً)' : 'لا توجد'), row('عمليات بعد آخر نسخة', String(b.since)), row('مفتاح الاسترداد', S.sec.key ? 'مُعدّ' : 'غير مُعدّ'), row('التخزين الدائم', persist === true ? 'مثبّت ✓' : persist === false ? '⚠ غير مثبّت' : persist === 'na' ? 'غير مدعوم في هذا المتصفح' : '…', persist === false ? 'bad' : ''),
     persist === false ? h('p', { class: 'bad' }, 'رفض النظام تثبيت التخزين: قد يحذف بيانات التطبيق إن امتلأت ذاكرة الهاتف. افتح التطبيق من أيقونة الشاشة الرئيسية، وأبقِ مساحة فارغة، وخذ نسخة احتياطية بعد كل جلسة إدخال. التذكير صار بعد 3 أيام أو 5 عمليات.') : null,
     h('p', { class: 'mut' }, 'احفظ النسخة في iCloud Drive (ملفات ثم iCloud Drive) لا على الهاتف وحده. لا نسخ تلقائي خارج الهاتف في تطبيق الويب.'));
-  if (!S.sec.key) { const key = FLS.fmtKey(FLS.newKey()); box.append(stat, sect('مفتاح الاسترداد', h('p', {}, 'اكتب هذا المفتاح على ورقة واحفظها في مكانين. بدونه لا تُفتح أي نسخة، ولن يظهر مرة ثانية.'), h('div', { class: 'big', style: 'direction:ltr;font-size:1.15rem;letter-spacing:.04em' }, key),
+  if (!S.sec.key) { const key = FLS.fmtKey(FLS.newKey()); box.append(stat, sect('مفتاح الاسترداد', h('p', {}, 'اكتب هذا المفتاح على ورقة واحفظها في مكانين. بدونه لا تُفتح أي نسخة، ولن يظهر مرة ثانية.'), h('div', { class: 'big', style: 'direction:ltr;font-size:1.15rem;letter-spacing:.04em' }, key), btn('📋 نسخ المفتاح', () => copyText(key, 'نُسخ المفتاح ✓ اكتبه أيضاً على ورقة'), 'alt mini'),
       buildForm([{ k: 'k', l: 'أعد كتابة المفتاح للتأكيد', t: 'text', req: true }], async v => { if (FLS.normKey(v.k) !== FLS.normKey(key)) throw new Error('المفتاح غير مطابق'); S.sec.key = FLS.normKey(key); await FStore.saveSec(BE, S); toast('حُفظ المفتاح'); go('more', 'backup'); }, 'أكّدتُ وكتبتُه')));
     if (S.x.openDate) box.append(restoreSect()); else box.insertBefore(restoreSect(), box.children[1]); return box; }
   prebuild(true); const ready = pending && pendSig === bakSig();
@@ -248,15 +309,15 @@ function ratesBlock(open) {
       if (v.g.trim() || v.s.trim()) L.setPrices(S, v.date, { G: v.g.trim() ? L.parseAmount(v.g, 2) : undefined, S: v.s.trim() ? L.parseAmount(v.s, 2) : undefined }); }, 'حُدّثت الأسعار'), 'حدّث');
   const gp = S.x.prices.filter(x => x.G != null), sp = S.x.prices.filter(x => x.S != null);
   return pubSect('الأسعار وسعر الصرف', h('p', { class: 'mut' }, 'تحديث الأسعار لا يغيّر أي عملية سابقة، بل يغيّر التقييم فقط. سعر كل عملية محفوظ فيها.'),
-    row('100 دولار', S.x.rates.length ? L.fmtRate(S.rate) + ' د.ع' + lastDate(S.x.rates) : (hasUsd ? '⚠ لم يُدخل بعد' : 'لم يُدخل')), row('أونصة الذهب', gp.length ? L.fmtUsd(S.price.G) + lastDate(gp) : 'لم تُدخل'), row('أونصة الفضة', sp.length ? L.fmtUsd(S.price.S) + lastDate(sp) : 'لم تُدخل'), fold('تحديث الأسعار وسعر الصرف', open, f));
+    row('100 دولار', S.x.rates.length ? L.fmtRate(S.rate) + ' د.ع' + lastDate(S.x.rates) : (hasUsd ? '⚠ لم يُدخل بعد' : 'لم يُدخل')), row('أونصة الذهب', gp.length ? L.fmtUsd(S.price.G) + lastDate(gp) : 'لم تُدخل'), row('أونصة الفضة', sp.length ? L.fmtUsd(S.price.S) + lastDate(sp) : 'لم تُدخل'), nabdRateBtn(saveNabdRate, 'أكّد واحفظ'), fold('تحديث الأسعار وسعر الصرف', open, f));
 }
 function usdBlock() { const U = L.usdInfo(S); if (!U.length) return null; const s = E.snap(S);
-  return sect('الدولار (متوسط التكلفة)', U.map(u => h('div', { class: 'tx' }, row(u.name, L.fmtUsd(u.bal)), row('متوسط الشراء (لكل 100$)', L.fmtRate(u.avg) + ' د.ع'), row('القيمة الحالية', money(u.mkt)), row('غير محقق', (u.unreal > 0 ? '+' : '') + L.fmt(u.unreal) + ' د.ع'))), row('محقق من الصرف حتى الآن', L.fmt(s.fx) + ' د.ع')); }
+  return sect('الدولار (متوسط التكلفة)', U.map(u => h('div', { class: 'tx' }, row(u.name, L.fmtUsd(u.bal)), row(ti('متوسط الشراء (لكل 100$)', 'متوسط التكلفة'), L.fmtRate(u.avg) + ' د.ع'), row('القيمة الحالية', money(u.mkt)), row(ti('غير محقق'), (u.unreal > 0 ? '+' : '') + L.fmt(u.unreal) + ' د.ع'))), row(ti('محقق من الصرف حتى الآن', 'محقق'), L.fmt(s.fx) + ' د.ع')); }
 function metalsBlock() {
   const P = L.pieces(S), held = P.filter(p => p.held), sold = P.filter(p => !p.held && S.tx.some(t => t.type === 'sell_metal' && t.meta && t.meta.piece === p.id && !t.voided));
   const tot = held.reduce((a, p) => ({ c: a.c + p.cost, t: a.t + p.theo }), { c: 0, t: 0 });
   return sect('الذهب والفضة', btn('شراء قطعة', () => go('assets', 'buy')), btn('قطعة موجودة قبل البدء', () => go('assets', 'old'), 'alt'),
-    held.length ? held.map(p => h('div', { class: 'tx' }, h('div', {}, pieceName(p) + (p.buy && p.buy.est ? ' (تكلفة تقديرية)' : '')), row('تكلفتها', money(p.cost)), row('قيمتها المعدنية النظرية', money(p.theo)), row('الفرق (غير محقق)', (p.unreal > 0 ? '+' : '') + L.fmt(p.unreal) + ' د.ع'), btn('بيع', () => go('assets', 'sell', { id: p.id }), 'mini')))
+    held.length ? held.map(p => h('div', { class: 'tx' }, h('div', {}, pieceName(p) + (p.buy && p.buy.est ? ' (تكلفة تقديرية)' : '')), row('تكلفتها', money(p.cost)), row(ti('قيمتها المعدنية النظرية', 'القيمة المعدنية النظرية'), money(p.theo)), row('الفرق (غير محقق)', (p.unreal > 0 ? '+' : '') + L.fmt(p.unreal) + ' د.ع'), btn('بيع', () => go('assets', 'sell', { id: p.id }), 'mini')))
       : h('p', { class: 'mut' }, 'لا قطع محتفَظ بها.'), held.length ? row('المجموع: التكلفة / النظرية', money(tot.c) + ' / ' + money(tot.t)) : null,
     sold.length ? h('div', {}, h('h2', {}, 'مبيعة'), sold.map(p => { const r = L.saleReport(S, p.id); return h('div', { class: 'tx' }, h('div', {}, pieceName(p)), row('النتيجة المحققة', (r.total > 0 ? '+' : '') + L.fmt(r.total) + ' د.ع'), btn('التقرير', () => go('assets', 'report', { id: p.id }), 'mini')); })) : null);
 }
@@ -315,7 +376,7 @@ MORE.push(['debts', 'الديون', () => { const p = view.p, D = L.debts(S), cu
 // ---- الجمعيات ----
 MORE.push(['jams', 'الجمعيات', () => { const p = view.p, J = S.x.jams.map(j => L.jamState(S, j)), cur = p.id && J.find(j => j.id === p.id);
   if (needAcct()) return needAcct();
-  const list = sect('الجمعيات', J.length ? J.map(j => h('div', { class: 'tx' }, h('div', {}, j.name), row('القسط / الحصيلة', money(j.s) + ' / ' + money(j.pot)), row('الحالة', j.done ? 'اكتملت' : j.received ? `قبضتَ. بقي ${j.remaining} قسط (${money(j.remaining * j.s)} التزام)` : `دفعتَ ${j.paid} من ${j.turn} قبل القبض`),
+  const list = sect(ti('الجمعيات', 'الجمعية'), J.length ? J.map(j => h('div', { class: 'tx' }, h('div', {}, j.name), row('القسط / الحصيلة', money(j.s) + ' / ' + money(j.pot)), row('الحالة', j.done ? 'اكتملت' : j.received ? `قبضتَ. بقي ${j.remaining} قسط (${money(j.remaining * j.s)} التزام)` : `دفعتَ ${j.paid} من ${j.turn} قبل القبض`),
     j.done ? null : h('div', {}, row('القسط القادم', j.next), btn('دفع قسط', () => go('more', 'jams', { id: j.id, mode: 'pay' }), 'mini'), j.received ? null : btn('قبض الحصيلة', () => go('more', 'jams', { id: j.id, mode: 'recv' }), 'mini')))) : h('p', { class: 'mut' }, 'لا جمعيات.'));
   const act1 = cur ? sect(cur.name + ' — ' + (p.mode === 'pay' ? 'دفع قسط' : 'قبض'), buildForm([dt(), { k: 'acct', l: p.mode === 'pay' ? 'يُدفع من' : 'تدخل إلى', t: 'select', opts: iqOpts() }],
     v => act(() => p.mode === 'pay' ? L.jamPay(S, { id: cur.id, from: v.acct, date: v.date }) : L.jamReceive(S, { id: cur.id, to: v.acct, date: v.date }), p.mode === 'pay' ? 'سُجّل القسط' : 'سُجّل القبض').then(() => go('more', 'jams')), 'سجّل')) : null;
@@ -327,7 +388,7 @@ MORE.push(['jams', 'الجمعيات', () => { const p = view.p, J = S.x.jams.ma
 const gm = (g, n) => g.cur === 'USD' ? L.fmtUsd(n) : money(n);
 MORE.push(['goals', 'الأهداف', () => { const p = view.p, G = L.goalView(S), cur = p.id && G.find(g => g.id === p.id);
   const list = sect('الأهداف', G.length ? G.map(g => h('div', { class: 'tx' }, h('div', { class: 'r' }, h('span', {}, g.name + (g.kind === 'long' ? ' (طويل الأمد)' : ' (قصير الأمد)')), h('b', {}, g.pct + '%')),
-    row('المخصص / المستهدف', gm(g, g.allocated) + ' / ' + gm(g, g.target)), g.iqd ? row('بالدينار بآخر سعر صرف', '≈ ' + L.fmt(g.iqd.allocated) + ' / ' + money(g.iqd.target)) : null,
+    row(ti('المخصص / المستهدف', 'التخصيص'), gm(g, g.allocated) + ' / ' + gm(g, g.target)), g.iqd ? row('بالدينار بآخر سعر صرف', '≈ ' + L.fmt(g.iqd.allocated) + ' / ' + money(g.iqd.target)) : null,
     row('الموعد', g.targetDate + (g.skipped ? ` (مُدِّد ${g.skipped})` : '')), g.done ? h('p', { class: 'okc' }, 'اكتمل الهدف') : h('div', {}, row('القسط الشهري المطلوب', gm(g, g.monthly) + (g.iqd ? ' ≈ ' + money(g.iqd.monthly) : '')), g.iqd ? row('المتبقي بالدينار بآخر سعر', '≈ ' + money(g.iqd.remaining)) : null, row('المخصص هذا الشهر', gm(g, g.paidMonth)), g.behind > 0 ? (g.firstMonth ? row('القسط المطلوب هذا الشهر', gm(g, g.behind)) : row('متأخر عن الخطة', gm(g, g.behind), 'bad')) : null),
     btn('تخصيص', () => go('more', 'goals', { id: g.id, mode: 'alloc' }), 'mini'), btn('تحرير', () => go('more', 'goals', { id: g.id, mode: 'release' }), 'mini'),
     !g.done && g.behind > 0 && !g.firstMonth ? btn('تخطَّ شهراً ومدِّد الموعد', () => { if (confirm('تمديد موعد الهدف شهراً بدل بقاء المتأخر مستحقاً؟')) act(() => L.goalSkip(S, g.id), 'مُدِّد الموعد'); }, 'mini alt') : null)) : h('p', { class: 'mut' }, 'لا أهداف.'),
@@ -357,18 +418,15 @@ MORE.push(['recurring', 'المتكررات والراتب', () => { const p = v
     v => act(() => L.recurNew(S, { kind: v.kind, name: v.name, amount: n0(v.amount), acct: v.acct, cat: v.kind === 'expense' ? v.cat : null, src: v.kind === 'income' ? v.src : null, day: Number(L.norm(v.day)), remind: Number(L.norm(v.remind)), salary: v.kind === 'income' && v.salary === '1' }), 'أُضيف البند'), 'أضف'));
   return h('div', {}, conf, due, all, add); }]);
 // ===== المرحلة 6: شاشة الحالة (الرئيسية)، الشريط المتحرك، التقارير، حدود التنبيه =====
-let tickTimer = null;
+let tickTimer = null; // يُفرَّغ فقط (الشريطان الحاليان في tickTimers)
 const sgn = n => n == null ? '—' : (n > 0 ? '+' : '') + L.fmt(n) + ' د.ع';
-function tickerBlock(st) { clearInterval(tickTimer); let i = 0; const al = st.alerts.filter(a => a.go[1] !== 'backup'), items = al.map(a => a.t).concat(L.TIPS), lv = k => (al[k] || {}).lv; // تنبيه النسخ له شريطه الخاص أعلى الصفحة فلا يتكرر هنا
-  const box = h('div', { class: 'ticker' }), set = () => { box.textContent = items[i % items.length]; box.className = 'ticker' + (i % items.length < al.length ? (lv(i % items.length) === 'red' ? ' alert' : lv(i % items.length) === 'warn' ? ' warn' : '') : ''); };
-  set(); if (items.length > 1) tickTimer = setInterval(() => { if (!document.body || !box.isConnected) return clearInterval(tickTimer); i++; set(); }, 5000); return box; }
 // لون المتاح للصرف (الوثيقة 7.1) حسب حدودك فقط: أحمر إن كان سالباً أو تجاوزتَ حداً، أصفر إن اقتربت، وإلا أخضر. تنبيهات النسخ وغيرها لا تلوّنه
 function availLevel(st) { if (st.avail < 0) return ['badc', 'المخصص للأهداف أكبر من السيولة'];
   const b = L.budget(S); return b.some(x => x.over) ? ['badc', 'تجاوزتَ حداً من حدود هذا الشهر'] : b.some(x => x.near || x.pace) ? ['warnc', 'اقتربتَ من حد من حدود هذا الشهر'] : ['okc', 'ضمن حدودك هذا الشهر']; }
 // آخر سعر صرف وتاريخه على الشاشة الرئيسية (الوثيقة 7.1)، والتحديث بنقرة في تبويب «الأصول»
 function rateBlock() { const has = S.x.rates.length > 0, usd = userAccts(a => a.cur === 'USD').length > 0;
   return pubSect('سعر الصرف', row('100 دولار', has ? L.fmtRate(S.rate) + ' د.ع' : (usd ? '⚠ لم يُدخل بعد' : 'لم يُدخل'), has || !usd ? '' : 'bad'),
-    has ? h('p', { class: 'mut' }, 'آخر تحديث: ' + S.x.rates[S.x.rates.length - 1].d) : null, btn('حدّث السعر', () => go('assets', null, { open: 'prices' }), 'alt mini')); }
+    has ? h('p', { class: 'mut' }, 'آخر تحديث: ' + S.x.rates[S.x.rates.length - 1].d) : null, btn('حدّث السعر', () => go('assets', null, { open: 'prices' }), 'alt mini'), nabdRateBtn(saveNabdRate, 'أكّد واحفظ')); }
 SCREENS.home = () => {
   if (!S.x.openDate) return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'أهلاً بك في فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), h('p', { class: 'mut' }, 'ثلاث خطوات فقط لتبدأ. لديك نسخة احتياطية؟ ⚙ ثم «النسخ الاحتياطي» لاستعادتها.'),
     h('div', { class: 'card' }, h('h2', {}, '1. ما تملكه اليوم'), h('p', { class: 'mut' }, 'نقد، فيزا، دولار، بنك. تبدأ منها.'), btn('ابدأ الخطوة 1', () => go('accts', 'open'))),
@@ -376,7 +434,7 @@ SCREENS.home = () => {
     h('div', { class: 'card dim' }, h('h2', {}, '3. الذهب والفضة'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: تبويب «الأصول» ثم «قطعة موجودة قبل البدء».')));
   const st = L.status(S);
   return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), (ADV = advItems(st), tickers(ADV)),
-    (lv => sect('المتاح للصرف', h('div', { class: 'big ' + lv[0], onclick: () => go('more', 'reports') }, money(st.avail)), h('p', { class: 'mut ' + lv[0] }, lv[1]), row('السائل', money(st.liq)),
+    (lv => sect(ti('المتاح للصرف'), h('div', { class: 'big ' + lv[0], onclick: () => go('more', 'reports') }, money(st.avail)), h('p', { class: 'mut ' + lv[0] }, lv[1]), row(ti('السائل'), money(st.liq)),
       row('دخل هذا الشهر', money(st.income)), row('مصروف هذا الشهر', money(st.expense)), row('المتبقي من دخل الشهر', sgn(st.left))))(availLevel(st)),
     advisorHome(ADV),
     rateBlock(),
@@ -390,7 +448,7 @@ function monthView(k) { let r; try { r = L.monthReport(S, k); } catch (e) { retu
   return h('div', {}, r.sinceStart ? h('p', { class: 'mut' }, 'هذا أول شهر: المقارنة من لحظة الرصيد الافتتاحي.') : null,
     sect('الدخل والمصروف', row('الدخل', money(r.income)), row('المصروف', money(r.expense)), row('الوفر', sgn(r.savings)), prev && prev.expense > 0 ? row('المصروف قبل شهر', money(prev.expense) + (r.expense > prev.expense ? ' ▲' : r.expense < prev.expense ? ' ▼' : '')) : null),
     sect('المصروف حسب الفئة', catRows.length ? catRows : h('p', { class: 'mut' }, 'لا مصروفات.')),
-    sect('جسر صافي الثروة', row('أول الشهر', money(r.nw0)), row('+ الدخل − المصروف', sgn(r.income - r.expense)), row('+ المحقق (معادن وصرف)', sgn(r.realized)), row('+ فروقات المطابقة', sgn(r.adj)), row('+ التغير غير المحقق (أسعار)', sgn(r.dU)), row('= آخر الشهر', money(r.nw1)), row('التغير', sgn(r.dNw)),
+    sect(ti('جسر صافي الثروة'), row('أول الشهر', money(r.nw0)), row('+ الدخل − المصروف', sgn(r.income - r.expense)), row('+ المحقق (معادن وصرف)', sgn(r.realized)), row(ti('+ فروقات المطابقة', 'المطابقة'), sgn(r.adj)), row('+ التغير غير المحقق (أسعار)', sgn(r.dU)), row('= آخر الشهر', money(r.nw1)), row('التغير', sgn(r.dNw)),
       h('p', { class: r.bridgeOk ? 'okc' : 'badc' }, r.bridgeOk ? '✓ المعادلة متطابقة' : '✗ المعادلة مختلة')),
     sect('حركة السيولة', flowRows.length ? flowRows : h('p', { class: 'mut' }, 'لا حركة.'), row('صافي حركة السيولة', sgn(r.liqNet))));
 }
@@ -412,6 +470,8 @@ MORE.push(['settings', 'الإعدادات', () => { const st = S.x.set;
     seg([['conservative', 'محافظ'], ['cost', 'بالتكلفة']], st.valuation, k => act(() => { st.valuation = k; }, 'تم'))),
     sect('الخصوصية: إخفاء الثروة', h('p', { class: 'mut' }, 'عند التفعيل تُخفى كل أرقامك المالية في كل الشاشات (••••••). زر 👁 يُظهرها 5 ثوانٍ ثم تُخفى تلقائياً، وتُخفى فوراً عند مغادرة التطبيق. أسعار السوق العامة تبقى ظاهرة. الإخفاء بصري فقط ولا يغيّر أي حساب.'),
       seg([['1', 'مفعّل'], ['0', 'متوقف']], st.hideAll ? '1' : '0', k => act(() => { st.hideAll = k === '1'; PRIV.until = 0; }, k === '1' ? 'أُخفيت الأرقام' : 'ظهرت الأرقام'))),
+    sect(ti('الخصوصية: الاستشارات المرتبطة بثروتك', 'خصوصية الاستشارات'), h('p', { class: 'mut' }, 'إخفاء استشارات المستشار (على الرئيسية وفي صفحته وفي نبض السوق). التنبيهات الأساسية مثل «هل استلمت الراتب؟» وتجاوز الحدود تبقى. لا يغيّر أي حساب.'),
+      seg([['0', 'ظاهرة'], ['1', 'مخفية']], st.hideAdvice ? '1' : '0', k => act(() => { st.hideAdvice = k === '1'; }, k === '1' ? 'أُخفيت الاستشارات' : 'ظهرت الاستشارات'))),
     sect('الإصدار', row('التطبيق', VER), h('p', { class: 'mut' }, 'قاعدة البيانات: flousi (محلية على هذا الهاتف). فحوصات المرحلة 0 في الصفحة المنفصلة:'), h('a', { href: 'diagnostics.html', class: 'btn' }, 'فتح صفحة الفحوصات'))); }]);
 MORE.push(['selftest', 'الاختبار الذاتي', () => { const box = h('div', {}), out = h('div', {});
   const show = (r1, r2, r3) => { const all = [...r1.results, ...r2.results, ...((r3 || {}).results || [])], ok = all.filter(x => x.ok).length; out.replaceChildren(h('div', { class: 'big ' + (ok === all.length ? 'okc' : 'badc') }, ok + ' من ' + all.length),
@@ -434,44 +494,48 @@ const nT = x => x && (x.data_time || x.fetched_ok_at);
 const nF = x => x && !x.data_time && !!x.fetched_ok_at; // المصدر لا يذكر تاريخاً: نعرض وقت الجلب صراحةً
 // سطر مؤشر: القيمة القديمة تظهر باهتة مع «قديم» ولا تُعرض كسعر حالي
 const nRow = (label, x, fmt, sub) => { if (!x) return null; const v = x.value == null ? '—' : fmt(x.value);
-  return h('div', { class: 'r nrow' + (x.live === 'current' ? '' : ' nold') }, h('span', {}, label, sub ? h('small', { class: 'mut' }, ' ' + sub) : null), h('span', { class: 'nv' }, h('b', {}, v), ' ', nChip(x.live, nT(x), nF(x)))); };
+  return h('div', { class: 'r nrow' + (x.live === 'current' ? '' : ' nold') }, h('span', {}, label, sub ? h('small', { class: 'mut' }, ' ' + sub) : null, srcLine(x)), h('span', { class: 'nv' }, h('b', {}, v), ' ', nChip(x.live, nT(x), nF(x)))); };
+// مصدر السعر تحت اسمه (المسح المحلي يُذكر بوصفه دون اسم الجهة)
+const srcName = x => { const n = x && x.source && x.source.name; return !n ? null : /shafaq|شفق/i.test(n) ? 'مسح السوق المحلي' : n.replace(/ — Federal Reserve Bank of St\. Louis/, '').replace(/ \(أسعار مرجعية عبر Frankfurter\)/, ''); };
+const srcLine = x => { const n = srcName(x); return n ? h('small', { class: 'src' }, 'المصدر: ' + n) : null; };
 function nabdPrices() {
   const I = FN.ind, D = FN.der, par = I('usd_iqd_parallel'), g = I('xau_usd'), sv = I('xag_usd'), gsr = D('gsr');
   const conv = [['مثقال ذهب 21', 'gold21_mithqal'], ['غرام ذهب 21', 'gold21_gram'], ['غرام ذهب 24', 'gold24_gram'], ['أونصة ذهب', 'gold_ounce_iqd'], ['كيلو فضة 999', 'silver999_kg']].map(([l, id]) => [l, D(id)]);
   const cLive = conv[0][1] ? conv[0][1].live : 'unavailable', mk = D('gold_expected_with_making'), nahr = I('gold21_mithqal_nahr'), iq = I('gold21_mithqal_iraqi'), lc = D('local_vs_calc_gold21');
   const sb = v => nI(v.sell) + ' / ' + nI(v.buy);
   return [
-    sect('١ · السعر العالمي (أونصة)', nRow('الذهب', g, v => nD(v) + ' $'), nRow('الفضة', sv, v => nD(v) + ' $'), gsr ? row('نسبة الذهب إلى الفضة', gsr.value == null ? '—' : String(gsr.value)) : null),
-    sect('٢ · التحويل الحسابي', h('p', { class: 'mut' }, 'من السعر العالمي بسعر الدولار المحلي', par && par.value ? ' (' + nI(par.value / 100) + ' للدولار)' : '', ' · بلا مصنعية · ', nChip(cLive)),
+    sect('١ · السعر العالمي (أونصة)', nRow('الذهب', g, v => nD(v) + ' $'), nRow('الفضة', sv, v => nD(v) + ' $'), gsr ? row(ti('نسبة الذهب إلى الفضة'), gsr.value == null ? '—' : String(gsr.value)) : null),
+    sect(ti('٢ · التحويل الحسابي', 'التحويل الحسابي'), h('p', { class: 'mut' }, 'من السعر العالمي (Gold-API) بسعر الدولار المحلي', par && par.value ? ' (' + nI(par.value / 100) + ' للدولار)' : '', ' · بلا مصنعية · ', nChip(cLive)),
       h('table', {}, h('tr', {}, h('th', {}, 'الوحدة'), h('th', {}, 'دولار'), h('th', {}, 'دينار')),
         conv.filter(([, d]) => d && d.value).map(([l, d]) => h('tr', { class: d.live === 'current' ? '' : 'nold' }, h('td', {}, l), h('td', { class: 'n' }, nD(d.value.usd)), h('td', { class: 'n' }, nI(d.value.iqd)))))),
-    mk && mk.value ? sect('المتوقع مع المصنعية (' + nI(mk.value.making_per_gram) + ' للغرام)', h('p', { class: 'mut' }, 'ما تتوقع دفعه عند الصائغ تقريباً · ', nChip(mk.live)),
+    mk && mk.value ? sect(ti('المتوقع مع المصنعية (' + nI(mk.value.making_per_gram) + ' للغرام)', 'المتوقع مع المصنعية'), h('p', { class: 'mut' }, 'ما تتوقع دفعه عند الصائغ تقريباً · ', nChip(mk.live)),
       row('مثقال 21', nI(mk.value.mithqal21)), row('غرام 21', nI(mk.value.gram21)), row('غرام 24', nI(mk.value.gram24))) : null,
-    sect('٣ · السعر المحلي الفعلي', h('p', { class: 'mut' }, 'مسح السوق (شفق نيوز) · بيع / شراء'),
-      nahr ? h('div', { class: 'r nrow' + (nahr.live === 'current' ? '' : ' nold') }, h('span', {}, 'مثقال 21 خليجي — شارع النهر', mk && mk.value ? h('small', { class: 'mut', style: 'display:block' }, '(المتوقع ' + nI(mk.value.mithqal21) + ')') : null), h('span', { class: 'nv' }, h('b', {}, nahr.value ? sb(nahr.value) : '—'), ' ', nChip(nahr.live, nT(nahr)))) : null,
+    sect('٣ · السعر المحلي الفعلي', h('p', { class: 'mut' }, 'مسح السوق المحلي · بيع / شراء'),
+      nahr ? h('div', { class: 'r nrow' + (nahr.live === 'current' ? '' : ' nold') }, h('span', {}, 'مثقال 21 خليجي — شارع النهر', srcLine(nahr), mk && mk.value ? h('small', { class: 'mut', style: 'display:block' }, '(المتوقع ' + nI(mk.value.mithqal21) + ')') : null), h('span', { class: 'nv' }, h('b', {}, nahr.value ? sb(nahr.value) : '—'), ' ', nChip(nahr.live, nT(nahr)))) : null,
       iq ? nRow('مثقال 21 عراقي', iq, sb) : null,
       lc && lc.value ? row('فرق الفعلي عن المحسوب', (lc.value.diff_gram > 0 ? '+' : '') + nI(lc.value.diff_gram) + ' للغرام (' + lc.value.diff_pct + '%)') : null,
       lc && lc.time_gap_hours > 6 ? h('p', { class: 'mut' }, 'تنبيه: بين السعرين ' + Math.round(lc.time_gap_hours) + ' ساعة، فالفرق تقريبي.') : null),
     sect('الدولار', nRow('الرسمي (البنك المركزي)', I('usd_iqd_official'), v => nI(v)),
       nRow('المحلي (السوق السوداء)', par, v => nI(v), 'لكل 100$'),
       (x => x ? nRow('صيرفات بغداد', x, v => nI(v.sell) + ' / ' + nI(v.buy), 'بيع/شراء') : null)(I('usd_iqd_shops_baghdad')),
-      (d => d && d.value != null ? row('الفجوة بين الرسمي والمحلي', d.value + '%') : null)(D('official_parallel_gap')),
-      nRow('مؤشر الدولار الأمريكي DXY', I('dxy'), v => nD(v)))];
+      (d => d && d.value != null ? row(ti('الفجوة بين الرسمي والمحلي'), d.value + '%') : null)(D('official_parallel_gap')),
+      nRow(ti('مؤشر الدولار الأمريكي DXY', 'DXY'), I('dxy'), v => nD(v)))];
 }
 function nabdEconomy() {
   const I = FN.ind, D = FN.der, pct = v => nD(v) + '%', fr = D('fed_target_range'), cot = v => (v.net_noncommercial > 0 ? '+' : '') + nI(v.net_noncommercial) + ' (' + (v.change_week > 0 ? '+' : '') + nI(v.change_week) + ' أسبوعياً)';
-  return [sect('الاقتصاد الأمريكي', fr && fr.value ? h('div', { class: 'r nrow' + (fr.live === 'current' ? '' : ' nold') }, h('span', {}, 'الفائدة الأمريكية (النطاق الرسمي)'), h('span', { class: 'nv' }, h('b', {}, fr.value + '%'), ' ', nChip(fr.live, nT(I('fed_target_upper'))))) : null,
-      nRow('التضخم السنوي CPI', I('cpi_yoy'), pct), nRow('البطالة', I('unrate'), pct), nRow('الفائدة الفعلية (متوسط الشهر)', I('fed_funds'), pct),
-      nRow('مؤشر الدولار DXY', I('dxy'), nD), nRow('الدولار الموسّع للفدرالي', I('usd_broad'), nD)),
+  return [sect('الاقتصاد الأمريكي', fr && fr.value ? h('div', { class: 'r nrow' + (fr.live === 'current' ? '' : ' nold') }, h('span', {}, ti('الفائدة الأمريكية (النطاق الرسمي)', 'الفائدة الأمريكية'), srcLine(I('fed_target_upper'))), h('span', { class: 'nv' }, h('b', {}, fr.value + '%'), ' ', nChip(fr.live, nT(I('fed_target_upper'))))) : null,
+      nRow(ti('التضخم السنوي CPI', 'التضخم CPI'), I('cpi_yoy'), pct), nRow(ti('البطالة'), I('unrate'), pct), nRow(ti('الفائدة الفعلية (متوسط الشهر)', 'الفائدة الفعلية'), I('fed_funds'), pct),
+      nRow(ti('مؤشر الدولار DXY', 'DXY'), I('dxy'), nD), nRow(ti('الدولار الموسّع للفدرالي', 'الدولار الموسّع'), I('usd_broad'), nD)),
     (s => s.length ? sect('الاتجاه (آخر 3 سنوات)', h('p', { class: 'mut' }, 'التضخم السنوي'), spark(FN.fredS('CPI_YOY').map(([d, v]) => [Date.parse(d), v]), '#c0392b'), h('p', { class: 'mut' }, 'العائد الحقيقي 10 سنوات'), spark(FN.fredS('DFII10').map(([d, v]) => [Date.parse(d), v]), '#2e86c1'),
       h('p', { class: 'mut' }, 'الدولار الموسّع'), spark(FN.fredS('DTWEXBGS').map(([d, v]) => [Date.parse(d), v]), '#7d3c98'), h('p', { class: 'mut' }, 'البطالة'), spark(FN.fredS('UNRATE').map(([d, v]) => [Date.parse(d), v]), '#1e8449')) : null)(FN.fredS('DFII10')),
-    sect('العوائد', nRow('عائد سندات 10 سنوات', I('ust10y'), pct), nRow('عائد سنتين', I('ust2y'), pct), nRow('العائد الحقيقي 10 سنوات', I('real10y'), pct), nRow('توقعات التضخم 10 سنوات', I('breakeven10y'), pct)),
-    sect('مراكز المضاربين (COT)', h('p', { class: 'mut' }, 'صافي مراكز غير التجاريين في العقود الآجلة · أسبوعي'), nRow('الذهب', I('cot_gold'), cot), nRow('الفضة', I('cot_silver'), cot)),
-    h('p', { class: 'mut' }, (FN.get().attribution || []).join(' · '))];
+    sect('العوائد', nRow(ti('عائد سندات 10 سنوات', 'عائد السندات'), I('ust10y'), pct), nRow('عائد سنتين', I('ust2y'), pct), nRow(ti('العائد الحقيقي 10 سنوات', 'العائد الحقيقي'), I('real10y'), pct), nRow(ti('توقعات التضخم 10 سنوات', 'توقعات التضخم'), I('breakeven10y'), pct)),
+    sect(ti('مراكز المضاربين (COT)', 'COT'), h('p', { class: 'mut' }, 'صافي مراكز غير التجاريين في العقود الآجلة · أسبوعي'), nRow('الذهب', I('cot_gold'), cot), nRow('الفضة', I('cot_silver'), cot)),
+    h('p', { class: 'mut' }, (FN.get().attribution || []).filter(t => !/shafaq|شفق/i.test(t)).join(' · '))];
 }
 // ---- رسوم SVG داخل التطبيق (بلا مكتبات ولا اتصال خارجي؛ CSP كما هي) ----
+// ملاحظة أمان: كل نص يدخل هذا الـ SVG يمر عبر esc()، وكل الأرقام محسوبة محلياً؛ لا يدخل إليه نص من مصدر خارجي إلا بعد الهروب
 const svgEl = (html, cls) => { const d = h('div', { class: 'chart ' + (cls || '') }); d.innerHTML = html; return d; };
-const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 // pts: [[ms، قيمة]] مرتبة. يعيد div فيه SVG: مساحة متدرجة، ومحور قيم (أعلى/أدنى)، وتسميات زمنية، ونقطة أخيرة
 function lineChart(pts, o = {}) {
   const W = 340, H = o.h || 140, P = 8, col = o.color || 'var(--acc)', fmt = o.fmt || (v => Math.round(v).toLocaleString('en-US'));
@@ -506,7 +570,7 @@ function nabdAnalysis() {
   return [sect((m === 'gold' ? 'الذهب' : 'الفضة') + ' — منحنى السعر (أونصة بالدولار)', seg([['gold', 'الذهب'], ['silver', 'الفضة']], m, k => pick('m', k)), seg(RANGES.map(x => [x[0], x[1]]), r, k => pick('r', k)), metalChart(m, r),
       h('p', { class: 'mut' }, 'التاريخ حتى 16 تشرين الثاني 2026 من مراجعك المرفوعة؛ وما بعده من الجالب. ' + (aux.ref ? '' : '(المراجع لم تُحمَّل)'))),
     A.gsr ? sect('نسبة الذهب إلى الفضة: ' + A.gsr.v, gsrGauge(A.gsr.v), h('p', {}, A.gsr.tip), h('p', { class: 'mut' }, 'متوسط 10 سنوات قرابة 80. النسبة للتوزيع بين المعدنين، ولا تدخل في حكم الذهب.')) : null,
-    sect('العوامل المؤثرة في الذهب (أفق 3–5 سنوات)', A.factors.map(f => h('div', { class: 'sig' }, h('span', { class: 'dot', style: 'background:' + SIGC[f.sig] }),
+    sect(ti('العوامل المؤثرة في الذهب (أفق 3–5 سنوات)', 'العوامل المؤثرة'), A.factors.map(f => h('div', { class: 'sig' }, h('span', { class: 'dot', style: 'background:' + SIGC[f.sig] }),
       h('div', {}, h('b', {}, f.label), f.value != null ? h('span', {}, ' — ', h('bdi', { dir: 'ltr' }, String(f.value))) : null, h('div', { class: 'mut' }, f.reason + ' · الوزن ' + f.w + '%'))))),
     sect('الخلاصة', A.verdict ? h('div', { class: 'verdict' }, h('b', {}, A.verdict), h('div', { class: 'mut' }, 'الثقة: ' + A.conf + ' · ' + A.used + ' من ' + A.total + ' عوامل متاحة · المؤشر ', h('bdi', { dir: 'ltr' }, String(A.score))))
       : h('p', { class: 'mut' }, 'لا حكم الآن: العوامل المتاحة أقل من 4 أو البيانات قديمة. لا نبني حكماً على بيانات ناقصة.'),
@@ -546,10 +610,10 @@ function insightsMain() {
       ms.length > 1 ? lineChart(nwPts, { color: 'var(--acc)', fmt: v => (v / 1e6).toFixed(1) + 'م', labels: [[nwPts[0][0], kLab(ms[0].k)], [nwPts[nwPts.length - 1][0], kLab(cur.k)]] }) : h('p', { class: 'mut' }, 'يظهر المنحنى بعد مرور شهرين من التسجيل.')),
     sect('الدخل والمصروف', barsChart(per === 'm' ? ms.slice(-1) : ms.slice(-12)), h('div', { class: 'lg' }, h('span', {}, h('i', { style: 'background:var(--ok)' }), 'الدخل'), h('span', {}, h('i', { style: 'background:var(--bad)' }), 'المصروف')),
       row('مجموع الدخل', money(per === 'm' ? (cur ? cur.income : 0) : inc)), row('مجموع المصروف', money(per === 'm' ? (cur ? cur.expense : 0) : exp)),
-      (r => r != null ? row('نسبة الادخار', r + '%', r < 10 ? 'bad' : r >= 20 ? 'okc' : '') : null)(per === 'm' ? (cur ? cur.rate : null) : rate),
+      (r => r != null ? row(ti('نسبة الادخار'), r + '%', r < 10 ? 'bad' : r >= 20 ? 'okc' : '') : null)(per === 'm' ? (cur ? cur.rate : null) : rate),
       ms.filter(m => m.rate != null).length > 2 && per !== 'm' ? h('div', {}, h('p', { class: 'mut' }, 'نسبة الادخار شهرياً'), spark(ms.filter(m => m.rate != null).map(m => [Date.parse(m.k + '-15'), m.rate]), 'var(--ok)')) : null),
     sect('المصروف حسب الفئة' + (per === 'm' ? ' — هذا الشهر' : ''), cats.length ? hbars(cats) : h('p', { class: 'mut' }, 'لا مصروفات في الفترة.')),
-    sect('توزيع الأصول', al.parts.length ? h('div', { class: 'dn' }, donut(al.parts), h('div', { class: 'lg col' }, al.parts.map(p => h('span', {}, h('i', { style: 'background:' + p.c }), p.n + ' ' + p.p + '%')))) : h('p', { class: 'mut' }, 'لا أصول بعد.'),
+    sect(ti('توزيع الأصول'), al.parts.length ? h('div', { class: 'dn' }, donut(al.parts), h('div', { class: 'lg col' }, al.parts.map(p => h('span', {}, h('i', { style: 'background:' + p.c }), p.n + ' ' + p.p + '%')))) : h('p', { class: 'mut' }, 'لا أصول بعد.'),
       mn ? h('p', { class: 'mut' }, 'الذهب والفضة بقيمة البيع المحسوبة الآن من نبض السوق: ' + money(mn.total) + ' (عرض فقط؛ لا يغيّر أسعارك المسجّلة).') : h('p', { class: 'mut' }, 'الذهب والفضة بالأسعار المسجّلة في «الأصول».')),
     sect('الأهداف', G.length ? G.map(g => h('div', { class: 'hb' }, h('div', { class: 'r' }, h('span', {}, g.name + (sv && sv.id === g.id ? ' (المدخرات)' : '')), h('b', {}, g.pct + '%')), h('div', { class: 'hbt' }, h('div', { class: 'hbf' + (g.behind > 0 && !g.firstMonth ? ' late' : ''), style: 'width:' + Math.min(100, g.pct) + '%' })))) : h('p', { class: 'mut' }, 'لا أهداف.'),
       sv && sal ? row('المدخرات تعادل', sv.salaries + ' راتب') : null),
@@ -583,7 +647,8 @@ function advItems(st) { // استشارات المستشار + تنبيهات ا
   try { return advItems0(st); } catch (e) { return []; } } // المستشار لا يُسقط الشاشة الرئيسية أبداً
 function advItems0(st) {
   if (typeof FA === 'undefined') return [];
-  const state = advLoad(), r = FA.run(S, state, L.today()); if (r.state.verdict !== (state.verdict || null) || r.state.vchg !== (state.vchg || null)) advSave({ ...state, verdict: r.state.verdict, vchg: r.state.vchg });
+  const state = advLoad(), r = FA.run(S, state, L.today()); if (S.x.set.hideAdvice) r.items = []; // خيار الخصوصية: الاستشارات مخفية (التنبيهات الأساسية تبقى)
+  if (r.state.verdict !== (state.verdict || null) || r.state.vchg !== (state.vchg || null)) advSave({ ...state, verdict: r.state.verdict, vchg: r.state.vchg }); // حفظ حكم الذهب الأخير لاكتشاف تغيّره (كان ضمن تعليق سهواً فتعطّل)
   const sys = (st || L.status(S)).alerts.filter(a => a.go[1] !== 'backup').map((a, i) => ({ id: 'AL' + i, lv: a.lv === 'info' ? 'info' : a.lv, title: a.t, text: a.t, go: a.go, sys: true }));
   const O = { red: 0, warn: 1, ok: 2, info: 3 }, prio = r.items.filter(x => x.id === 'PRIO');
   ADV = prio.concat([...sys, ...r.items.filter(x => x.id !== 'PRIO')].sort((a, b) => O[a.lv] - O[b.lv])); return ADV; }
@@ -604,16 +669,16 @@ function tickers(items) {
   if (!NB.tried) { NB.tried = true; Promise.all([FN.load(), FN.loadAux()]).then(() => { if (['home', 'nabd', 'insights'].includes(view.tab)) render(); }); }
   return h('div', {}, tickerLine('لك', mine, x => x && x.it ? advGo(x.it) : go('insights', 'advisor')), pubEl(tickerLine('العالم', world, () => go('nabd', null, { t: 'news' })))); }
 function advisorHome(items) { const top = items.slice(0, 3);
-  return sect('المستشار', top.length ? top.map(x => advCard(x)) : h('p', { class: 'mut' }, 'لا شيء يحتاج انتباهك الآن. وضعك مستقر.'),
+  return sect('المستشار', top.length ? top.map(x => advCard(x)) : h('p', { class: 'mut' }, 'لا شيء يحتاج انتباهك الآن. وضعك مستقر.'), advHiddenNote(),
     items.length > 3 ? btn('كل الاستشارات (' + items.length + ')', () => go('insights', 'advisor'), 'alt mini') : btn('صفحة المستشار', () => go('insights', 'advisor'), 'alt mini')); }
-function advisorScreen() { const items = advItems(), all = FA.run(S, { verdict: advLoad().verdict, vchg: advLoad().vchg }, L.today()).items.filter(x => x.id !== 'PRIO').length, own = items.filter(x => !x.sys && x.id !== 'PRIO').length, hidden = Math.max(0, all - own);
+function advisorScreen() { const items = advItems(), all = FA.run(S, { verdict: advLoad().verdict, vchg: advLoad().vchg }, L.today()).items.filter(x => x.id !== 'PRIO').length, own = items.filter(x => !x.sys && x.id !== 'PRIO').length, hidden = S.x.set.hideAdvice ? 0 : Math.max(0, all - own);
   const G = [['red', 'يحتاج انتباهاً'], ['warn', 'للمراجعة'], ['ok', 'إنجازات'], ['info', 'معلومات']];
   return h('div', {}, btn('رجوع', () => go('insights'), 'alt mini'), h('h1', {}, 'المستشار'),
-    h('p', { class: 'mut' }, 'يقرأ أرقامك ونبض السوق ويعلّق. «رأيته» يخفي الاستشارة مدة، وتعود فوراً إن ساء الرقم. ليست استشارة مالية ملزمة.'),
+    h('p', { class: 'mut' }, 'يقرأ أرقامك ونبض السوق ويعلّق. «رأيته» يخفي الاستشارة مدة، وتعود فوراً إن ساء الرقم. ليست استشارة مالية ملزمة.'), advHiddenNote(),
     items.length ? G.map(([lv, t]) => { const xs = items.filter(x => x.lv === lv); return xs.length ? sect(t + ' (' + xs.length + ')', xs.map(x => advCard(x, true))) : null; }) : h('p', {}, 'لا استشارات الآن. وضعك مستقر.'),
     hidden ? sect('', h('p', { class: 'mut' }, hidden + ' استشارة مخفية مؤقتاً.'), btn('أظهر المخفية', () => { const st = advLoad(); advSave({ verdict: st.verdict, vchg: st.vchg }); render(); }, 'alt mini')) : null); }
 function nabdAdvice() { const xs = advItems().filter(x => x.go && x.go[0] === 'nabd');
-  return privEl(sect('استشارات السوق لك', xs.length ? xs.map(x => advCard(x)) : h('p', { class: 'mut' }, 'لا استشارات سوق تخصك الآن.'), h('p', { class: 'mut' }, 'تربط حالة السوق بمدخراتك ونسبة معادنك التي حددتها.'))); }
+  return privEl(sect('استشارات السوق لك', xs.length ? xs.map(x => advCard(x)) : S.x.set.hideAdvice ? advHiddenNote() : h('p', { class: 'mut' }, 'لا استشارات سوق تخصك الآن.'), h('p', { class: 'mut' }, 'تربط حالة السوق بمدخراتك ونسبة معادنك التي حددتها.'))); }
 // تعليق المستشار على نسبة المعادن التي يحددها المستخدم (قرار المستخدم؛ المستشار يعلّق فقط)
 function metalsComment(p) { if (p == null) return 'لم تحدد نسبة. لن تظهر استشارات «فوق/تحت نسبتك» حتى تحددها.';
   return p <= 10 ? 'نسبة متحفظة: حماية جيدة من التضخم دون تقلب كبير.' : p <= 25 ? 'نسبة معتدلة وشائعة للادخار طويل الأمد (3–5 سنوات).' : p <= 40 ? 'نسبة مرتفعة: المعادن متقلبة، وفرق البيع والشراء محلياً يأكل جزءاً من القيمة عند البيع السريع.' : 'نسبة عالية جداً: معظم ثروتك سيتحرك مع سعر الذهب والفضة. تأكد أن مدخراتك (الطوارئ) مكتملة أولاً.'; }
@@ -633,7 +698,7 @@ SCREENS.nabd = () => {
   const M = FN.get(), tab = view.p.t || 'prices';
   if (!NB.tried) { NB.tried = true; Promise.all([FN.load(), FN.loadAux()]).then(() => { if (['home', 'nabd', 'insights'].includes(view.tab)) render(); }); }
   const head = h('div', {}, h('h1', {}, 'نبض السوق'), h('p', { class: 'mut' }, M ? 'آخر تحديث للبيانات: ' + nWhen(M.generated_at) + ' · يتحدّث تلقائياً' : (FN.err() ? 'تعذّر تحميل بيانات السوق' : 'جارٍ التحميل…'),
-    ' ', h('button', { class: 'mini alt', onclick: async () => { await Promise.all([FN.load(true), FN.loadAux(true)]); render(); toast(FN.err() ? 'تعذّر التحديث: ' + FN.err() : 'حُدّثت البيانات', !!FN.err()); } }, 'تحديث')));
+    ' ', h('button', { class: 'mini alt', onclick: async () => { const g0 = (FN.get() || {}).generated_at; await Promise.all([FN.load(true), FN.loadAux(true)]); render(); const g1 = (FN.get() || {}).generated_at; toast(FN.err() ? 'تعذّر التحديث: ' + FN.err() : g1 && g1 === g0 ? 'لا توجد بيانات أحدث الآن · آخر ملف ' + nWhen(g1) + ' · يتجدد الملف عند تشغيل الجالب على GitHub' : 'حُدّثت البيانات', !!FN.err()); } }, 'تحديث')));
   if (!M) return h('div', {}, head, sect('', h('p', {}, FN.err() ? 'لا تتوفر بيانات السوق الآن. تحقق من الاتصال ثم اضغط «تحديث». بياناتك المالية لم تتأثر.' : '…')));
   return h('div', { class: 'pub' }, head, seg([['prices', 'الأسعار'], ['analysis', 'التحليل'], ['econ', 'الاقتصاد'], ['news', 'الأخبار']], tab, k => go('nabd', null, { t: k })), ...(tab === 'econ' ? nabdEconomy() : tab === 'analysis' ? nabdAnalysis() : tab === 'news' ? nabdNews() : nabdPrices()));
 };
@@ -663,6 +728,137 @@ function privBtn() { let b = $('#eye'); if (!privOn() || bootErr) { if (b) b.hid
 // مغادرة التطبيق أو انتقاله إلى الخلفية: تُخفى الأرقام فوراً
 document.addEventListener('visibilitychange', () => { if (document.hidden && S) privHide(); });
 addEventListener('pagehide', () => { if (S) privHide(); });
+// ===== f1-v4: «تحويل العملات» — محوّل مستقل بين الدينار والدولار =====
+// يحسب فقط حتى تطلب غير ذلك. السعر اليدوي مؤقت لهذه العملية ولا يغيّر السعر المعتمد إلا إذا ضغطت «اعتمد هذا السعر» وأكّدت.
+function fxForm() { const hasRate = S.x.rates.length > 0, st = { dir: 'iqd2usd', mode: hasRate ? 'app' : 'manual' };
+  const amt = h('input', { inputmode: 'decimal', placeholder: 'المبلغ', autocomplete: 'off' }), man = h('input', { inputmode: 'decimal', placeholder: 'مثال: 150000', autocomplete: 'off' });
+  const out = h('div', { class: 'fxout' }), act2 = h('div', {}), segBox = h('div', {}), manL = h('label', { class: 'f' }, h('span', {}, 'سعرك لهذه العملية: كم دينار لكل 100 دولار'), man);
+  const rateNow = () => { if (st.mode === 'app') return hasRate ? S.rate : null; try { const r = L.parseAmount(man.value, 2); return r > 0 ? r : null; } catch (e) { return null; } };
+  const calc = () => { const r = rateNow(); let a = null; try { a = L.parseAmount(amt.value, st.dir === 'iqd2usd' ? 0 : 2); } catch (e) {} if (!r || !a || a <= 0) return null;
+    return st.dir === 'iqd2usd' ? { r, iqd: a, usd: Number(E.rd(BigInt(a) * 1000000n, BigInt(r))) } : { r, usd: a, iqd: E.usdToIqd(a, r) }; };
+  const draw = () => { manL.hidden = st.mode !== 'manual';
+    segBox.replaceChildren(h('label', { class: 'f' }, h('span', {}, 'الاتجاه'), seg([['iqd2usd', 'دينار ← دولار'], ['usd2iqd', 'دولار ← دينار']], st.dir, k => { st.dir = k; draw(); })),
+      h('label', { class: 'f' }, h('span', {}, 'سعر التحويل'), seg([['app', 'السعر المعتمد في التطبيق'], ['manual', 'سعر يدوي لهذه العملية']].filter(x => hasRate || x[0] === 'manual'), st.mode, k => { st.mode = k; draw(); })));
+    amt.placeholder = st.dir === 'iqd2usd' ? 'المبلغ بالدينار' : 'المبلغ بالدولار'; upd(); };
+  const upd = () => { const c = calc(), r = rateNow();
+    out.replaceChildren(h('div', { class: 'r' }, h('span', {}, 'السعر المستخدم'), h('b', {}, r ? L.fmtRate(r) + ' لكل 100$' + (st.mode === 'app' ? ' (المعتمد ' + S.x.rates[S.x.rates.length - 1].d + ')' : ' (يدوي، مؤقت)') : '—')),
+      h('div', { class: 'r big2' }, h('span', {}, 'النتيجة'), h('b', {}, c ? (st.dir === 'iqd2usd' ? L.fmtUsd(c.usd) : money(c.iqd)) : '—')));
+    act2.replaceChildren(...(c ? recordBox(c) : []), st.mode === 'manual' && r ? btn('اعتمد هذا السعر سعراً للتطبيق', () => { if (!confirm('اعتماد ' + L.fmtRate(r) + ' دينار لكل 100$ سعراً للصرف بتاريخ اليوم (' + L.today() + ')؟\nيُستعمل في تقييم دولارك من الآن.')) return; act(() => L.setRate(S, L.today(), r), 'اعتُمد السعر الجديد'); }, 'alt') : null); };
+  const recordBox = c => { const from = accOpts(a => a.cur === (st.dir === 'iqd2usd' ? 'IQD' : 'USD') && a.kind === 'asset'), to = accOpts(a => a.cur === (st.dir === 'iqd2usd' ? 'USD' : 'IQD') && a.kind === 'asset');
+    if (!from.length || !to.length) return [h('p', { class: 'mut' }, 'للتسجيل كعملية تحتاج حساباً بالدينار وآخر بالدولار. الحساب وحده لا يُسجَّل شيئاً.')];
+    const fs = h('select', {}, from.map(([v, t]) => h('option', { value: v }, t))), ts = h('select', {}, to.map(([v, t]) => h('option', { value: v }, t))), dt0 = h('input', { type: 'date', value: L.today(), max: L.today() });
+    return [h('details', { class: 'fold' }, h('summary', {}, 'سجّلها عملية بين حساباتي (اختياري)'), h('label', { class: 'f' }, h('span', {}, 'من'), fs), h('label', { class: 'f' }, h('span', {}, 'إلى'), ts), h('label', { class: 'f' }, h('span', {}, 'التاريخ'), dt0),
+      btn('سجّل التحويل', () => { const a = st.dir === 'iqd2usd' ? c.iqd : c.usd, b = st.dir === 'iqd2usd' ? c.usd : c.iqd;
+        if (!confirm('تسجيل تحويل: ' + (st.dir === 'iqd2usd' ? money(c.iqd) + ' ← ' + L.fmtUsd(c.usd) : L.fmtUsd(c.usd) + ' ← ' + money(c.iqd)) + '\nبسعر ' + L.fmtRate(c.r) + ' لكل 100$؟\nلا يتغير سعر الصرف المعتمد.')) return;
+        act(() => L.transfer(S, { date: dt0.value, from: fs.value, to: ts.value, amount: a, amount2: b, note: 'تحويل عملات' }), 'سُجّل التحويل'); }, 'prim'))]; };
+  amt.oninput = upd; man.oninput = upd; draw();
+  return h('div', {}, sect(ti('تحويل العملات'), h('p', { class: 'mut' }, 'احسب المبلغ بين الدينار والدولار. الحساب لا يحفظ شيئاً، والسعر اليدوي لا يغيّر سعرك المعتمد إلا إذا اعتمدته صراحة.'), segBox, h('label', { class: 'f' }, h('span', {}, 'المبلغ'), amt), manL, out, act2)); }
+// ===== f1-v4: «سجل التغييرات» — للقراءة فقط، من سجلاتك المحفوظة أصلاً (لا يضيف شيئاً إلى بياناتك) =====
+MORE.push(['log', 'سجل التغييرات', () => { const f = view.p.f || 'all', ev = [], LT = new Map(L.listTx(S).map(y => [y.id, y]));
+  S.tx.forEach(t => { const x = LT.get(t.id); ev.push({ k: 'tx', o: t.id, d: t.date, t: (x ? x.label : t.type) + (t.voided ? ' (معكوسة)' : '') + (x && x.note ? ' — ' + x.note : ''), v: x ? money(x.amount) + (x.usd ? ' (' + L.fmtUsd(x.usd) + ')' : '') : '' }); });
+  S.x.rates.forEach(r => ev.push({ k: 'price', o: 0, d: r.d, t: 'سعر الصرف', v: L.fmtRate(r.r) + ' لكل 100$' }));
+  S.x.prices.forEach(r => ev.push({ k: 'price', o: 0, d: r.d, t: 'أسعار الأونصة', v: [r.G != null ? 'ذهب ' + L.fmtUsd(r.G) : null, r.S != null ? 'فضة ' + L.fmtUsd(r.S) : null].filter(Boolean).join(' · ') }));
+  (S.x.vals || []).forEach(v => ev.push({ k: 'price', o: 0, d: v.d, t: 'تقييم «' + ((S.acc[v.a] || {}).name || v.a) + '»', v: money(v.v) }));
+  S.goals.filter(g => g.date).forEach(g => { const d = S.x.goalsDef.find(x => x.id === g.name); ev.push({ k: 'goal', o: 0, d: g.date, t: (g.amount >= 0 ? 'تخصيص لـ ' : 'تحرير من ') + '«' + (d ? d.name : g.name) + '»', v: money(Math.abs(g.amount)) }); });
+  if (S.x.backup) ev.push({ k: 'backup', o: 0, d: L.iso(new Date(S.x.backup.t)), t: 'آخر نسخة احتياطية', v: S.x.backup.tx + ' عملية' });
+  const xs = ev.filter(e => f === 'all' || e.k === f).sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : b.o - a.o).slice(0, 300);
+  return h('div', {}, h('p', { class: 'mut' }, 'كل ما سُجّل في بياناتك بتاريخه، الأحدث أولاً. للقراءة فقط. العمليات المعكوسة تبقى ظاهرة للأمانة.'),
+    seg([['all', 'الكل'], ['tx', 'العمليات'], ['price', 'الأسعار والتقييم'], ['goal', 'الأهداف']], f, k => go('more', 'log', { f: k })),
+    sect('', xs.length ? xs.map(e => h('div', { class: 'tx' }, h('div', { class: 'r' }, h('span', {}, e.d + ' · ' + e.t), h('b', {}, e.v)))) : h('p', { class: 'mut' }, 'لا شيء بعد.'), ev.length > 300 ? h('p', { class: 'mut' }, 'يُعرض آخر 300 سجل.') : null)); }]);
+// ===== f1-v3.2: صفحة «التعليمات» =====
+// لتحديثها عند إضافة ميزة: عدّل HELP فقط (عنوان، ثم فقرات؛ السطر الذي يبدأ بـ «• » يُعرض كنقطة)
+const HELP = [
+  ['ما هو «فلوسي»؟', [
+    'تطبيق شخصي لإدارة مالك: تسجّل فيه دخلك ومصروفك وما تملكه وما عليك، فيعطيك صورة واضحة عن وضعك المالي وكيف يتغيّر شهراً بعد شهر.',
+    'كل بياناتك محفوظة على هاتفك فقط، ولا تُرسل إلى أي خادم. لهذا النسخة الاحتياطية مهمة جداً (انظر قسمها في الأسفل).',
+    'التطبيق يحسب ويعرض وينبّه، لكنه لا يضمن أي نتيجة مالية، والقرار دائماً لك.']],
+  ['كيف تبدأ (أول مرة)', [
+    '• الخطوة 1: من الرئيسية «ابدأ الخطوة 1»، واكتب كم عندك اليوم في كل حساب (نقد، فيزا، بنك، دولار، عقار، التزام). هذا «الرصيد الافتتاحي» ولا يُحسب دخلاً.',
+    '• إن كان عندك دولار فاكتب سعر الصرف اليوم، أو اضغط «اعتمد سعر نبض السوق» ثم «ضعه في الخانة».',
+    '• الخطوة 2: من «أموالي» ← «المتكررات والراتب» أضف راتبك بنوع «دخل متكرر» واختر «هل هو الراتب؟ نعم». يذكّرك التطبيق بموعده.',
+    '• الخطوة 3: من «الأصول» ← «قطعة موجودة قبل البدء» أضف ذهبك وفضتك بالوزن والعيار.',
+    '• أخطأت في رقم البداية؟ «أموالي» ← «تصحيح الرصيد الافتتاحي».']],
+  ['التسجيل اليومي الصحيح', [
+    '• «العمليات» ← «مصروف»: المبلغ، والحساب الذي صرفت منه، والفئة (أكل، مواصلات...)، ثم «تم». سجّل كل مصروف في يومه.',
+    '• «دخل»: أي مال يدخل (راتب أو دخل إضافي).',
+    '• «تحويل»: نقل مال بين حساباتك (من الفيزا إلى النقد، أو صرف دولار إلى دينار). لا يُحسب دخلاً ولا مصروفاً.',
+    '• «مطابقة نقد»: إن عددت نقدك ووجدته مختلفاً عن المسجّل، اكتب الرقم الفعلي فيُصحَّح الفرق.',
+    '• «تحويل العملات»: حاسبة بين الدينار والدولار بالسعر المعتمد أو بسعر يدوي لهذه العملية. يعرض السعر المستخدم والنتيجة، ويمكنك تسجيلها تحويلاً بين حساباتك، أو اعتماد السعر اليدوي سعراً للتطبيق بعد تأكيدك. السعر المعتمد لا يتغير وحده.',
+    '• أخطأت في عملية؟ اضغط «تراجع» تحتها في القائمة ثم أدخلها صحيحة. تبقى المعكوسة ظاهرة في السجل للأمانة.']],
+  ['التبويبات الستة', [
+    '• الرئيسية: شريط «لك» (تنبيهاتك واستشاراتك) وشريط «العالم» (أهم أخبار السوق)، والمتاح للصرف، وأهم 3 استشارات، وسعر الصرف، وصافي الثروة، وأرصدتك.',
+    '• العمليات: تسجيل المصروف والدخل والتحويل والمطابقة، و«تحويل العملات»، وآخر العمليات.',
+    '• أموالي: حساباتك، والديون (لك أو عليك)، والجمعيات، والمتكررات والراتب.',
+    '• الأصول: سعر الصرف وأسعار الأونصة، ودولارك بمتوسط التكلفة، وقطع الذهب والفضة (شراء وبيع)، وتقييم العقار والسيارة، والأهداف.',
+    '• نبض السوق: أسعار الذهب والفضة والدولار، والتحليل، والاقتصاد الأمريكي، والأخبار.',
+    '• تحليلاتي: رسوم وضعك المالي، و«هل أشتري؟»، والمستشار، والتقارير والحدود.',
+    '• ⚙ في الرئيسية: الإعدادات، والقفل، والنسخ الاحتياطي، و«سجل التغييرات» (كل ما سجّلته بتاريخه)، وبصمة البيانات، وفحص السلامة، والاختبار الذاتي، وهذه التعليمات.',
+    '• التنقل بالسحب: اسحب الشاشة يميناً أو يساراً للانتقال بين أقسام التبويب ثم إلى التبويب التالي. لا يعمل السحب فوق الرسوم والجداول وخانات الإدخال.']],
+  ['قراءة الأرقام والتقارير', [
+    '• المتاح للصرف: ما تستطيع صرفه بعد حجز مبالغ أهدافك. لونه أخضر ضمن حدودك، وأصفر إن اقتربت من حد، وأحمر إن تجاوزت.',
+    '• صافي الثروة: ما تملكه ناقص ما عليك. اضغط ⓘ بجانب أي مصطلح لشرحه.',
+    '• تحليلاتي: منحنى ثروتك، ودخلك ومصروفك لكل شهر، ونسبة ادخارك، وأين يذهب مصروفك، وتوزيع أصولك. غيّر الفترة من الأزرار في الأعلى.',
+    '• التقارير والحدود: تقرير شهري وسنوي، و«جسر صافي الثروة» الذي يفسّر سبب تغيّرها، و«الحدود» وهي نسب من دخلك لكل نوع مصروف، فينبهك التطبيق قبل تجاوزها. عدّلها بما يناسبك.',
+    '• استفد منها هكذا: إن كانت نسبة ادخارك أقل من 10% فابحث في «المصروف حسب الفئة» عن أكبر بند وابدأ به.']],
+  ['الأهداف والمدخرات', [
+    '• أنشئ هدفاً من «الأصول» ← «الأهداف»: الاسم والمبلغ والموعد، ويعرض لك القسط الشهري المطلوب.',
+    '• «تخصيص»: تحجز مبلغاً للهدف دون نقله من حسابك. «تحرير»: تعيده متاحاً للصرف.',
+    '• هدف المدخرات (الطوارئ): علّم هدفاً بأنه «هدف المدخرات» عند إنشائه، أو من ⚙ ← الإعدادات. يقيس المستشار أمانك المالي عليه ويعلّق على مبلغه وموعده.']],
+  ['الذهب والفضة والدولار', [
+    '• كل قطعة تُسجَّل وحدها بوزنها وعيارها وما دفعته فيها. تعرض تكلفتها وقيمتها المعدنية الحالية.',
+    '• عند البيع يعرض «تقرير البيع» كم ربحت أو خسرت، ومقدار ما ضاع من المصنعية وخصم الصائغ.',
+    '• الدولار يُحسب بمتوسط سعر شرائك، فتعرف ربحك أو خسارتك عند الصرف.',
+    '• نسبة المعادن المستهدفة: حدّدها في ⚙ ← الإعدادات إن أردت، فينبّهك المستشار إن صارت معادنك فوقها أو تحتها.']],
+  ['نبض السوق', [
+    '• الأسعار: الأونصة العالمية للذهب والفضة، ثم تحويلها بالحساب إلى مثقال وغرام بسعر الدولار المحلي، ثم «المتوقع مع المصنعية»، ثم السعر المحلي الفعلي في السوق.',
+    '• الدولار: الرسمي (البنك المركزي)، والمحلي (السوق السوداء)، والفجوة بينهما، ومؤشر DXY.',
+    '• تحت كل سعر مصدره ووقت آخر تحديث. «حالي» يعني حديثاً، و«قديم» يعني أنه تأخر فلا تعتمد عليه لقرار اليوم.',
+    '• التحليل: منحنى الذهب والفضة، ونسبة الذهب إلى الفضة، وسبعة عوامل مؤثرة وخلاصة (شراء تدريجي، أو انتظار، أو محايد)، واستشارات السوق المرتبطة بوضعك. هي قواعد تنظّم القرار ولا تتنبأ بالسعر.',
+    '• الاقتصاد: الفائدة والتضخم والبطالة والعوائد الأمريكية ومراكز المضاربين. الأخبار: مكتوبة آلياً من الأرقام نفسها.',
+    '• سعر الصرف في التطبيق أنت من يحدده. يمكنك اعتماد سعر نبض السوق بزر «اعتمد سعر نبض السوق» في الرئيسية أو «الأصول»: يظهر السعر ووقته ومصدره، ولا يُحفظ إلا بعد تأكيدك.']],
+  ['المستشار و«هل أشتري؟»', [
+    '• المستشار يقرأ أرقامك ونبض السوق ويعطيك ملاحظات مرتبة: الأحمر يحتاج انتباهاً، والأصفر للمراجعة، والأخضر إنجازات، والأزرق معلومات.',
+    '• «افتح» ينقلك إلى المكان المناسب. «رأيته» يخفي الملاحظة مدة، وتعود فوراً إن ساء الرقم.',
+    '• إن تراكمت ملاحظات حمراء ظهرت «أولويتك هذا الأسبوع» لتبدأ بالأهم.',
+    '• «هل أشتري؟» في تحليلاتي: اكتب المبلغ ونوع الشراء (ترفيه، سفر، شخصي، عقار، ذهب، فضة، أصل آخر)، فيقارنه بسيولتك ومدخراتك وراتبك ويعطيك رأياً. للذهب يقارن سعر البائع بالمتوقع ويبيّن خسارتك لو بعت فوراً.',
+    '• ملاحظات المستشار قواعد عامة مساعدة، وليست استشارة مالية ملزمة.']],
+  ['إخفاء الثروة والخصوصية', [
+    '• ⚙ ← الإعدادات ← «الخصوصية: إخفاء الثروة» ← «مفعّل»: تظهر كل مبالغك هكذا ••••••، مفيد أمام الآخرين.',
+    '• زر 👁 في أسفل الشاشة يُظهر الأرقام 5 ثوانٍ ثم يخفيها تلقائياً. تُخفى فوراً عند مغادرة التطبيق.',
+    '• أسعار السوق العامة والنسب والتواريخ تبقى ظاهرة. الإخفاء بصري فقط ولا يغيّر أي رقم.',
+    '• «الخصوصية: الاستشارات المرتبطة بثروتك»: خيار مستقل يخفي بطاقات المستشار أو يظهرها.',
+    '• القفل: ⚙ ← «القفل» لتفعيل رمز من 6 أرقام يحمي التطبيق عند فتحه.']],
+  ['النسخ الاحتياطي والاستعادة', [
+    '• أول مرة تفتح ⚙ ← «النسخ الاحتياطي» يظهر لك «مفتاح الاسترداد». انسخه بزر «نسخ المفتاح» واكتبه أيضاً على ورقة واحفظه في مكانين. بدونه لا تُفتح أي نسخة، ولا يمكن استرجاعه.',
+    '• «💾 احفظ نسخة الآن»: ضغطة واحدة تفتح المشاركة بملف flousi-backup.flousibak. اختر «حفظ في الملفات» ثم iCloud Drive، واستبدل الملف القديم إن سُئلت.',
+    '• خذ نسخة بعد كل جلسة إدخال كبيرة. التطبيق يذكّرك إن تأخرت.',
+    '• الاستعادة على هاتف جديد: افتح الرابط وأضف التطبيق إلى الشاشة الرئيسية، ثم ⚙ ← «النسخ الاحتياطي» ← «استعادة نسخة»: اكتب مفتاحك القديم ثم اختر الملف. يفحص التطبيق النسخة ويعرض ملخصها (تاريخها، وعدد عملياتها، وآخر عملية، وصافي الثروة)، ولا يستعيدها إلا بعد ضغطك «استعد هذه النسخة». إن كانت أقدم من بياناتك الحالية ينبّهك ويطلب تأكيداً إضافياً. تُحفظ لقطة من بياناتك الحالية 30 يوماً يمكن التراجع إليها.',
+    '• بعد الاستعادة افتح ⚙ ← «بصمة البيانات» وقارنها بلقطة أخذتها قبل النسخ للتأكد.']]
+];
+MORE.unshift(['help', 'التعليمات', () => h('div', { class: 'help' }, h('p', { class: 'mut' }, 'شرح مختصر لاستعمال التطبيق في الإصدار ' + VER + '. اضغط أي عنوان لفتحه.'),
+  HELP.map(([t, ps], i) => sect('', fold(t, i === 0, ps.map(x => x.startsWith('• ') ? h('p', { class: 'hb-i' }, x.slice(2)) : h('p', {}, x)))))) ]);
+// ===== f1-v3.2: التنقل بالسحب يميناً ويساراً =====
+// الترتيب: أقسام كل تبويب ثم التبويب التالي. السحب لليمين = التالي (اتجاه القراءة العربية)، ولليسار = السابق.
+// لا يعمل فوق خانات الإدخال والرسوم والجداول، ولا إن كانت الحركة عمودية، ولا في النماذج الفرعية (شراء، بيع، تخصيص...) حتى لا تضيع مدخلاتك
+const PAGES = [{ tab: 'home' }, ...['expense', 'income', 'transfer', 'reconcile', 'fx'].map(kind => ({ tab: 'ops', p: { kind } })),
+  { tab: 'accts' }, { tab: 'more', sub: 'debts' }, { tab: 'more', sub: 'jams' }, { tab: 'more', sub: 'recurring' },
+  { tab: 'assets' }, { tab: 'more', sub: 'goals' }, ...['prices', 'analysis', 'econ', 'news'].map(t => ({ tab: 'nabd', p: { t } })),
+  { tab: 'insights' }, { tab: 'insights', sub: 'buy' }, { tab: 'insights', sub: 'advisor' }, { tab: 'more', sub: 'reports' }];
+function pageIdx() { const v = view, p = v.p || {}; if (p.id || p.mode || p.confirm || p.off) return -1;
+  if (v.tab === 'accts' && v.sub) return -1; if (v.tab === 'assets' && v.sub) return -1;
+  return PAGES.findIndex(x => x.tab === v.tab && (x.sub || null) === (v.sub || null) && (x.tab !== 'ops' || (p.kind || 'expense') === x.p.kind) && (x.tab !== 'nabd' || (p.t || 'prices') === x.p.t)); }
+function swipeGo(dir) { const i = pageIdx(); if (i < 0) return false; const j = i + dir; if (j < 0 || j >= PAGES.length) return false;
+  const x = PAGES[j]; go(x.tab, x.sub || null, x.p ? { ...x.p } : {}); const a = $('#app'); a.classList.remove('sw-n', 'sw-p'); void a.offsetWidth; a.classList.add(dir > 0 ? 'sw-n' : 'sw-p'); return true; }
+(() => { let x0 = 0, y0 = 0, t0 = 0, on = false;
+  const NO = 'input,select,textarea,svg,.chart,table,#eye,#tipbox,.noswipe';
+  document.addEventListener('touchstart', e => { on = false; if (e.touches.length !== 1 || !S || bootErr || !unlocked) return; const lk = $('#lock'); if (lk && !lk.hidden) return;
+    const t = e.target; if (t && t.closest && t.closest(NO)) return; const ae = document.activeElement; if (ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return;
+    const p = e.touches[0]; if (p.clientX < 24 || p.clientX > innerWidth - 24) return; /* الحافة محجوزة لإيماءة الرجوع في المتصفح */ x0 = p.clientX; y0 = p.clientY; t0 = Date.now(); on = true; }, { passive: true });
+  document.addEventListener('touchmove', e => { if (on && e.touches.length !== 1) on = false; }, { passive: true });
+  document.addEventListener('touchcancel', () => { on = false; }, { passive: true });
+  document.addEventListener('touchend', e => { if (!on) return; on = false; const p = e.changedTouches[0], dx = p.clientX - x0, dy = p.clientY - y0;
+    if (Date.now() - t0 > 800 || Math.abs(dx) < 70 || Math.abs(dx) < 2 * Math.abs(dy)) return; swipeGo(dx > 0 ? 1 : -1); }, { passive: true });
+})();
 // ===== الإطار: التنقل والإقلاع =====
 const TABS = [['home', 'الرئيسية'], ['ops', 'العمليات'], ['accts', 'أموالي'], ['assets', 'الأصول'], ['nabd', 'نبض السوق'], ['insights', 'تحليلاتي']];
 // المرحلة 2: لا «المزيد». صفحاته الفرعية تبقى بمساراتها نفسها (go('more', x)) لكنها تتبع زراً واضحاً في الشريط، ورجوعها إليه.
@@ -676,7 +872,7 @@ function render() { try { renderView(); } catch (e) { screenFail(e); } }
 const errInfo = e => VER + ' — ' + view.tab + (view.sub ? '/' + view.sub : '') + ': ' + ((e && (e.message || String(e))) || '');
 const copyInfo = t => async () => { try { await navigator.clipboard.writeText(t); toast('نُسخت التفاصيل'); } catch (x) { toast('تعذّر النسخ', true); } };
 function screenFail(e) {
-  clearInterval(tickTimer); const msg = (e && (e.message || String(e))) || '', home = view.tab === 'home' && !view.sub;
+  tickTimers.forEach(clearInterval); tickTimers = []; const msg = (e && (e.message || String(e))) || '', home = view.tab === 'home' && !view.sub;
   $('#app').replaceChildren(h('h1', {}, 'تعذّر عرض هذه الشاشة'),
     sect('', h('p', {}, 'بياناتك المحفوظة لم تتأثر. انتقل إلى تبويب آخر أو أعد المحاولة.'), msg ? h('p', { class: 'mut', style: 'direction:ltr;text-align:left;word-break:break-word' }, msg) : null,
       home ? btn('أعد التشغيل', () => location.reload()) : btn('العودة إلى الرئيسية', () => go('home')), btn('انسخ تفاصيل الخطأ', copyInfo(errInfo(e)), 'alt')));
@@ -706,7 +902,7 @@ function bootRestore() {
   return sect('استعادة من نسخة احتياطية', h('p', { class: 'mut' }, 'إن تكرّر الخطأ بعد إعادة المحاولة: اكتب مفتاح الاسترداد ثم اختر آخر نسخة. تُحفظ البيانات الحالية لقطةً 30 يوماً، ويمكن التراجع من صفحة النسخ بعد أن يعمل التطبيق.'),
     key, h('label', { class: 'btn', onclick: () => file.click() }, 'اختر ملف النسخة'), file); }
 function bootFail(why, e) {
-  bootErr = true; clearInterval(tickTimer);
+  bootErr = true; tickTimers.forEach(clearInterval); tickTimers = [];
   const msg = e ? (e.message || String(e)) : '', info = VER + ' — ' + why + (msg ? ': ' + msg : '');
   const lock = $('#lock'); if (lock) lock.hidden = true; // لا بيانات معروضة هنا، فلا حاجة للقفل فوقها
   $('#app').replaceChildren(h('h1', {}, 'تعذّر تشغيل فلوسي'),
