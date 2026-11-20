@@ -1,0 +1,999 @@
+{
+ "schema": "nabd-market/1",
+ "generated_at": "2026-11-20T12:04:54.284Z",
+ "run": {
+  "forced": false,
+  "log": [
+   "metals: فشل — fetch failed ENOTFOUND",
+   "dxy: لم يحن موعده",
+   "shafaq_usd: فشل — fetch failed ENOTFOUND",
+   "shafaq_gold: لم يحن موعده",
+   "cbi: لم يحن موعده",
+   "treasury: لم يحن موعده",
+   "fred_daily: لم يحن موعده",
+   "fred_monthly: لم يحن موعده",
+   "cot: لم يحن موعده",
+   "series: لم يحن موعده"
+  ]
+ },
+ "rules": {
+  "stale": "القيمة القديمة تبقى للمرجع فقط ولا تُعرض كسعر حالي",
+  "no_guess": "لا قيمة مقدّرة: عند غياب المصدر تكون القيمة null وحالتها «غير متاحة»",
+  "conversions": "أسعار الذهب والفضة بالدينار تحويل حسابي من السعر العالمي بسعر الموازي، ولا تشمل المصنعية"
+ },
+ "attribution": [
+  "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.",
+  "سعر الدولار في السوق العراقي: مسح Shafaq News (يُذكر المصدر والرابط)"
+ ],
+ "groups": {
+  "metals": {
+   "label": "الذهب والفضة العالمي",
+   "every_min": 30,
+   "last_attempt_at": "2026-11-20T12:04:54.284Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": "fetch failed ENOTFOUND",
+   "ran": true
+  },
+  "dxy": {
+   "label": "مؤشر الدولار الأمريكي DXY",
+   "every_min": 60,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "shafaq_usd": {
+   "label": "الدولار في السوق العراقي (الموازي)",
+   "every_min": 30,
+   "last_attempt_at": "2026-11-20T12:04:54.284Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": "fetch failed ENOTFOUND",
+   "ran": true
+  },
+  "shafaq_gold": {
+   "label": "الذهب المحلي الفعلي (مسح السوق)",
+   "every_min": 60,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "cbi": {
+   "label": "الدولار الرسمي العراقي",
+   "every_min": 360,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "treasury": {
+   "label": "عوائد الخزانة (خلفية للتحليل)",
+   "every_min": 1440,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "fred_daily": {
+   "label": "FRED اليومية (الفائدة الرسمية، توقعات التضخم، الدولار الموسّع)",
+   "every_min": 360,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "fred_monthly": {
+   "label": "FRED الشهرية والفصلية",
+   "every_min": 1440,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "cot": {
+   "label": "COT الأسبوعي",
+   "every_min": 1440,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  },
+  "series": {
+   "label": "السلاسل التاريخية للتحليل (series.json)",
+   "every_min": 720,
+   "last_attempt_at": "2026-11-20T11:29:49.055Z",
+   "last_ok_at": "2026-11-20T11:29:49.055Z",
+   "last_error": null,
+   "ran": false
+  }
+ },
+ "indicators": [
+  {
+   "id": "xau_usd",
+   "label": "الذهب — أونصة",
+   "unit": "USD/oz",
+   "group": "metals",
+   "source": {
+    "name": "Gold-API",
+    "url": "https://gold-api.com",
+    "reliability": "عالية (تطابق مع مصدرين للمقارنة)"
+   },
+   "value": 3590.55,
+   "data_time": "2026-11-20T11:29:35.000Z",
+   "fetched_at": "2026-11-20T12:04:54.284Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "failed",
+   "error": "fetch failed ENOTFOUND",
+   "note": null,
+   "link": null,
+   "check": {
+    "source": "Swissquote (مقارنة داخلية)",
+    "mid": 3590.21,
+    "diff_pct": 0.01
+   },
+   "every_min": 30,
+   "max_age_min": 180,
+   "status": "stale",
+   "status_ar": "قديمة — لا تُعرض كسعر حالي",
+   "age_min": 35
+  },
+  {
+   "id": "xag_usd",
+   "label": "الفضة — أونصة",
+   "unit": "USD/oz",
+   "group": "metals",
+   "source": {
+    "name": "Gold-API",
+    "url": "https://gold-api.com",
+    "reliability": "عالية (تطابق مع مصدرين للمقارنة)"
+   },
+   "value": 42.47,
+   "data_time": "2026-11-20T11:29:35.000Z",
+   "fetched_at": "2026-11-20T12:04:54.284Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "failed",
+   "error": "fetch failed ENOTFOUND",
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 30,
+   "max_age_min": 180,
+   "status": "stale",
+   "status_ar": "قديمة — لا تُعرض كسعر حالي",
+   "age_min": 35
+  },
+  {
+   "id": "usd_iqd_parallel",
+   "label": "الدولار المحلي (السوق الموازي/السوداء) — بورصة الكفاح والحارثية",
+   "unit": "IQD/100 USD",
+   "group": "shafaq_usd",
+   "source": {
+    "name": "Shafaq News (مسح السوق)",
+    "url": "https://shafaq.com/en/Economy",
+    "reliability": "متوسطة: مسح صحفي يومي"
+   },
+   "value": 170650,
+   "data_time": "2026-11-19T13:53:14.000Z",
+   "fetched_at": "2026-11-20T12:04:54.284Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "failed",
+   "error": "fetch failed ENOTFOUND",
+   "note": null,
+   "link": "https://shafaq.com/en/Economy/Dollar-edges-higher-in-Baghdad-Erbil-8-5",
+   "check": null,
+   "every_min": 30,
+   "max_age_min": 2160,
+   "status": "stale",
+   "status_ar": "قديمة — لا تُعرض كسعر حالي",
+   "age_min": 1332
+  },
+  {
+   "id": "usd_iqd_shops_baghdad",
+   "label": "الدولار — صيرفات بغداد (بيع/شراء)",
+   "unit": "IQD/100 USD",
+   "group": "shafaq_usd",
+   "source": {
+    "name": "Shafaq News (مسح السوق)",
+    "url": "https://shafaq.com/en/Economy",
+    "reliability": "متوسطة: مسح صحفي يومي"
+   },
+   "value": {
+    "sell": 171000,
+    "buy": 170000
+   },
+   "data_time": "2026-11-19T13:53:14.000Z",
+   "fetched_at": "2026-11-20T12:04:54.284Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "failed",
+   "error": "fetch failed ENOTFOUND",
+   "note": null,
+   "link": "https://shafaq.com/en/Economy/Dollar-edges-higher-in-Baghdad-Erbil-8-5",
+   "check": null,
+   "every_min": 30,
+   "max_age_min": 2160,
+   "status": "stale",
+   "status_ar": "قديمة — لا تُعرض كسعر حالي",
+   "age_min": 1332
+  },
+  {
+   "id": "gold21_mithqal_nahr",
+   "label": "ذهب 21 خليجي — مثقال، شارع النهر بالجملة (بيع/شراء) — سعر فعلي",
+   "unit": "IQD/mithqal",
+   "group": "shafaq_gold",
+   "source": {
+    "name": "Shafaq News (مسح السوق)",
+    "url": "https://shafaq.com/en/Economy",
+    "reliability": "متوسطة: مسح صحفي يومي"
+   },
+   "value": {
+    "sell": 890000,
+    "buy": 886000
+   },
+   "data_time": "2026-11-19T09:11:45.000Z",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": "https://shafaq.com/en/Economy/Gold-ticks-lower-in-Baghdad-stable-in-Erbil",
+   "check": null,
+   "every_min": 60,
+   "max_age_min": 2880,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 1613
+  },
+  {
+   "id": "gold21_mithqal_iraqi",
+   "label": "ذهب 21 عراقي — مثقال (بيع/شراء) — سعر فعلي",
+   "unit": "IQD/mithqal",
+   "group": "shafaq_gold",
+   "source": {
+    "name": "Shafaq News (مسح السوق)",
+    "url": "https://shafaq.com/en/Economy",
+    "reliability": "متوسطة: مسح صحفي يومي"
+   },
+   "value": {
+    "sell": 860000,
+    "buy": 856000
+   },
+   "data_time": "2026-11-19T09:11:45.000Z",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": "https://shafaq.com/en/Economy/Gold-ticks-lower-in-Baghdad-stable-in-Erbil",
+   "check": null,
+   "every_min": 60,
+   "max_age_min": 2880,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 1613
+  },
+  {
+   "id": "usd_iqd_official",
+   "label": "الدولار الرسمي (البنك المركزي العراقي)",
+   "unit": "IQD/USD",
+   "group": "cbi",
+   "source": {
+    "name": "البنك المركزي العراقي",
+    "url": "https://cbi.iq",
+    "reliability": "رسمية"
+   },
+   "value": 1510,
+   "data_time": null,
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": "الصفحة لا تذكر تاريخ النشرة؛ وقت البيانات = وقت الجلب",
+   "link": null,
+   "check": null,
+   "every_min": 360,
+   "max_age_min": 11520,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 35
+  },
+  {
+   "id": "ust10y",
+   "label": "عائد سندات 10 سنوات",
+   "unit": "%",
+   "group": "treasury",
+   "source": {
+    "name": "U.S. Department of the Treasury",
+    "url": "https://home.treasury.gov",
+    "reliability": "رسمية"
+   },
+   "value": 5.04,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 7200,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "ust2y",
+   "label": "عائد سندات سنتين",
+   "unit": "%",
+   "group": "treasury",
+   "source": {
+    "name": "U.S. Department of the Treasury",
+    "url": "https://home.treasury.gov",
+    "reliability": "رسمية"
+   },
+   "value": 4.76,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 7200,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "real10y",
+   "label": "العائد الحقيقي 10 سنوات (TIPS)",
+   "unit": "%",
+   "group": "treasury",
+   "source": {
+    "name": "U.S. Department of the Treasury",
+    "url": "https://home.treasury.gov",
+    "reliability": "رسمية"
+   },
+   "value": 2.88,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 7200,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "fed_target_upper",
+   "label": "الفائدة الأمريكية — الحد الأعلى للنطاق الرسمي",
+   "unit": "%",
+   "group": "fred_daily",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 4,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 360,
+   "max_age_min": 8640,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "fed_target_lower",
+   "label": "الفائدة الأمريكية — الحد الأدنى للنطاق الرسمي",
+   "unit": "%",
+   "group": "fred_daily",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 3.75,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 360,
+   "max_age_min": 8640,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "dxy",
+   "label": "مؤشر الدولار الأمريكي DXY (محسوب بمعادلته الرسمية من أسعار البنك المركزي الأوروبي اليومية)",
+   "unit": "index",
+   "group": "dxy",
+   "source": {
+    "name": "البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)",
+    "url": "https://www.ecb.europa.eu",
+    "reliability": "رسمية؛ DXY هنا تقريب بمعادلة ICE (الفرق عادةً أقل من 0.3%)"
+   },
+   "value": 103.72,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": "يُحدَّث مرة يومياً بعد نشر أسعار البنك المركزي الأوروبي (~16:00 بتوقيت أوروبا)",
+   "link": null,
+   "check": null,
+   "every_min": 60,
+   "max_age_min": 5760,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "breakeven10y",
+   "label": "توقعات التضخم 10 سنوات",
+   "unit": "%",
+   "group": "fred_daily",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 2.16,
+   "data_time": "2026-11-19",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 360,
+   "max_age_min": 8640,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 2165
+  },
+  {
+   "id": "usd_broad",
+   "label": "مؤشر الدولار الموسّع للفدرالي (أسبوعي التأخر)",
+   "unit": "index",
+   "group": "fred_daily",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 122.6503,
+   "data_time": "2026-11-13",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 360,
+   "max_age_min": 17280,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 10805
+  },
+  {
+   "id": "cpi_yoy",
+   "label": "التضخم الأمريكي السنوي CPI",
+   "unit": "%",
+   "group": "fred_monthly",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 3.72,
+   "data_time": "2026-09-01",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": "أحدث شهر منشور 2026-10-01 بلا قيمة مقابلة قبل سنة؛ استُعمل 2026-09-01",
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 144000,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 115925
+  },
+  {
+   "id": "fed_funds",
+   "label": "سعر الفائدة الفعلي",
+   "unit": "%",
+   "group": "fred_monthly",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 3.88,
+   "data_time": "2026-10-01",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 144000,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 72725
+  },
+  {
+   "id": "unrate",
+   "label": "البطالة الأمريكية",
+   "unit": "%",
+   "group": "fred_monthly",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 4.1,
+   "data_time": "2026-10-01",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 144000,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 72725
+  },
+  {
+   "id": "gdp",
+   "label": "الناتج المحلي الأمريكي",
+   "unit": "مليار USD (سنوي)",
+   "group": "fred_monthly",
+   "source": {
+    "name": "FRED — Federal Reserve Bank of St. Louis",
+    "url": "https://fred.stlouisfed.org",
+    "reliability": "رسمية",
+    "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
+   },
+   "value": 33010.036,
+   "data_time": "2026-07-01",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": null,
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 288000,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 205205
+  },
+  {
+   "id": "cot_gold",
+   "label": "COT الذهب — صافي المضاربين وتغيّره الأسبوعي",
+   "unit": "عقود",
+   "group": "cot",
+   "source": {
+    "name": "CFTC Commitments of Traders",
+    "url": "https://www.cftc.gov",
+    "reliability": "رسمية"
+   },
+   "value": {
+    "net_noncommercial": 190107,
+    "change_week": 10559,
+    "open_interest": 404725
+   },
+   "data_time": "2026-11-10",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": "Futures Only (Legacy). تاريخ التقرير الثلاثاء، يُنشر الجمعة",
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 20160,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 15125
+  },
+  {
+   "id": "cot_silver",
+   "label": "COT الفضة — صافي المضاربين وتغيّره الأسبوعي",
+   "unit": "عقود",
+   "group": "cot",
+   "source": {
+    "name": "CFTC Commitments of Traders",
+    "url": "https://www.cftc.gov",
+    "reliability": "رسمية"
+   },
+   "value": {
+    "net_noncommercial": 19364,
+    "change_week": -1887,
+    "open_interest": 115652
+   },
+   "data_time": "2026-11-10",
+   "fetched_at": "2026-11-20T11:29:49.055Z",
+   "fetched_ok_at": "2026-11-20T11:29:49.055Z",
+   "update": "ok",
+   "error": null,
+   "note": "Futures Only (Legacy). تاريخ التقرير الثلاثاء، يُنشر الجمعة",
+   "link": null,
+   "check": null,
+   "every_min": 1440,
+   "max_age_min": 20160,
+   "status": "current",
+   "status_ar": "حالية",
+   "age_min": 15125
+  }
+ ],
+ "derived": [
+  {
+   "id": "gsr",
+   "label": "نسبة الذهب إلى الفضة",
+   "unit": "ratio",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "xag_usd": {
+     "value": 42.47,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    }
+   },
+   "value": 84.54,
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 0
+  },
+  {
+   "id": "gold_ounce_iqd",
+   "label": "الذهب — أونصة",
+   "unit": "USD & IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية",
+   "value": {
+    "usd": 3590.55,
+    "iqd": 6127274
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "gold24_gram",
+   "label": "ذهب عيار 24 — غرام",
+   "unit": "USD & IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية",
+   "value": {
+    "usd": 115.44,
+    "iqd": 196996
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "gold21_gram",
+   "label": "ذهب عيار 21 — غرام",
+   "unit": "USD & IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية",
+   "value": {
+    "usd": 101.01,
+    "iqd": 172372
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "gold21_mithqal",
+   "label": "ذهب عيار 21 — مثقال (5 غرام)",
+   "unit": "USD & IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية",
+   "value": {
+    "usd": 505.04,
+    "iqd": 861859
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "silver_ounce_iqd",
+   "label": "الفضة — أونصة",
+   "unit": "USD & IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xag_usd": {
+     "value": 42.47,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية",
+   "value": {
+    "usd": 42.47,
+    "iqd": 72475
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "silver999_kg",
+   "label": "فضة 999 — كيلو",
+   "unit": "USD & IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xag_usd": {
+     "value": 42.47,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية",
+   "value": {
+    "usd": 1364.08,
+    "iqd": 2327795
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "gold_expected_with_making",
+   "label": "الذهب: المتوقع مع المصنعية (5,000 د/غرام)",
+   "unit": "IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "المحسوب + مصنعية ثابتة. قيمة البيع = المحسوب بلا مصنعية",
+   "value": {
+    "gram24": 201996,
+    "gram21": 177372,
+    "mithqal21": 886859,
+    "making_per_gram": 5000
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "local_vs_calc_gold21",
+   "label": "الذهب المحلي الفعلي مقارنةً بالمحسوب (مثقال 21)",
+   "unit": "IQD",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "gold21_mithqal_nahr": {
+     "value": {
+      "sell": 890000,
+      "buy": 886000
+     },
+     "data_time": "2026-11-19T09:11:45.000Z",
+     "status": "current"
+    },
+    "xau_usd": {
+     "value": 3590.55,
+     "data_time": "2026-11-20T11:29:35.000Z",
+     "status": "stale"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "note": "الفعلي (شارع النهر) مقابل المحسوب (المتوقع). الفرق يتأثر بفرق التوقيت بين السعرين؛ انظر time_gap_hours",
+   "value": {
+    "actual_sell": 890000,
+    "calc": 861859,
+    "diff_mithqal": 28141,
+    "diff_gram": 5628,
+    "diff_pct": 3.27
+   },
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 26.3
+  },
+  {
+   "id": "official_parallel_gap",
+   "label": "فجوة الدولار الرسمي العراقي عن الموازي",
+   "unit": "%",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "usd_iqd_official": {
+     "value": 1510,
+     "data_time": null,
+     "status": "current"
+    },
+    "usd_iqd_parallel": {
+     "value": 170650,
+     "data_time": "2026-11-19T13:53:14.000Z",
+     "status": "stale"
+    }
+   },
+   "value": 13.01,
+   "status": "stale",
+   "status_ar": "قديمة: أحد المدخلات قديم",
+   "time_gap_hours": 21.6
+  },
+  {
+   "id": "fed_target_range",
+   "label": "نطاق الفائدة الأمريكية الرسمي",
+   "unit": "%",
+   "source": {
+    "name": "محسوب داخل الجالب",
+    "url": "",
+    "reliability": "تابعة لمدخلاتها"
+   },
+   "inputs": {
+    "fed_target_lower": {
+     "value": 3.75,
+     "data_time": "2026-11-19",
+     "status": "current"
+    },
+    "fed_target_upper": {
+     "value": 4,
+     "data_time": "2026-11-19",
+     "status": "current"
+    }
+   },
+   "value": "3.75–4",
+   "status": "current",
+   "status_ar": "حالية",
+   "time_gap_hours": 0
+  }
+ ]
+}

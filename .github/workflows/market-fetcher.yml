@@ -1,0 +1,39 @@
+name: market-fetcher
+# جالب «نبض السوق»: يحدّث data/*.json فقط. المفاتيح من GitHub Secrets ولا تُكتب في أي ملف.
+on:
+  schedule:
+    - cron: '4,19,34,49 * * * *'   # كل 15 دقيقة؛ الجالب نفسه يقرر أي مصدر حان موعده
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Fetch all sources now'
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: market-fetcher
+  cancel-in-progress: false
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+        run: node fetcher/fetch-market.mjs
+      - name: Commit data if changed
+        run: |
+          git config user.name "nabd-fetcher"
+          git config user.email "nabd-fetcher@users.noreply.github.com"
+          git add data/market.json data/history.json data/series.json
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -q -m "market.json $(date -u +%FT%TZ)"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1

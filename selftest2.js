@@ -149,6 +149,10 @@ const FSelfTest2 = (() => {
     await St.run(be, S, () => L.goalSkip(S, id)); v = L.goalView(S, '2026-03-15')[0]; eq([v.targetDate, v.skipped, v.monthly], ['2026-08-01', 1, 1000000]);
     eq(L.goalAdvice(S, id, 500000, '2026-03-15').length >= 1, true); eq(L.goalAdvice(S, id, 1000000, '2026-03-15').length, 0); await St.run(be, S, () => L.goalNew(S, { name: 'قصير', target: 100000, targetDate: '2099-01-01', priority: 2, kind: 'short' })); eq(L.goalView(S).map(x => x.name), ['سيارة', 'قصير']);
     for (const [o, m] of [[{ name: 'x', target: 0, targetDate: '2099-01-01', priority: 1, kind: 'short' }, 'موجباً'], [{ name: 'x', target: 5, targetDate: '2000-01-01', priority: 1, kind: 'short' }, 'الماضي'], [{ name: 'x', target: 5, targetDate: '2099-01-01', priority: 4, kind: 'short' }, 'الأولوية']]) await bad(() => St.run(be, S, () => L.goalNew(S, o)), m); });
+  T(5, 'الأهداف: في شهر الإنشاء يظهر القسط «مطلوباً» لا «متأخراً» (لا تنبيه ولا تخطٍّ)، ثم يصير متأخراً بعده، والأرقام لا تتغير', async () => { const { be, S } = await fresh(); await seed(be, S); const id = await mkGoal(be, S);
+    await St.run(be, S, () => { S.x.goalsDef[0].created = '2026-03-01'; }); let v = L.goalView(S, '2026-03-15')[0]; eq([v.firstMonth, v.behind], [true, 1500000]);
+    eq(L.alerts(S, '2026-03-15').some(a => a.t.includes('متأخر') && a.t.includes('سيارة')), false);
+    v = L.goalView(S, '2026-04-02')[0]; eq([v.firstMonth, v.behind], [false, 3000000]); eq(L.alerts(S, '2026-04-02').some(a => a.t.includes('متأخر') && a.t.includes('سيارة')), true); });
   T(5, 'المتكررات: التذكير قبل الاستحقاق، التأكيد يسجّل العملية مرة واحدة في الشهر، والتخطّي والإيقاف', async () => { const { be, S } = await fresh(); await seed(be, S);
     const id = await St.run(be, S, () => L.recurNew(S, { kind: 'expense', name: 'إيجار', amount: 500000, acct: 'u1', cat: 'c_fixed', day: 25, remind: 3 }));
     eq([L.recurDue(S, '2026-03-21').length, L.recurDue(S, '2026-03-22').length, L.recurDue(S, '2026-03-22')[0].overdue, L.recurDue(S, '2026-03-26')[0].overdue], [0, 1, false, true]);
@@ -200,6 +204,99 @@ const FSelfTest2 = (() => {
     await St.run(be, S, () => L.expense(S, { date: '2026-01-15', acct: A.cash, cat: 'c_food', amount: 10000 })); const ch = await St.run(be, S, () => L.snapMonths(S, '2026-03-10')); eq([ch, S.x.snaps['2026-01'].stale.diff, L.snapStale(S)], [['2026-01', '2026-02'], -10000, ['2026-01', '2026-02']]);
     eq(L.alerts(S, '2026-03-10').filter(a => a.t.includes('تغيّرت أرقام')).length, 2); await St.run(be, S, () => L.acceptSnap(S, '2026-01')); eq([S.x.snaps['2026-01'].nw, S.x.snaps['2026-01'].stale, L.snapStale(S)], [8990000, undefined, ['2026-02']]);
     eq((await St.load(be)).x.snaps['2026-01'].nw, 8990000); });
+
+  // ===== فحوصات السلامة عند الفتح (4.4) =====
+  const full = async () => { const { be, S, out } = await scen4(); await St.run(be, S, () => { L.debtNew(S, { dir: 'borrowed', person: 'بكر', amount: 1000000, acct: 'u1', date: '2026-01-14' }); L.recurNew(S, { kind: 'expense', name: 'إيجار', amount: 1, acct: 'u1', cat: 'c_fixed', day: 25, remind: 3 }); });
+    const jid = await St.run(be, S, () => L.jamNew(S, J0)); await St.run(be, S, () => L.jamPay(S, { id: jid, from: 'u1', date: '2026-01-05' })); const gid = await mkGoal(be, S); await St.run(be, S, () => L.goalMove(S, { id: gid, amount: 100000, date: '2026-01-20' }));
+    const x = await St.run(be, S, () => L.expense(S, { date: '2026-02-03', acct: 'u3', cat: 'c_food', amount: 1000, r: 15200000 })); await St.run(be, S, () => L.undo(S, x, '2026-02-04')); return { be, S }; };
+  T(7, 'فحص السلامة: بيانات سليمة بكل الأنواع (معادن، دولار، ديون، جمعية، هدف، متكرر، عكس) = لا مشاكل، ولا يغيّر شيئاً', async () => { const { S } = await full(), before = JSON.stringify(St.dump(S));
+    eq(L.integrity(S, '2026-03-15'), []); eq(JSON.stringify(St.dump(S)), before); const S2 = await St.load((await full()).be); eq(L.integrity(S2, '2026-03-15'), []); });
+  T(7, 'فحص السلامة يكشف كل نوع خلل ويسمّيه', async () => { const cases = [
+      ['غير متوازنة', S => { S.post[1].iqd += 1; }], ['حساب غير موجود', S => { S.post[0].a = 'zz'; }], ['قطعة غير موجودة', S => { delete S.pieces[S.post.find(p => p.piece).piece]; }],
+      ['يخالف تاريخ', S => { S.post[0].date = '2026-01-02'; }], ['بلا سعر صرف', S => { S.post.find(p => S.acc[p.a].cur === 'USD').rate = null; }], ['غير معلَّمة', S => { S.tx.find(t => t.voided).voided = false; }],
+      ['دين «بكر»', S => { delete S.acc[S.x.debts[0].acct]; }], ['المتكرر «إيجار»', S => { S.x.recur[0].cat = 'c_none'; }], ['هدف غير موجود', S => { S.goals[0].name = 'g999'; }], ['تسلسل', S => { S.tx[2].id = 99; }],
+      ['بلا قيود', S => { const t = S.tx[S.tx.length - 1]; S.post = S.post.filter(p => p.tx !== t.id); S.tx[t.reverses - 1].voided = true; }]];
+    for (const [part, hurt] of cases) { const { S } = await full(); eq(L.integrity(S, '2026-03-15').length, 0, 'قبل: ' + part); hurt(S); const r = L.integrity(S, '2026-03-15'); if (!r.some(m => m.includes(part))) throw new Error('لم يكشف «' + part + '»: ' + JSON.stringify(r)); } });
+  T(7, 'فحص السلامة يكشف اختلال الهوية الدفترية واختلال معادلة صافي الثروة في شهر', async () => { let { S } = await full(); S.acc.c_food.kind = 'weird';
+    if (!L.integrity(S, '2026-03-15').some(m => m.includes('الهوية الدفترية'))) throw new Error('لم يكشف الهوية');
+    ({ S } = await full()); E.post(S, '2026-02-10', 'x', [{ a: 'u1', n: 1000 }, { a: 'eq_open', n: -1000 }]); const r = L.integrity(S, '2026-03-15');
+    if (!r.some(m => m.includes('شهر 2026-02'))) throw new Error('لم يكشف معادلة الشهر: ' + JSON.stringify(r)); });
+
+  // ===== تصحيح الرصيد الافتتاحي =====
+  T(8, 'تصحيح الافتتاحي بالدينار: يغيّر الرصيد وحقوق الملكية فقط، لا دخل ولا مصروف، والجسر الشهري والفحص سليمان', async () => { const { be, S } = await fresh(); await seed(be, S);
+    await St.run(be, S, () => L.expense(S, { date: '2026-02-03', acct: 'u1', cat: 'c_food', amount: 100000 })); const a = E.snap(S);
+    await St.run(be, S, () => L.openingFix(S, { acct: 'u1', amount: 5200000 })); const b = E.snap(S);
+    eq([E.bal(S, 'u1'), b.eq - a.eq, b.inc, b.exp, b.real, b.adj, b.nw - a.nw, L.openingAmt(S, 'u1')], [5100000, 200000, a.inc, a.exp, a.real, a.adj, 200000, 5200000]); eq(E.identity(b), true);
+    eq(['2026-01', '2026-02', '2026-03'].map(k => L.monthReport(S, k).bridgeOk), [true, true, true]); eq(L.integrity(S, '2026-03-15'), []); eq(S.tx[S.tx.length - 1].date, '2026-01-01');
+    eq(L.listTx(S)[0].label === 'تصحيح افتتاحي' || L.listTx(S).some(t => t.label === 'تصحيح افتتاحي'), true);
+    await St.run(be, S, () => L.openingFix(S, { acct: 'u1', amount: 4900000 })); eq([E.bal(S, 'u1'), L.openingAmt(S, 'u1')], [4800000, 4900000]); });
+  T(8, 'تصحيح الافتتاحي بالدولار: الزيادة بالسعر الأصلي، والتخفيض بتكلفته يوم البدء فلا ربح ولا خسارة صرف', async () => { const { be, S } = await fresh(); await seed(be, S);
+    await St.run(be, S, () => L.expense(S, { date: '2026-02-01', acct: 'u3', cat: 'c_food', amount: 5000, r: 15200000 })); const real0 = E.snap(S).real;
+    await St.run(be, S, () => L.openingFix(S, { acct: 'u3', amount: 120000 })); let s = E.snap(S); eq([E.bal(S, 'u3'), s.real, L.openingAmt(S, 'u3')], [115000, real0, 120000]);
+    await St.run(be, S, () => L.openingFix(S, { acct: 'u3', amount: 90000 })); s = E.snap(S); eq([E.bal(S, 'u3'), s.real, L.openingAmt(S, 'u3')], [85000, real0, 90000]); eq(E.identity(s), true); eq(L.integrity(S, '2026-03-15'), []);
+    eq(L.usdInfo(S)[0].avg, 14800000); await St.run(be, S, () => L.openingFix(S, { acct: 'u3', amount: 100000, r: 15000000 })); eq(E.bal(S, 'u3'), 95000); });
+  T(8, 'تصحيح الافتتاحي: التزام، وحساب نُسي يوم البدء، والرفض، والحفظ والنسخ الاحتياطي', async () => { const { be, S } = await fresh();
+    await St.run(be, S, () => { L.setRate(S, '2026-01-01', 15000000); L.opening(S, '2026-01-01', [{ name: 'نقد', type: 'asset_cash', amount: 5000000 }, { name: 'قرض', type: 'liab', amount: 1000000 }]); });
+    const eq0 = E.snap(S).eq; await St.run(be, S, () => L.openingFix(S, { acct: 'u2', amount: 800000 })); eq([-E.bal(S, 'u2'), E.snap(S).eq - eq0, E.snap(S).liab], [800000, 200000, 800000]);
+    const nb = await St.run(be, S, () => L.addAccount(S, { name: 'بنك', type: 'bank' })); await St.run(be, S, () => L.openingFix(S, { acct: nb, amount: 300000 })); eq([E.bal(S, nb), E.snap(S).inc], [300000, 0]);
+    await bad(() => St.run(be, S, () => L.openingFix(S, { acct: nb, amount: 300000 })), 'أصلاً'); await bad(() => St.run(be, S, () => L.openingFix(S, { acct: nb, amount: -1 })), 'صفراً');
+    await bad(() => St.run(be, S, () => L.openingFix(S, { acct: 'eq_open', amount: 1 })), 'حساباتك'); const d = await St.run(be, S, () => L.debtNew(S, { dir: 'lent', person: 'س', amount: 5, acct: 'u1', date: '2026-01-02' }));
+    await bad(() => St.run(be, S, () => L.openingFix(S, { acct: d, amount: 1 })), 'حساباتك'); const { be: be2, S: S2 } = await fresh(); await bad(() => St.run(be2, S2, () => L.openingFix(S2, { acct: 'u1', amount: 1 })), 'أولاً');
+    const S3 = await St.load(be); eq(E.snap(S3), E.snap(S)); const key = 'ABCD-EFGH-JKLM-NPQR-STUV-WXYZ', { S: S4 } = await G.B.open(await G.B.build(S, key), key); eq(E.snap(S4), E.snap(S)); eq(L.integrity(S4, '2026-03-15'), []); });
+
+  // ===== تعديل اسم الحساب وإخفاؤه =====
+  T(8, 'تعديل الاسم والإخفاء: لا يمسّان أي قيد، ويُرفض الاسم المكرر وإخفاء حساب فيه رصيد أو يستعمله متكرر', async () => { const { be, S } = await fresh(); await seed(be, S);
+    const nb = await St.run(be, S, () => L.addAccount(S, { name: 'بنك قديم', type: 'bank' })), snap0 = JSON.stringify(E.snap(S)), post0 = JSON.stringify(S.post);
+    await St.run(be, S, () => L.renameAccount(S, 'u1', 'نقد البيت')); eq(S.acc.u1.name, 'نقد البيت'); await bad(() => St.run(be, S, () => L.renameAccount(S, 'u2', 'نقد البيت')), 'مستخدم'); await bad(() => St.run(be, S, () => L.renameAccount(S, 'u2', ' ')), 'مطلوب');
+    await bad(() => St.run(be, S, () => L.hideAccount(S, 'u1')), 'رصيد'); await St.run(be, S, () => L.recurNew(S, { kind: 'expense', name: 'رسوم', amount: 1, acct: nb, cat: 'c_fee', day: 3, remind: 0 })); await bad(() => St.run(be, S, () => L.hideAccount(S, nb)), 'متكرر');
+    await St.run(be, S, () => L.recurToggle(S, S.x.recur[0].id)); await St.run(be, S, () => L.hideAccount(S, nb)); eq(S.acc[nb].hidden, true); eq([JSON.stringify(E.snap(S)), JSON.stringify(S.post)], [snap0, post0]);
+    await bad(() => St.run(be, S, () => L.renameAccount(S, 'c_food', 'x')), 'حساباتك'); const S2 = await St.load(be); eq([S2.acc.u1.name, S2.acc[nb].hidden], ['نقد البيت', true]); eq(L.integrity(S2, '2026-03-15'), []);
+    await St.run(be, S, () => L.hideAccount(S, nb, false)); eq(S.acc[nb].hidden, undefined); const key = 'ABCD-EFGH-JKLM-NPQR-STUV-WXYZ', { S: S3 } = await G.B.open(await G.B.build(S, key), key); eq(S3.acc.u1.name, 'نقد البيت'); });
+
+  // ===== التقييم اليدوي (عقار، أرض، سيارة) =====
+  T(9, 'التقييم اليدوي: يغيّر القيمة السوقية فقط (غير محقق)، والتكلفة والقيود كما هي، ومعادلة الجسر سليمة', async () => { const { be, S } = await fresh(); await seed(be, S);
+    const h = await St.run(be, S, () => L.addAccount(S, { name: 'أرض', type: 'other' })); await St.run(be, S, () => L.openingFix(S, { acct: h, amount: 50000000 }));
+    const s0 = E.snap(S), post0 = JSON.stringify(S.post);
+    await St.run(be, S, () => L.setValuation(S, { acct: h, date: '2026-02-10', value: 65000000 })); const s1 = E.snap(S);
+    eq([s1.nw - s0.nw, s1.nwc, s1.inc, s1.real, JSON.stringify(S.post)], [15000000, s0.nwc, s0.inc, s0.real, post0]); eq(E.identity(s1), true);
+    eq([L.at(S, '2026-02-09').nw, L.at(S, '2026-02-10').nw], [s0.nw, s1.nw]); eq(L.integrity(S, '2026-03-15'), []);
+    const v = L.valuations(S).find(x => x.id === h); eq([v.book, v.value, v.unreal, v.last.d], [50000000, 65000000, 15000000, '2026-02-10']);
+    await St.run(be, S, () => L.setValuation(S, { acct: h, date: '2026-03-01', value: 60000000 })); eq(E.snap(S).nw - s0.nw, 10000000);
+    await St.run(be, S, () => L.setValuation(S, { acct: h, date: '2026-03-01', value: 70000000 })); eq([S.x.vals.length, E.snap(S).nw - s0.nw], [2, 20000000]);
+    await St.run(be, S, () => L.removeValuation(S, h, '2026-03-01')); eq(E.snap(S).nw - s0.nw, 15000000); });
+  T(9, 'التقييم اليدوي: الرفض، وإهماله عند صفر الرصيد، والحفظ والنسخ الاحتياطي وفحص السلامة', async () => { const { be, S } = await fresh(); await seed(be, S);
+    const h = await St.run(be, S, () => L.addAccount(S, { name: 'سيارة', type: 'other' })); await St.run(be, S, () => L.openingFix(S, { acct: h, amount: 20000000 })); const u0 = E.snap(S).nw - E.snap(S).nwc;
+    await bad(() => St.run(be, S, () => L.setValuation(S, { acct: 'u1', date: '2026-02-01', value: 1 })), 'أصل آخر'); await bad(() => St.run(be, S, () => L.setValuation(S, { acct: h, date: '2025-12-01', value: 1 })), 'قبل');
+    await bad(() => St.run(be, S, () => L.setValuation(S, { acct: h, date: '2026-02-01', value: -1 })), 'صفراً'); await bad(() => St.run(be, S, () => L.setValuation(S, { acct: h, date: 'x', value: 1 })), 'تاريخ');
+    await bad(() => St.run(be, S, () => L.removeValuation(S, h, '2026-02-01')), 'لا يوجد'); eq(S.x.vals, []);
+    await St.run(be, S, () => L.setValuation(S, { acct: h, date: '2026-02-01', value: 18000000 })); const nw = E.snap(S).nw;
+    const S2 = await St.load(be); eq(E.snap(S2), E.snap(S)); eq(Object.keys(S2).includes('vals'), false);
+    const key = 'ABCD-EFGH-JKLM-NPQR-STUV-WXYZ', { S: S3 } = await G.B.open(await G.B.build(S, key), key); eq(E.snap(S3).nw, nw); eq(L.integrity(S3, '2026-03-15'), []);
+    await St.run(be, S, () => L.transfer(S, { date: '2026-02-05', from: h, to: 'u1', amount: 20000000 })); eq(E.bal(S, h), 0); const s = E.snap(S); eq(s.nw - s.nwc, u0); eq(E.identity(s), true);
+    const S4 = await St.load(be); S4.x.vals.push({ a: 'u99', d: '2026-02-01', v: 1 }); eq(L.integrity(S4, '2026-03-15').some(m => m.includes('u99')), true); });
+
+  // ===== عملة الهدف =====
+  T(9, 'هدف بالدينار يبقى كما هو، وهدف بالدولار: التخصيص بالسنت ويُحجز ما يعادله بسعر يومه، والعرض بما يعادله بآخر سعر', async () => { const { be, S } = await fresh(); await seed(be, S);
+    const gi = await St.run(be, S, () => L.goalNew(S, { name: 'سفر', target: 1000000, targetDate: '2099-12-01', priority: 1, kind: 'short' })); eq(S.x.goalsDef[0].cur, undefined); eq(L.goalView(S)[0].iqd, null);
+    const gu = await St.run(be, S, () => L.goalNew(S, { name: 'لابتوب', target: 100000, targetDate: '2099-12-01', priority: 2, kind: 'short', cur: 'USD' }));
+    const av0 = E.snap(S).avail; await St.run(be, S, () => L.goalMove(S, { id: gu, amount: 40000, date: '2026-02-01' }));
+    eq([E.snap(S).avail, S.goals[0].amount, S.goals[0].usd], [av0 - 600000, 600000, 40000]);
+    let v = L.goalView(S).find(x => x.id === gu); eq([v.cur, v.allocated, v.remaining, v.pct, v.iqd.target, v.iqd.allocated, v.iqd.reserved], ['USD', 40000, 60000, 40, 1500000, 600000, 600000]);
+    await St.run(be, S, () => L.setRate(S, '2026-02-15', 16000000)); v = L.goalView(S).find(x => x.id === gu); eq([v.allocated, v.iqd.allocated, v.iqd.target, v.iqd.reserved], [40000, 640000, 1600000, 600000]);
+    await St.run(be, S, () => L.goalMove(S, { id: gu, amount: 20000, date: '2026-02-20' })); eq([L.goalView(S).find(x => x.id === gu).allocated, S.goals[1].amount], [60000, 320000]);
+    await St.run(be, S, () => L.goalMove(S, { id: gu, amount: 30000, date: '2026-03-01', release: true })); v = L.goalView(S).find(x => x.id === gu); eq([v.allocated, v.iqd.reserved], [30000, 460000]);
+    await St.run(be, S, () => L.goalMove(S, { id: gu, amount: 30000, date: '2026-03-02', release: true })); v = L.goalView(S).find(x => x.id === gu); eq([v.allocated, v.iqd.reserved, E.snap(S).avail], [0, 0, E.snap(S).liq]);
+    await St.run(be, S, () => L.goalMove(S, { id: gi, amount: 500000, date: '2026-03-02' })); eq(L.goalView(S).find(x => x.id === gi).allocated, 500000); eq(L.integrity(S, '2026-03-15'), []); });
+  T(9, 'هدف الدولار: الرفض، والتنبيه بعملته، والحفظ والنسخ الاحتياطي', async () => { const { be, S } = await fresh();
+    await bad(() => St.run(be, S, () => L.goalNew(S, { name: 'x', target: 1, targetDate: '2099-12-01', priority: 1, kind: 'short', cur: 'USD' })), 'سعر صرف'); await seed(be, S);
+    await bad(() => St.run(be, S, () => L.goalNew(S, { name: 'x', target: 1, targetDate: '2099-12-01', priority: 1, kind: 'short', cur: 'EUR' })), 'عملة');
+    const gu = await St.run(be, S, () => L.goalNew(S, { name: 'سيارة', target: 1000000, targetDate: '2099-12-01', priority: 1, kind: 'long', cur: 'USD' }));
+    await bad(() => St.run(be, S, () => L.goalMove(S, { id: gu, amount: 1000000, date: '2026-02-01' })), 'المتاح'); await bad(() => St.run(be, S, () => L.goalMove(S, { id: gu, amount: 1, date: '2026-02-01', release: true })), 'أقل');
+    await bad(() => St.run(be, S, () => L.goalMove(S, { id: gu, amount: 0, date: '2026-02-01' })), 'موجباً'); eq(S.goals, []);
+    eq(L.goalAdvice(S, gu, 100, '2026-02-01').some(w => w.includes('$')), true); eq(L.goalFmt(L.goalView(S)[0], 12345), '$123.45');
+    await St.run(be, S, () => L.goalMove(S, { id: gu, amount: 10000, date: '2026-02-01' })); const S2 = await St.load(be); eq(L.goalView(S2), L.goalView(S)); eq(E.snap(S2), E.snap(S));
+    const key = 'ABCD-EFGH-JKLM-NPQR-STUV-WXYZ', { S: S3 } = await G.B.open(await G.B.build(S, key), key); eq(L.goalView(S3)[0].allocated, 10000); eq(L.integrity(S3, '2026-03-15'), []);
+    delete S2.goals[0].usd; eq(L.integrity(S2, '2026-03-15').some(m => m.includes('سيارة')), true); });
 
   async function run(only) {
     const out = []; for (const t of tests) { if (only && t.phase > only) continue; let ok = true, msg = 'تم'; try { await t.fn(); } catch (e) { ok = false; msg = 'خطأ: ' + e.message; } out.push({ id: 'م' + t.phase, name: t.name, ok, msg }); }

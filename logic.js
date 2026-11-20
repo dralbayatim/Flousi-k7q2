@@ -31,14 +31,18 @@ const FL = {};
 
   function init(S) {
     const D = { seq: 1, openDate: null, set: { valuation: 'conservative', hideNw: true, lockOn: false, lockMin: 1, passkey: false }, rates: [], prices: [], debts: [], jams: [], goalsDef: [],
-      recur: [], limits: { ...GROUPS }, snaps: {}, backup: null, audit: [], dismissed: {} };
+      recur: [], limits: { ...GROUPS }, snaps: {}, backup: null, audit: [], dismissed: {}, vals: [] };
     S.x = S.x || {}; for (const k in D) if (S.x[k] === undefined) S.x[k] = D[k];
     [['eq_open', 'equity', 'الرصيد الافتتاحي'], ['pnlm', 'pnlm', 'أرباح وخسائر المعادن المحققة'], ['recon', 'recon', 'فروقات المطابقة'], ['inc_salary', 'income', 'الراتب'], ['inc_other', 'income', 'دخل آخر']]
       .forEach(([id, k, n]) => { if (!S.acc[id]) { E.addAcc(S, id, k); S.acc[id].name = n; } });
     [['gold', 'ذهب', 'G'], ['silver', 'فضة', 'S']].forEach(([id, n, m]) => { if (!S.acc[id]) { E.addAcc(S, id, 'asset', 'IQD', false, m); S.acc[id].name = n; } });
     CATS.forEach(([id, n, g]) => { if (!S.acc[id]) { E.addAcc(S, id, 'expense'); S.acc[id].name = n; S.acc[id].group = g; } });
+    // التقييمات اليدوية السارية الآن، تُقرأ وقت الحساب (لا تُخزَّن): خاصية غير قابلة للعدّ فلا تدخل الحفظ ولا النسخ
+    if (!Object.getOwnPropertyDescriptor(S, 'vals')) Object.defineProperty(S, 'vals', { get: () => valsAt(S, '9999-12-31'), configurable: true, enumerable: false });
     return S;
   }
+  // آخر تقييم يدوي لكل حساب حتى تاريخ معيّن
+  const valsAt = (S, d) => { const o = {}; (S.x && S.x.vals || []).forEach(v => { if (v.d <= d) o[v.a] = v.v; }); return o; };
   const rateAt = (S, d) => { const r = S.x.rates.filter(x => x.d <= d).sort((a, b) => a.d < b.d ? -1 : 1).pop() || S.x.rates[0]; return r ? r.r : S.rate; };
   const priceAt = (S, d) => { const pick = k => { const xs = S.x.prices.filter(x => x[k] != null).sort((a, b) => a.d < b.d ? -1 : 1), e = xs.filter(x => x.d <= d).pop() || xs[0]; return e ? e[k] : S.price[k]; }; return { G: pick('G'), S: pick('S') }; };
   function setRate(S, d, r) { if (!E.okDate(d)) throw new Error('تاريخ غير صالح'); if (!Number.isSafeInteger(r) || r <= 0) throw new Error('سعر الصرف غير صالح');
@@ -81,7 +85,7 @@ const FL = {};
   const undo = (S, id, date) => { E.reverse(S, id, date); audit(S, 'reverse', id); };
 
   const LABEL = { opening: 'رصيد افتتاحي', income: 'دخل', expense: 'مصروف', transfer: 'تحويل', convert: 'تحويل عملة', buy_metal: 'شراء معدن', sell_metal: 'بيع معدن', lend: 'إقراض', borrow: 'اقتراض',
-    repay_in: 'سداد لي', repay_out: 'سداد مني', debt_fee: 'فائدة/رسوم دين', jam_pay: 'قسط جمعية', jam_receive: 'قبض جمعية', reconcile: 'مطابقة', reversal: 'عكس', buy_usd: 'شراء دولار' };
+    repay_in: 'سداد لي', repay_out: 'سداد مني', debt_fee: 'فائدة/رسوم دين', jam_pay: 'قسط جمعية', jam_receive: 'قبض جمعية', reconcile: 'مطابقة', reversal: 'عكس', buy_usd: 'شراء دولار', opening_fix: 'تصحيح افتتاحي' };
   function describe(S, t) {
     const ps = S.post.filter(p => p.tx === t.id), nm = id => S.acc[id].name || id, ids = k => [...new Set(ps.filter(p => k(p.iqd)).map(p => nm(p.a)))].join('، ');
     const usd = ps.find(p => S.acc[p.a].cur === 'USD');
@@ -91,7 +95,7 @@ const FL = {};
   const listTx = S => S.tx.map(t => describe(S, t)).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id);
 
   const nwv = (S, s) => S.x.set.valuation === 'cost' ? s.nwc : s.nw;
-  const at = (S, d) => E.snapAt(S, d, rateAt(S, d), priceAt(S, d));
+  const at = (S, d) => E.snapAt(S, d, rateAt(S, d), priceAt(S, d), valsAt(S, d));
   function panel(S, d = today()) {
     const cur = E.snap(S), mEnd = monthEnd(prevMonth(mkey(d))), yEnd = (+d.slice(0, 4) - 1) + '-12-31', od = S.x.openDate;
     const delta = e => !od ? null : nwv(S, cur) - nwv(S, at(S, e < od ? od : e)); // قبل البدء: المقارنة مع لحظة الافتتاح (التغير منذ البدء)
@@ -101,7 +105,7 @@ const FL = {};
     return { id: a.id, name: a.name, kind: a.kind, cur: a.cur, liquid: a.liquid, bal: a.kind === 'liab' ? -b : b, iqd: a.cur === 'USD' ? E.usdToIqd(b, S.rate) : (a.kind === 'liab' ? -b : b) }; });
 
   Object.assign(FL, { parseAmount, fmt, fmtUsd, fmtRate, iso, today, mkey, monthEnd, prevMonth, addMonths, monthsDiff, CATS, GROUPS, init, rateAt, priceAt, setRate, TYPES, addAccount, opening,
-    income, expense, transfer, reconcile, undo, audit, describe, listTx, nwv, at, panel, accountsView, norm });
+    income, expense, transfer, reconcile, undo, audit, describe, listTx, nwv, at, panel, accountsView, norm, valsAt });
 })();
 // ===== المرحلة 4: الأسعار وسعر الصرف، الدولار (WAC)، الذهب والفضة قطعةً قطعة، تقرير البيع =====
 (() => {
@@ -195,24 +199,38 @@ const FL = {};
     return E.atomic(S, () => { const id = E.jamReceive(S, o.date, { cash: o.to, asset: j.asset, liab: j.liab, N: j.N, s: j.s, k: st.paid }); S.tx.find(t => t.id === id).meta = { jam: j.id }; return id; });
   }
 
-  // ---------- الأهداف (بالدينار) ----------
-  const goalAlloc = (S, id) => S.goals.filter(g => g.name === id).reduce((s, g) => s + g.amount, 0);
+  // ---------- الأهداف (بالدينار، أو بالدولار مع ما يعادله بالدينار بآخر سعر) ----------
+  // هدف الدولار: المستهدف والتخصيص بالسنت (usd)، ويُحجز ما يعادله بالدينار بسعر يوم التخصيص (amount) فيبقى «المتاح للصرف» صحيحاً
+  const isUsdGoal = g => g && g.cur === 'USD';
+  const goalAlloc = (S, id) => { const g = S.x.goalsDef.find(x => x.id === id), u = isUsdGoal(g); return S.goals.filter(x => x.name === id).reduce((s, x) => s + (u ? x.usd || 0 : x.amount), 0); };
+  const goalIqd = (S, id) => S.goals.filter(x => x.name === id).reduce((s, x) => s + x.amount, 0);
   function goalNew(S, o) { const name = need(o.name, 'اسم الهدف مطلوب'); posInt(o.target, 'المبلغ المستهدف يجب أن يكون موجباً'); date(o.targetDate); if (o.targetDate < FL.today()) throw new Error('موعد الهدف في الماضي');
     if (![1, 2, 3].includes(o.priority)) throw new Error('الأولوية من 1 إلى 3'); if (o.kind !== 'short' && o.kind !== 'long') throw new Error('نوع الهدف غير صالح');
-    const id = 'g' + S.x.seq++; S.x.goalsDef.push({ id, name, target: o.target, targetDate: o.targetDate, priority: o.priority, kind: o.kind, created: FL.today(), skipped: 0 }); return id; }
+    const cur = o.cur || 'IQD'; if (cur !== 'IQD' && cur !== 'USD') throw new Error('عملة غير صالحة'); if (cur === 'USD' && !S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً (تبويب «الأصول»)');
+    const id = 'g' + S.x.seq++, g = { id, name, target: o.target, targetDate: o.targetDate, priority: o.priority, kind: o.kind, created: FL.today(), skipped: 0 }; if (cur === 'USD') g.cur = 'USD'; S.x.goalsDef.push(g); return id; }
   function goalMove(S, o) { const g = S.x.goalsDef.find(x => x.id === o.id); if (!g) throw new Error('هدف غير معروف'); date(o.date);
+    if (isUsdGoal(g)) return goalMoveUsd(S, g, o);
     if (o.release) return E.goalRelease(S, g.id, o.amount, o.date);
     if (!Number.isSafeInteger(o.amount) || o.amount < 0) throw new Error('مبلغ التخصيص يجب أن يكون عدداً صحيحاً غير سالب');
     const avail = E.snap(S).avail; if (o.amount > avail) throw new Error('المتاح للصرف (' + FL.fmt(avail) + ') أقل من المبلغ'); return E.goalAlloc(S, g.id, o.amount, o.date); }
+  // o.amount بالسنت. التحرير الجزئي يحرّر من الدينار المحجوز بالنسبة نفسها، والتحرير الكامل يحرّره كله بلا بواقٍ
+  function goalMoveUsd(S, g, o) { if (!Number.isSafeInteger(o.amount) || o.amount <= 0) throw new Error('المبلغ يجب أن يكون موجباً'); const last = () => { S.goals[S.goals.length - 1].usd = o.release ? -o.amount : o.amount; };
+    if (o.release) { const u = goalAlloc(S, g.id), iq = goalIqd(S, g.id); if (o.amount > u) throw new Error('المخصص للهدف (' + FL.fmtUsd(u) + ') أقل من المبلغ');
+      const n = o.amount === u ? iq : Number(E.rd(BigInt(iq) * BigInt(o.amount), BigInt(u))); if (n > 0) E.goalRelease(S, g.id, n, o.date); else E.goalAlloc(S, g.id, 0, o.date); return last(); }
+    if (!S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً (تبويب «الأصول»)'); const iq = E.usdToIqd(o.amount, FL.rateAt(S, o.date)), avail = E.snap(S).avail;
+    if (iq > avail) throw new Error('المتاح للصرف (' + FL.fmt(avail) + ') أقل من ' + FL.fmt(iq) + ' (ما يعادل ' + FL.fmtUsd(o.amount) + ')'); E.goalAlloc(S, g.id, iq, o.date); return last(); }
   function goalSkip(S, id) { const g = S.x.goalsDef.find(x => x.id === id); if (!g) throw new Error('هدف غير معروف'); g.targetDate = FL.addMonths(g.targetDate, 1); g.skipped++; }
   function goalView(S, today = FL.today()) {
     return S.x.goalsDef.map(g => { const a = goalAlloc(S, g.id), rem = Math.max(0, g.target - a), left = Math.max(1, FL.monthsDiff(today, g.targetDate)), T = Math.max(1, FL.monthsDiff(g.created, g.targetDate)), m = Math.min(T, Math.max(1, FL.monthsDiff(g.created, today) + 1));
       const expected = Math.floor((g.target * m + T - 1) / T), month = FL.mkey(today);
-      return { ...g, allocated: a, remaining: rem, pct: Math.min(100, Math.floor(a * 100 / g.target)), monthly: Math.ceil(rem / left), behind: Math.max(0, Math.min(expected, g.target) - a), done: a >= g.target,
-        paidMonth: S.goals.filter(x => x.name === g.id && x.amount > 0 && x.date && FL.mkey(x.date) === month).reduce((s, x) => s + x.amount, 0) }; }).sort((x, y) => x.priority - y.priority || (x.targetDate < y.targetDate ? -1 : 1));
+      const u = isUsdGoal(g), eq = n => u ? E.usdToIqd(n, S.rate) : n; // ما يعادله بالدينار بآخر سعر صرف (عرض فقط)
+      return { ...g, cur: u ? 'USD' : 'IQD', allocated: a, remaining: rem, iqd: u ? { target: eq(g.target), allocated: eq(a), remaining: eq(rem), monthly: eq(Math.ceil(rem / left)), reserved: goalIqd(S, g.id) } : null, pct: Math.min(100, Math.floor(a * 100 / g.target)), monthly: Math.ceil(rem / left), behind: Math.max(0, Math.min(expected, g.target) - a), firstMonth: FL.mkey(g.created) === month, done: a >= g.target,
+        paidMonth: S.goals.filter(x => x.name === g.id && (u ? x.usd > 0 : x.amount > 0) && x.date && FL.mkey(x.date) === month).reduce((s, x) => s + (u ? x.usd : x.amount), 0) }; }).sort((x, y) => x.priority - y.priority || (x.targetDate < y.targetDate ? -1 : 1));
   }
+  const goalFmt = (g, n) => isUsdGoal(g) ? FL.fmtUsd(n) : FL.fmt(n);
   function goalAdvice(S, id, amount, today = FL.today()) { const v = goalView(S, today).find(x => x.id === id), w = [], av = E.snap(S).avail; if (!v) return w;
-    if (amount < v.monthly) w.push('أقل من القسط الشهري المطلوب (' + FL.fmt(v.monthly) + ')، فسيتأخر الهدف أو يُمدَّد موعده.'); if (av > 0 && amount > av / 2) w.push('أكثر من نصف المتاح للصرف، فتنخفض سيولتك المتاحة بشدة.'); return w; }
+    const iq = v.cur === 'USD' ? E.usdToIqd(amount, FL.rateAt(S, today)) : amount;
+    if (amount < v.monthly) w.push('أقل من القسط الشهري المطلوب (' + goalFmt(v, v.monthly) + ')، فسيتأخر الهدف أو يُمدَّد موعده.'); if (av > 0 && iq > av / 2) w.push('أكثر من نصف المتاح للصرف، فتنخفض سيولتك المتاحة بشدة.'); return w; }
 
   // ---------- المتكررات والراتب المتوقع (بالدينار، تذكير داخل التطبيق فقط) ----------
   function recurNew(S, o) { const name = need(o.name, 'الاسم مطلوب'); posInt(o.amount); iqAsset(S, o.acct); if (o.kind !== 'expense' && o.kind !== 'income') throw new Error('النوع غير صالح');
@@ -227,7 +245,7 @@ const FL = {};
   const recurToggle = (S, id) => { const r = S.x.recur.find(x => x.id === id); if (!r) throw new Error('بند غير معروف'); r.active = !r.active; };
   const recurDelete = (S, id) => { S.x.recur = S.x.recur.filter(x => x.id !== id); };
 
-  Object.assign(FL, { debtNew, debtRepay, debts, jamNew, jamState, jamPay, jamReceive, goalNew, goalMove, goalSkip, goalView, goalAdvice, recurNew, recurDue, recurConfirm, recurSkip, recurToggle, recurDelete });
+  Object.assign(FL, { debtNew, debtRepay, debts, jamNew, jamState, jamPay, jamReceive, goalNew, goalMove, goalSkip, goalView, goalAdvice, goalFmt, recurNew, recurDue, recurConfirm, recurSkip, recurToggle, recurDelete });
 })();
 // ===== المرحلة 6: التقارير الشهرية والسنوية، حدود التنبيه، التنبيهات، اللقطات الشهرية، شاشة الحالة =====
 (() => {
@@ -276,7 +294,7 @@ const FL = {};
     L2.recurDue(S, today).forEach(x => push(x.overdue ? 'red' : 'warn', (x.r.salary ? 'هل استلمت الراتب؟ ' : 'مستحق: ') + x.r.name, ['more', 'recurring']));
     L2.debts(S, today).filter(d => d.overdue).forEach(d => push('red', 'دين متأخر: ' + d.person + ' (' + FL.fmt(d.remaining) + ')', ['more', 'debts']));
     budget(S, today).forEach(x => { if (x.over) push('red', `تجاوزتَ حد «${x.g}» هذا الشهر (${FL.fmt(x.spent)} من ${FL.fmt(x.limit)})`, ['more', 'reports']); else if (x.near) push('warn', `اقتربتَ من حد «${x.g}» (${FL.fmt(x.spent)} من ${FL.fmt(x.limit)})`, ['more', 'reports']); else if (x.pace) push('warn', `إنفاقك على «${x.g}» أسرع من وتيرة الشهر`, ['more', 'reports']); });
-    L2.goalView(S, today).filter(g => !g.done && g.behind > 0).forEach(g => push('warn', `الهدف «${g.name}» متأخر ${FL.fmt(g.behind)}`, ['more', 'goals']));
+    L2.goalView(S, today).filter(g => !g.done && g.behind > 0 && !g.firstMonth).forEach(g => push('warn', `الهدف «${g.name}» متأخر ${FL.goalFmt(g, g.behind)}`, ['more', 'goals']));
     snapStale(S).forEach(k => push('warn', `تغيّرت أرقام شهر ${k} بعد إغلاقه`, ['more', 'reports']));
     return out.sort((a, c) => ({ red: 0, warn: 1, info: 2 })[a.lv] - ({ red: 0, warn: 1, info: 2 })[c.lv]); }
   const userHasUsd = S => Object.values(S.acc).some(a => a.cur === 'USD' && a.kind === 'asset');
@@ -286,5 +304,71 @@ const FL = {};
     return { avail: s.avail, liq: s.liq, nw: FL.nwv(S, s), income: r.income, expense: r.expense, left: r.income - r.expense, level, alerts: al, ticker: al.map(a => a.t).concat(TIPS) }; }
   const L2 = FL; // مراجع الدوال المعرَّفة في مراحل سابقة تُقرأ وقت التنفيذ
   Object.assign(FL, { FLOW, monthReport, yearReport, snapMonths, acceptSnap, setLimit, budget, alerts, snapStale, status, TIPS });
+})();
+// ===== تصحيح الرصيد الافتتاحي (5.3): قيد بتاريخ البدء مقابل «الرصيد الافتتاحي»، فلا دخل ولا مصروف ولا مطابقة ولا ربح صرف =====
+(() => {
+  const E = typeof FE !== 'undefined' ? FE : require('./engine.js');
+  const live = t => t && !t.voided && !t.reverses, isOpen = t => t.type === 'opening' || t.type === 'opening_fix';
+  // الرصيد الافتتاحي الحالي للحساب بعملته (موجب للأصل، سالب للالتزام) = الافتتاحي الأصلي + تصحيحاته
+  const openingAmt = (S, id) => S.post.filter(p => p.a === id && live(S.tx[p.tx - 1]) && isOpen(S.tx[p.tx - 1])).reduce((s, p) => s + p.n, 0);
+  const openingRate = (S, id) => { const p = S.post.find(p => p.a === id && p.rate && live(S.tx[p.tx - 1]) && S.tx[p.tx - 1].type === 'opening'); return p ? p.rate : null; };
+  function openingFix(S, o) {
+    const od = S.x.openDate; if (!od) throw new Error('سجّل الرصيد الافتتاحي أولاً');
+    const a = S.acc[o.acct]; if (!a || !a.type) throw new Error('اختر حساباً من حساباتك');
+    if (!Number.isSafeInteger(o.amount) || o.amount < 0) throw new Error('المبلغ يجب أن يكون صفراً أو أكثر');
+    const diff = (a.kind === 'liab' ? -o.amount : o.amount) - openingAmt(S, o.acct); if (diff === 0) throw new Error('الرصيد الافتتاحي لهذا الحساب هو هذا المبلغ أصلاً');
+    let leg = { a: o.acct, n: diff };
+    if (a.cur === 'USD') {
+      if (diff > 0) { const r = o.r || openingRate(S, o.acct); if (!r) throw new Error('اكتب متوسط سعر شراء الدولار الإضافي'); leg.r = r; }
+      else { // التخفيض يُخرَج بتكلفته يوم البدء بالضبط، فلا يظهر ربح أو خسارة صرف وهمية
+        const w = E.derive({ acc: S.acc, tx: S.tx.filter(t => t.date <= od), post: S.post.filter(p => p.date <= od) }).usd[o.acct];
+        if (!w || w.B < BigInt(-diff)) throw new Error('رصيد الدولار يوم البدء لا يكفي لهذا التخفيض');
+        leg.r = Number(E.rd(w.C * 1000000n, w.B)); leg.iqd = -Number(E.rd(w.C * BigInt(-diff), w.B)); }
+    }
+    const iqd = leg.iqd !== undefined ? leg.iqd : a.cur === 'USD' ? E.usdToIqd(leg.n, leg.r) : leg.n;
+    return E.post(S, od, 'opening_fix', [leg, { a: 'eq_open', n: -iqd }], o.note || 'تصحيح الرصيد الافتتاحي', { fix: o.acct }); }
+  // تعديل اسم حساب وإخفاؤه: بيانات عرض فقط، لا تمس أي قيد. الإخفاء ليس حذفاً، ولا يُخفى حساب فيه رصيد
+  const userAcc = (S, id) => { const a = S.acc[id]; if (!a || !a.type) throw new Error('اختر حساباً من حساباتك'); return a; };
+  function renameAccount(S, id, name) { const a = userAcc(S, id); name = String(name || '').trim(); if (!name) throw new Error('الاسم مطلوب');
+    if (Object.values(S.acc).some(x => x !== a && x.name === name)) throw new Error('الاسم مستخدم'); a.name = name; }
+  function hideAccount(S, id, hide = true) { const a = userAcc(S, id);
+    if (!hide) { delete a.hidden; return; }
+    if (E.bal(S, id) !== 0) throw new Error('لا يُخفى حساب فيه رصيد. انقل رصيده إلى حساب آخر أولاً');
+    if (S.x.recur.some(r => r.active && r.acct === id)) throw new Error('يستعمله بند متكرر فعّال. أوقفه أو غيّره أولاً'); a.hidden = true; }
+  // التقييم اليدوي (الوثيقة 3.0: manual_valuations) لحسابات «أصل آخر» بالدينار: عرض وتقييم فقط، لا قيد. الفرق عن التكلفة غير محقق
+  const valAcc = (S, id) => { const a = S.acc[id]; if (!a || a.type !== 'other' || a.cur !== 'IQD') throw new Error('التقييم اليدوي لحسابات «أصل آخر» (عقار، أرض، سيارة) فقط'); return a; };
+  function setValuation(S, o) { valAcc(S, o.acct); if (!E.okDate(o.date)) throw new Error('تاريخ غير صالح'); if (S.x.openDate && o.date < S.x.openDate) throw new Error('التاريخ قبل بدء التسجيل');
+    if (!Number.isSafeInteger(o.value) || o.value < 0) throw new Error('القيمة يجب أن تكون صفراً أو أكثر');
+    S.x.vals = (S.x.vals || []).filter(v => !(v.a === o.acct && v.d === o.date)).concat([{ a: o.acct, d: o.date, v: o.value }]).sort((x, y) => x.d < y.d ? -1 : x.d > y.d ? 1 : 0); }
+  function removeValuation(S, acct, date) { const n = (S.x.vals || []).length; S.x.vals = (S.x.vals || []).filter(v => !(v.a === acct && v.d === date)); if (S.x.vals.length === n) throw new Error('لا يوجد تقييم بهذا التاريخ'); }
+  const valuations = S => Object.values(S.acc).filter(a => a.type === 'other' && a.cur === 'IQD').map(a => { const hist = (S.x.vals || []).filter(v => v.a === a.id), last = hist[hist.length - 1], book = E.bal(S, a.id), on = !!last && book !== 0;
+    return { id: a.id, name: a.name, hidden: !!a.hidden, book, last: last || null, value: on ? last.v : book, unreal: on ? last.v - book : 0, hist }; });
+  Object.assign(FL, { openingAmt, openingRate, openingFix, renameAccount, hideAccount, setValuation, removeValuation, valuations });
+})();
+// ===== فحوصات السلامة (الوثيقة 3.0، القسم 4.4): للقراءة فقط، تكشف ولا تُصلح شيئاً =====
+(() => {
+  const E = typeof FE !== 'undefined' ? FE : require('./engine.js');
+  function integrity(S, today = FL.today()) { // يعيد قائمة المشاكل بالعربية؛ فارغة = سليم
+    const bad = [], add = m => { if (!bad.includes(m) && bad.length < 30) bad.push(m); }, sums = new Map();
+    S.tx.forEach((t, i) => { if (t.id !== i + 1) add('تسلسل العمليات مختل عند العملية ' + t.id); if (!E.okDate(t.date)) add('تاريخ غير صالح في العملية ' + t.id);
+      if (t.reverses && !(S.tx[t.reverses - 1] || {}).voided) add('العملية ' + t.id + ' تعكس عملية غير معلَّمة كمعكوسة'); });
+    S.post.forEach(p => { const t = S.tx[p.tx - 1], a = S.acc[p.a];
+      if (!t) return add('رجل قيد بلا عملية (' + p.tx + ')'); if (!a) add('العملية ' + p.tx + ' على حساب غير موجود (' + p.a + ')');
+      if (!Number.isSafeInteger(p.n) || !Number.isSafeInteger(p.iqd)) add('مبلغ غير صحيح في العملية ' + p.tx);
+      if (p.date !== t.date) add('تاريخ رجل يخالف تاريخ عمليته ' + p.tx); if (a && a.cur === 'USD' && !p.rate) add('رجل دولار بلا سعر صرف في العملية ' + p.tx);
+      if (p.piece && !S.pieces[p.piece]) add('العملية ' + p.tx + ' تشير إلى قطعة غير موجودة'); sums.set(p.tx, (sums.get(p.tx) || 0) + p.iqd); });
+    S.tx.forEach(t => { if (!sums.has(t.id)) add('العملية ' + t.id + ' بلا قيود'); else if (sums.get(t.id) !== 0) add('العملية ' + t.id + ' غير متوازنة بالدينار'); });
+    const has = id => !!S.acc[id];
+    S.x.debts.forEach(d => { if (!has(d.acct)) add('دين «' + d.person + '» يشير إلى حساب غير موجود'); });
+    S.x.jams.forEach(j => { if (!has(j.asset) || !has(j.liab)) add('جمعية «' + j.name + '» تشير إلى حساب غير موجود'); });
+    S.x.recur.forEach(r => { if (!has(r.acct) || (r.cat && !has(r.cat)) || (r.src && !has(r.src))) add('البند المتكرر «' + r.name + '» يشير إلى حساب أو فئة غير موجودة'); });
+    (S.x.vals || []).forEach(v => { if (!has(v.a)) add('تقييم يدوي لحساب غير موجود (' + v.a + ')'); });
+    const gids = new Set(S.x.goalsDef.map(g => g.id)); S.goals.forEach(g => { if (!gids.has(g.name)) add('تخصيص لهدف غير موجود (' + g.name + ')'); });
+    S.x.goalsDef.filter(g => g.cur === 'USD').forEach(g => { if (S.goals.some(x => x.name === g.id && !Number.isSafeInteger(x.usd))) add('تخصيص بلا مبلغ بالدولار للهدف «' + g.name + '»'); });
+    try { if (!E.identity(E.snap(S))) add('الهوية الدفترية مختلة: الأرصدة لا تطابق مجموع الحركات'); } catch (e) { add('تعذّر احتساب الأرصدة: ' + e.message); }
+    if (S.x.openDate && !bad.length) { let k = FL.mkey(S.x.openDate); const last = FL.mkey(today);
+      for (let i = 0; i < 1200 && k <= last; i++, k = FL.addMonths(k + '-01', 1).slice(0, 7)) { try { if (!FL.monthReport(S, k).bridgeOk) add('معادلة صافي الثروة مختلة في شهر ' + k); } catch (e) { add('تعذّر فحص شهر ' + k + ': ' + e.message); } } }
+    return bad; }
+  Object.assign(FL, { integrity });
 })();
 if (typeof module !== 'undefined') module.exports = FL;

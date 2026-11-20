@@ -87,7 +87,7 @@ const FE = (() => {
         let m, c;
         if (a.cur === 'USD') { m = BigInt(usdToIqd(N(nat), S.rate)); c = d.usd[id] ? d.usd[id].C : 0n; usdC += c; }
         else if (a.metal) { m = 0n; c = iq; }
-        else { m = iq; c = iq; }
+        else { m = S.vals && S.vals[id] != null && iq !== 0n ? BigInt(S.vals[id]) : iq; c = iq; } // تقييم يدوي (عقار، سيارة): القيمة المقدّرة سوقياً والتكلفة كما هي، ويُهمَل إن صار الرصيد صفراً
         am += m; ac += c; if (a.liquid) liq += m;
       } else if (a.kind === 'liab') li += -iq;
       else if (a.kind === 'income') inc += -iq;
@@ -139,8 +139,8 @@ const FE = (() => {
   const goalRelease = (S, name, amount, date = null) => { if (!Number.isSafeInteger(amount) || amount <= 0) throw new Error('مبلغ التحرير يجب أن يكون عدداً صحيحاً موجباً');
     if (S.goals.filter(g => g.name === name).reduce((s, g) => s + g.amount, 0) < amount) throw new Error('المخصص للهدف أقل من المبلغ');
     S.goals.push({ name, amount: -amount, date }); };
-  const snapAt = (S, date, rate, price) => snap({ acc: S.acc, tx: S.tx.filter(t => t.date <= date), post: S.post.filter(p => p.date <= date), pieces: S.pieces,
-    goals: S.goals.filter(g => !g.date || g.date <= date), rate: rate || S.rate, price: price || S.price });
+  const snapAt = (S, date, rate, price, vals) => snap({ acc: S.acc, tx: S.tx.filter(t => t.date <= date), post: S.post.filter(p => p.date <= date), pieces: S.pieces,
+    goals: S.goals.filter(g => !g.date || g.date <= date), rate: rate || S.rate, price: price || S.price, vals: vals || S.vals });
   const atomic = (S, fn) => { const n = S.tx.length, p = S.post.length, g = S.goals.length, v = S.tx.map(t => t.voided), pk = Object.keys(S.pieces);
     try { return fn(); } catch (e) { S.tx.length = n; S.post.length = p; S.goals.length = g; S.tx.forEach((t, i) => { t.voided = v[i]; }); Object.keys(S.pieces).forEach(k => { if (!pk.includes(k)) delete S.pieces[k]; }); throw e; } };
 
