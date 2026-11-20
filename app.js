@@ -4,7 +4,7 @@ const $ = s => document.querySelector(s);
 const h = (t, a, ...k) => { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (n === 'class') e.className = v; else if (n.startsWith('on')) e[n] = v; else if (v !== false && v != null) e.setAttribute(n, v === true ? '' : v); }
   k.flat(9).forEach(c => { if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(c)); }); return e; };
 // إن نقص ملف أو تلف فلا يتوقف هذا الملف هنا؛ الإقلاع في الأسفل يكشف ذلك ويعرض شاشة خطأ بدل «…»
-const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v3'; // ارفع VER مع V في sw.js عند كل إصدار
+const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v3.1'; // ارفع VER مع V في sw.js عند كل إصدار
 let S, BE, view = { tab: 'home', sub: null, p: {} }, sessionDismiss = false, integ = [], persist = null; // persist: نتيجة طلب التخزين الدائم (8.1): true مثبّت، false مرفوض، 'na' غير مدعوم، null لم يُعرف بعد // integ: نتيجة فحوصات السلامة (4.4) عند الفتح
 const money = n => L.fmt(n) + ' د.ع';
 const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, bad ? 5000 : 2200); };
@@ -20,6 +20,7 @@ const decOf = id => S.acc[id].cur === 'USD' ? 2 : 0;
 const amtStr = (n, cur) => cur === 'USD' ? L.fmtUsd(n) : money(n);
 const sect = (title, ...k) => h('section', {}, title ? h('h2', {}, title) : null, ...k);
 // قسم قابل للطيّ للنماذج النادرة (مطويّ افتراضياً؛ يُفتح فقط إن طُلب)
+const pubEl = e => { e.classList.add('pub'); return e; }, privEl = e => { e.classList.add('priv'); return e; }, pubSect = (...a) => pubEl(sect(...a)); // pub: أسعار سوق عامة لا تُخفى
 const fold = (title, open, ...k) => h('details', { class: 'fold', open: open ? true : null }, h('summary', {}, title), ...k);
 const btn = (t, f, cls) => h('button', { class: cls || '', onclick: f }, t);
 const row = (a, b, cls) => h('div', { class: 'r ' + (cls || '') }, h('span', {}, a), h('b', {}, b));
@@ -121,8 +122,8 @@ function openingFixBlock() { if (!S.x.openDate) return null; const A = accOpts()
 // صافي الثروة بالدولار بآخر سعر صرف مسجّل (عرض فقط، لا يُخزَّن). دينار × 1,000,000 ÷ السعر = سنت
 const nwUsd = n => S.x.rates.length ? L.fmtUsd(Number(E.rd(BigInt(n) * 1000000n, BigInt(S.rate)))) : '— (أدخل سعر الصرف)';
 function nwBlock() {
-  const p = L.panel(S), hide = S.x.set.hideNw && !view.reveal, mask = v => hide ? '••••••' : v, d = v => v == null ? '—' : (v > 0 ? '+' : '') + L.fmt(v) + ' د.ع';
-  return sect('صافي الثروة', h('div', { class: 'big', onclick: () => { view.reveal = !view.reveal; render(); } }, mask(money(p.nw))), h('p', { class: 'mut' }, hide ? 'اضغط الرقم للإظهار' : 'اضغط الرقم للإخفاء'),
+  const p = L.panel(S), mask = v => v, d = v => v == null ? '—' : (v > 0 ? '+' : '') + L.fmt(v) + ' د.ع';
+  return sect('صافي الثروة', h('div', { class: 'big', onclick: () => privHidden() ? privReveal() : null }, mask(money(p.nw))), privOn() ? h('p', { class: 'mut' }, 'الأرقام مخفية: اضغط 👁 أو الرقم لإظهارها 5 ثوانٍ') : null,
     row('بالدولار', mask(nwUsd(p.nw))), row('الأصول', mask(money(p.cur.assets))), row('الالتزامات', mask(money(p.cur.liab))), row('التغير هذا الشهر', mask(d(p.dMonth))), row('التغير منذ بداية السنة', mask(d(p.dYear))),
     S.x.set.valuation === 'cost' ? null : row('أرباح/خسائر غير محققة', mask(d(p.U))));
 }
@@ -186,22 +187,26 @@ function prebuild(rerender) { if (!S || !S.sec.key || !S.x.openDate) return; con
   building = FB.build(S, S.sec.key).then(bytes => { pending = new File([bytes], BAK_NAME, { type: 'application/octet-stream' }); pendSig = sig; }).catch(() => { pending = null; }).finally(() => { building = null; if (rerender && view.tab === 'more' && view.sub === 'backup') render(); }); }
 async function oneTapBackup() { if (!pending || pendSig !== bakSig()) { toast('النسخة تُجهَّز… اضغط مرة أخرى بعد ثانية', true); prebuild(true); return; }
   const how = await shareFile(pending); if (how) await act(() => { S.x.backup = { t: Date.now(), tx: S.tx.length, how }; }, 'سُجّلت النسخة: ' + BAK_NAME); }
+// قسم الاستعادة ظاهر دائماً (f1-v3.1)، حتى على جهاز جديد فارغ لم يُنشأ عليه مفتاح بعد: اختر الملف واكتب مفتاحك القديم
+function restoreSect() {
+  const key = h('input', { placeholder: 'مفتاح الاسترداد', autocomplete: 'off' }), file = h('input', { type: 'file', accept: '*/*', hidden: true });
+  file.onchange = async () => { const f = file.files[0]; file.value = ''; if (!f) return; try { const bytes = new Uint8Array(await f.arrayBuffer()), { payload } = await FB.open(bytes, key.value);
+      const m = payload.manifest; if (!confirm(`استعادة ${m.txCount} عملية، صافي الثروة ${L.fmt(m.nw)} د.ع؟ ستستبدل بياناتك الحالية (وتُحفظ لقطة منها 30 يوماً).`)) return;
+      await FB.restore(BE, S, bytes, key.value); S = await FStore.load(BE); integ = L.integrity(S); toast('تمت الاستعادة: ' + m.txCount + ' عملية'); go('home'); } catch (e) { toast(e.message === 'auth' ? 'المفتاح خاطئ أو الملف تالف' : e.message === 'format' ? 'ملف غير صالح' : e.message, true); } };
+  return sect('استعادة نسخة', h('p', { class: 'mut' }, 'اكتب مفتاح الاسترداد الخاص بالنسخة (القديم) ثم اختر الملف. بعد الاستعادة يصبح هذا المفتاح مفتاحك على هذا الجهاز.'), key, h('label', { class: 'btn', onclick: () => file.click() }, 'اختر ملف النسخة'), file,
+    btn('التراجع عن آخر استعادة', async () => { try { await FB.undoRestore(BE, S); S = await FStore.load(BE); integ = L.integrity(S); toast('تم الرجوع'); go('home'); } catch (e) { toast(e.message, true); } }, 'alt mini')); }
 MORE.push(['backup', 'النسخ الاحتياطي والتصدير', () => { const b = FB.status(S), box = h('div', {});
   const stat = sect('الحالة', row('آخر نسخة', S.x.backup ? new Date(S.x.backup.t).toLocaleDateString('en-GB') + ' (' + b.days + ' يوماً)' : 'لا توجد'), row('عمليات بعد آخر نسخة', String(b.since)), row('مفتاح الاسترداد', S.sec.key ? 'مُعدّ' : 'غير مُعدّ'), row('التخزين الدائم', persist === true ? 'مثبّت ✓' : persist === false ? '⚠ غير مثبّت' : persist === 'na' ? 'غير مدعوم في هذا المتصفح' : '…', persist === false ? 'bad' : ''),
     persist === false ? h('p', { class: 'bad' }, 'رفض النظام تثبيت التخزين: قد يحذف بيانات التطبيق إن امتلأت ذاكرة الهاتف. افتح التطبيق من أيقونة الشاشة الرئيسية، وأبقِ مساحة فارغة، وخذ نسخة احتياطية بعد كل جلسة إدخال. التذكير صار بعد 3 أيام أو 5 عمليات.') : null,
     h('p', { class: 'mut' }, 'احفظ النسخة في iCloud Drive (ملفات ثم iCloud Drive) لا على الهاتف وحده. لا نسخ تلقائي خارج الهاتف في تطبيق الويب.'));
   if (!S.sec.key) { const key = FLS.fmtKey(FLS.newKey()); box.append(stat, sect('مفتاح الاسترداد', h('p', {}, 'اكتب هذا المفتاح على ورقة واحفظها في مكانين. بدونه لا تُفتح أي نسخة، ولن يظهر مرة ثانية.'), h('div', { class: 'big', style: 'direction:ltr;font-size:1.15rem;letter-spacing:.04em' }, key),
-      buildForm([{ k: 'k', l: 'أعد كتابة المفتاح للتأكيد', t: 'text', req: true }], async v => { if (FLS.normKey(v.k) !== FLS.normKey(key)) throw new Error('المفتاح غير مطابق'); S.sec.key = FLS.normKey(key); await FStore.saveSec(BE, S); toast('حُفظ المفتاح'); go('more', 'backup'); }, 'أكّدتُ وكتبتُه'))); return box; }
+      buildForm([{ k: 'k', l: 'أعد كتابة المفتاح للتأكيد', t: 'text', req: true }], async v => { if (FLS.normKey(v.k) !== FLS.normKey(key)) throw new Error('المفتاح غير مطابق'); S.sec.key = FLS.normKey(key); await FStore.saveSec(BE, S); toast('حُفظ المفتاح'); go('more', 'backup'); }, 'أكّدتُ وكتبتُه')));
+    if (S.x.openDate) box.append(restoreSect()); else box.insertBefore(restoreSect(), box.children[1]); return box; }
   prebuild(true); const ready = pending && pendSig === bakSig();
   const prep = btn(ready ? '💾 احفظ نسخة الآن' : '… جارٍ تجهيز النسخة', oneTapBackup, ready ? 'prim' : 'alt');
   const save = h('p', { class: 'mut' }, 'ضغطة واحدة: تفتح ورقة المشاركة بملف «' + BAK_NAME + '». اختر «حفظ في الملفات» ثم iCloud Drive، واستبدل الملف القديم إن سُئلت. (النسخ إلى تليجرام يُضاف لاحقاً.)');
   const expo = btn('تصدير CSV (ملف مضغوط)', async () => { const z = new File([FB.exportZip(S)], 'flousi-export-' + L.today() + '.zip', { type: 'application/zip' }); await shareFile(z); }, 'alt');
-  const key = h('input', { placeholder: 'مفتاح الاسترداد', autocomplete: 'off' }), file = h('input', { type: 'file', accept: '*/*', hidden: true });
-  file.onchange = async () => { const f = file.files[0]; file.value = ''; if (!f) return; try { const bytes = new Uint8Array(await f.arrayBuffer()), { payload } = await FB.open(bytes, key.value);
-      const m = payload.manifest; if (!confirm(`استعادة ${m.txCount} عملية، صافي الثروة ${L.fmt(m.nw)} د.ع؟ ستستبدل بياناتك الحالية (وتُحفظ لقطة منها 30 يوماً).`)) return;
-      await FB.restore(BE, S, bytes, key.value); S = await FStore.load(BE); integ = L.integrity(S); toast('تمت الاستعادة: ' + m.txCount + ' عملية'); go('home'); } catch (e) { toast(e.message === 'auth' ? 'المفتاح خاطئ أو الملف تالف' : e.message === 'format' ? 'ملف غير صالح' : e.message, true); } };
-  box.append(stat, sect('نسخة احتياطية', prep, save, expo), sect('استعادة', h('p', { class: 'mut' }, 'اكتب المفتاح ثم اختر الملف.'), key, h('label', { class: 'btn', onclick: () => file.click() }, 'اختر ملف النسخة'), file,
-    btn('التراجع عن آخر استعادة', async () => { try { await FB.undoRestore(BE, S); S = await FStore.load(BE); integ = L.integrity(S); toast('تم الرجوع'); go('home'); } catch (e) { toast(e.message, true); } }, 'alt mini')));
+  box.append(stat, sect('نسخة احتياطية', prep, save, expo), restoreSect());
   return box; }]);
 // ---- شاشة «البصمة» (الوثيقة 3.0، القسم 8.6): للقراءة فقط. تُعرض قبل النسخ وبعد الاستعادة، والشرط مطابقة حرفية ----
 function fpLines() { // نص حتمي لا يعتمد على تاريخ اليوم ولا على الإعدادات: يتطابق ما دامت البيانات نفسها
@@ -242,7 +247,7 @@ function ratesBlock(open) {
     v => act(() => { if (!v.rate.trim() && !v.g.trim() && !v.s.trim()) throw new Error('أدخل سعراً واحداً على الأقل'); if (v.rate.trim()) L.setRate(S, v.date, L.parseAmount(v.rate, 2));
       if (v.g.trim() || v.s.trim()) L.setPrices(S, v.date, { G: v.g.trim() ? L.parseAmount(v.g, 2) : undefined, S: v.s.trim() ? L.parseAmount(v.s, 2) : undefined }); }, 'حُدّثت الأسعار'), 'حدّث');
   const gp = S.x.prices.filter(x => x.G != null), sp = S.x.prices.filter(x => x.S != null);
-  return sect('الأسعار وسعر الصرف', h('p', { class: 'mut' }, 'تحديث الأسعار لا يغيّر أي عملية سابقة، بل يغيّر التقييم فقط. سعر كل عملية محفوظ فيها.'),
+  return pubSect('الأسعار وسعر الصرف', h('p', { class: 'mut' }, 'تحديث الأسعار لا يغيّر أي عملية سابقة، بل يغيّر التقييم فقط. سعر كل عملية محفوظ فيها.'),
     row('100 دولار', S.x.rates.length ? L.fmtRate(S.rate) + ' د.ع' + lastDate(S.x.rates) : (hasUsd ? '⚠ لم يُدخل بعد' : 'لم يُدخل')), row('أونصة الذهب', gp.length ? L.fmtUsd(S.price.G) + lastDate(gp) : 'لم تُدخل'), row('أونصة الفضة', sp.length ? L.fmtUsd(S.price.S) + lastDate(sp) : 'لم تُدخل'), fold('تحديث الأسعار وسعر الصرف', open, f));
 }
 function usdBlock() { const U = L.usdInfo(S); if (!U.length) return null; const s = E.snap(S);
@@ -362,14 +367,14 @@ function availLevel(st) { if (st.avail < 0) return ['badc', 'المخصص للأ
   const b = L.budget(S); return b.some(x => x.over) ? ['badc', 'تجاوزتَ حداً من حدود هذا الشهر'] : b.some(x => x.near || x.pace) ? ['warnc', 'اقتربتَ من حد من حدود هذا الشهر'] : ['okc', 'ضمن حدودك هذا الشهر']; }
 // آخر سعر صرف وتاريخه على الشاشة الرئيسية (الوثيقة 7.1)، والتحديث بنقرة في تبويب «الأصول»
 function rateBlock() { const has = S.x.rates.length > 0, usd = userAccts(a => a.cur === 'USD').length > 0;
-  return sect('سعر الصرف', row('100 دولار', has ? L.fmtRate(S.rate) + ' د.ع' : (usd ? '⚠ لم يُدخل بعد' : 'لم يُدخل'), has || !usd ? '' : 'bad'),
+  return pubSect('سعر الصرف', row('100 دولار', has ? L.fmtRate(S.rate) + ' د.ع' : (usd ? '⚠ لم يُدخل بعد' : 'لم يُدخل'), has || !usd ? '' : 'bad'),
     has ? h('p', { class: 'mut' }, 'آخر تحديث: ' + S.x.rates[S.x.rates.length - 1].d) : null, btn('حدّث السعر', () => go('assets', null, { open: 'prices' }), 'alt mini')); }
 SCREENS.home = () => {
   if (!S.x.openDate) return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'أهلاً بك في فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), h('p', { class: 'mut' }, 'ثلاث خطوات فقط لتبدأ. لديك نسخة احتياطية؟ ⚙ ثم «النسخ الاحتياطي» لاستعادتها.'),
     h('div', { class: 'card' }, h('h2', {}, '1. ما تملكه اليوم'), h('p', { class: 'mut' }, 'نقد، فيزا، دولار، بنك. تبدأ منها.'), btn('ابدأ الخطوة 1', () => go('accts', 'open'))),
     h('div', { class: 'card dim' }, h('h2', {}, '2. الراتب'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: «أموالي» ثم «المتكررات والراتب».')),
     h('div', { class: 'card dim' }, h('h2', {}, '3. الذهب والفضة'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: تبويب «الأصول» ثم «قطعة موجودة قبل البدء».')));
-  const st = L.status(S), hide = S.x.set.hideNw && !view.reveal, mask = v => hide ? '••••••' : v;
+  const st = L.status(S);
   return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), (ADV = advItems(st), tickers(ADV)),
     (lv => sect('المتاح للصرف', h('div', { class: 'big ' + lv[0], onclick: () => go('more', 'reports') }, money(st.avail)), h('p', { class: 'mut ' + lv[0] }, lv[1]), row('السائل', money(st.liq)),
       row('دخل هذا الشهر', money(st.income)), row('مصروف هذا الشهر', money(st.expense)), row('المتبقي من دخل الشهر', sgn(st.left))))(availLevel(st)),
@@ -405,7 +410,8 @@ MORE.push(['reports', 'التقارير والحدود', () => { const ms = mont
 MORE.push(['settings', 'الإعدادات', () => { const st = S.x.set;
   return h('div', {}, savingsSettings(), sect('طريقة التقييم', h('p', { class: 'mut' }, 'محافظ: المعادن بقيمتها النظرية والدولار بسعر التقييم. بالتكلفة: لا أرباح غير محققة.'),
     seg([['conservative', 'محافظ'], ['cost', 'بالتكلفة']], st.valuation, k => act(() => { st.valuation = k; }, 'تم'))),
-    sect('الخصوصية', seg([['1', 'إخفاء صافي الثروة'], ['0', 'إظهاره']], st.hideNw ? '1' : '0', k => act(() => { st.hideNw = k === '1'; }, 'تم'))),
+    sect('الخصوصية: إخفاء الثروة', h('p', { class: 'mut' }, 'عند التفعيل تُخفى كل أرقامك المالية في كل الشاشات (••••••). زر 👁 يُظهرها 5 ثوانٍ ثم تُخفى تلقائياً، وتُخفى فوراً عند مغادرة التطبيق. أسعار السوق العامة تبقى ظاهرة. الإخفاء بصري فقط ولا يغيّر أي حساب.'),
+      seg([['1', 'مفعّل'], ['0', 'متوقف']], st.hideAll ? '1' : '0', k => act(() => { st.hideAll = k === '1'; PRIV.until = 0; }, k === '1' ? 'أُخفيت الأرقام' : 'ظهرت الأرقام'))),
     sect('الإصدار', row('التطبيق', VER), h('p', { class: 'mut' }, 'قاعدة البيانات: flousi (محلية على هذا الهاتف). فحوصات المرحلة 0 في الصفحة المنفصلة:'), h('a', { href: 'diagnostics.html', class: 'btn' }, 'فتح صفحة الفحوصات'))); }]);
 MORE.push(['selftest', 'الاختبار الذاتي', () => { const box = h('div', {}), out = h('div', {});
   const show = (r1, r2, r3) => { const all = [...r1.results, ...r2.results, ...((r3 || {}).results || [])], ok = all.filter(x => x.ok).length; out.replaceChildren(h('div', { class: 'big ' + (ok === all.length ? 'okc' : 'badc') }, ok + ' من ' + all.length),
@@ -596,7 +602,7 @@ function tickers(items) {
   const mine = items.length ? items.map(x => ({ t: x.title, lv: x.lv, it: x })) : L.TIPS.map(t => ({ t }));
   const N = FN.get() ? FN.news() : null, world = N && N.items.length ? N.items.slice(0, 8).map(x => ({ t: x.t, lv: x.lv === 'warn' ? 'warn' : '' })) : [{ t: FN.err() ? 'نبض السوق غير متاح الآن (لا اتصال). يعود تلقائياً.' : 'نبض السوق: جارٍ التحميل…' }];
   if (!NB.tried) { NB.tried = true; Promise.all([FN.load(), FN.loadAux()]).then(() => { if (['home', 'nabd', 'insights'].includes(view.tab)) render(); }); }
-  return h('div', {}, tickerLine('لك', mine, x => x && x.it ? advGo(x.it) : go('insights', 'advisor')), tickerLine('العالم', world, () => go('nabd', null, { t: 'news' }))); }
+  return h('div', {}, tickerLine('لك', mine, x => x && x.it ? advGo(x.it) : go('insights', 'advisor')), pubEl(tickerLine('العالم', world, () => go('nabd', null, { t: 'news' })))); }
 function advisorHome(items) { const top = items.slice(0, 3);
   return sect('المستشار', top.length ? top.map(x => advCard(x)) : h('p', { class: 'mut' }, 'لا شيء يحتاج انتباهك الآن. وضعك مستقر.'),
     items.length > 3 ? btn('كل الاستشارات (' + items.length + ')', () => go('insights', 'advisor'), 'alt mini') : btn('صفحة المستشار', () => go('insights', 'advisor'), 'alt mini')); }
@@ -607,7 +613,7 @@ function advisorScreen() { const items = advItems(), all = FA.run(S, { verdict: 
     items.length ? G.map(([lv, t]) => { const xs = items.filter(x => x.lv === lv); return xs.length ? sect(t + ' (' + xs.length + ')', xs.map(x => advCard(x, true))) : null; }) : h('p', {}, 'لا استشارات الآن. وضعك مستقر.'),
     hidden ? sect('', h('p', { class: 'mut' }, hidden + ' استشارة مخفية مؤقتاً.'), btn('أظهر المخفية', () => { const st = advLoad(); advSave({ verdict: st.verdict, vchg: st.vchg }); render(); }, 'alt mini')) : null); }
 function nabdAdvice() { const xs = advItems().filter(x => x.go && x.go[0] === 'nabd');
-  return sect('استشارات السوق لك', xs.length ? xs.map(x => advCard(x)) : h('p', { class: 'mut' }, 'لا استشارات سوق تخصك الآن.'), h('p', { class: 'mut' }, 'تربط حالة السوق بمدخراتك ونسبة معادنك التي حددتها.')); }
+  return privEl(sect('استشارات السوق لك', xs.length ? xs.map(x => advCard(x)) : h('p', { class: 'mut' }, 'لا استشارات سوق تخصك الآن.'), h('p', { class: 'mut' }, 'تربط حالة السوق بمدخراتك ونسبة معادنك التي حددتها.'))); }
 // تعليق المستشار على نسبة المعادن التي يحددها المستخدم (قرار المستخدم؛ المستشار يعلّق فقط)
 function metalsComment(p) { if (p == null) return 'لم تحدد نسبة. لن تظهر استشارات «فوق/تحت نسبتك» حتى تحددها.';
   return p <= 10 ? 'نسبة متحفظة: حماية جيدة من التضخم دون تقلب كبير.' : p <= 25 ? 'نسبة معتدلة وشائعة للادخار طويل الأمد (3–5 سنوات).' : p <= 40 ? 'نسبة مرتفعة: المعادن متقلبة، وفرق البيع والشراء محلياً يأكل جزءاً من القيمة عند البيع السريع.' : 'نسبة عالية جداً: معظم ثروتك سيتحرك مع سعر الذهب والفضة. تأكد أن مدخراتك (الطوارئ) مكتملة أولاً.'; }
@@ -629,8 +635,34 @@ SCREENS.nabd = () => {
   const head = h('div', {}, h('h1', {}, 'نبض السوق'), h('p', { class: 'mut' }, M ? 'آخر تحديث للبيانات: ' + nWhen(M.generated_at) + ' · يتحدّث تلقائياً' : (FN.err() ? 'تعذّر تحميل بيانات السوق' : 'جارٍ التحميل…'),
     ' ', h('button', { class: 'mini alt', onclick: async () => { await Promise.all([FN.load(true), FN.loadAux(true)]); render(); toast(FN.err() ? 'تعذّر التحديث: ' + FN.err() : 'حُدّثت البيانات', !!FN.err()); } }, 'تحديث')));
   if (!M) return h('div', {}, head, sect('', h('p', {}, FN.err() ? 'لا تتوفر بيانات السوق الآن. تحقق من الاتصال ثم اضغط «تحديث». بياناتك المالية لم تتأثر.' : '…')));
-  return h('div', {}, head, seg([['prices', 'الأسعار'], ['analysis', 'التحليل'], ['econ', 'الاقتصاد'], ['news', 'الأخبار']], tab, k => go('nabd', null, { t: k })), ...(tab === 'econ' ? nabdEconomy() : tab === 'analysis' ? nabdAnalysis() : tab === 'news' ? nabdNews() : nabdPrices()));
+  return h('div', { class: 'pub' }, head, seg([['prices', 'الأسعار'], ['analysis', 'التحليل'], ['econ', 'الاقتصاد'], ['news', 'الأخبار']], tab, k => go('nabd', null, { t: k })), ...(tab === 'econ' ? nabdEconomy() : tab === 'analysis' ? nabdAnalysis() : tab === 'news' ? nabdNews() : nabdPrices()));
 };
+// ===== الخصوصية (f1-v3.1): «إخفاء الثروة» يخفي كل الأرقام المالية بصرياً في كل الشاشات، مثل تطبيقات البنوك =====
+// بصري فقط: يغيّر النص المعروض على الشاشة، ولا يلمس الحسابات ولا البيانات ولا التقارير ولا المستشار.
+// أسعار السوق العامة (نبض السوق، سعر الصرف) ليست من ثروتك فتبقى ظاهرة (وسم pub)، أما ما يخصك داخلها فيُخفى (وسم priv).
+const PRIV = { until: 0, iv: null }, MASK = '••••••', REVEAL_MS = 5000;
+const privOn = () => !!(S && S.x && S.x.set && S.x.set.hideAll); // مفتاح جديد يبدأ متوقفاً (hideNw القديم كان مفعّلاً افتراضياً لبطاقة الثروة وحدها، ولم يعد مستعملاً)
+const privHidden = () => privOn() && Date.now() >= PRIV.until;
+// مبلغ = رقم بفواصل آلاف، أو رقم مع $، أو رقم يليه «د.ع/دينار»، أو اختصار الملايين في الرسوم (42.3م). النسب والأعداد والتواريخ تبقى
+const MONEY_RE = /[-+−]?\$?\d{1,3}(?:,\d{3})+(?:\.\d+)?\$?|[-+−]?\$\d+(?:\.\d+)?|[-+−]?\d+(?:\.\d+)?\$|[-+−]?\d+(?:\.\d+)?(?=\s?(?:د\.ع|دينار))|\d+(?:\.\d+)?م(?![؀-ۿ])/g;
+const maskText = s => s.replace(MONEY_RE, MASK);
+let privObs = null;
+function privApply() { const root = $('#app'); if (!root) return; if (privObs) privObs.disconnect(); const hide = privHidden();
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())) { if (n.__o == null || n.nodeValue !== n.__s) n.__o = n.nodeValue; if (!/\d/.test(n.__o)) continue;
+    const z = n.parentElement && n.parentElement.closest('.pub,.priv'), pub = !!z && z.classList.contains('pub'), v = hide && !pub ? maskText(n.__o) : n.__o;
+    n.__s = v; if (n.nodeValue !== v) n.nodeValue = v; }
+  privBtn(); if (privObs) privObs.observe(root, { childList: true, subtree: true, characterData: true }); }
+function privReveal() { if (!privOn()) return; PRIV.until = Date.now() + REVEAL_MS; privApply(); clearInterval(PRIV.iv);
+  PRIV.iv = setInterval(() => { if (Date.now() >= PRIV.until) { clearInterval(PRIV.iv); PRIV.iv = null; } privApply(); }, 250); }
+function privHide() { PRIV.until = 0; clearInterval(PRIV.iv); PRIV.iv = null; privApply(); }
+function privBtn() { let b = $('#eye'); if (!privOn() || bootErr) { if (b) b.hidden = true; return; }
+  if (!b) { b = h('button', { id: 'eye', type: 'button', onclick: () => privHidden() ? privReveal() : privHide() }); document.body.append(b); }
+  const left = Math.max(0, Math.ceil((PRIV.until - Date.now()) / 1000)), hid = privHidden();
+  b.hidden = false; b.textContent = hid ? '👁' : '👁 ' + left; b.className = hid ? '' : 'on'; b.setAttribute('aria-label', hid ? 'إظهار الأرقام 5 ثوانٍ' : 'إخفاء الأرقام الآن'); }
+// مغادرة التطبيق أو انتقاله إلى الخلفية: تُخفى الأرقام فوراً
+document.addEventListener('visibilitychange', () => { if (document.hidden && S) privHide(); });
+addEventListener('pagehide', () => { if (S) privHide(); });
 // ===== الإطار: التنقل والإقلاع =====
 const TABS = [['home', 'الرئيسية'], ['ops', 'العمليات'], ['accts', 'أموالي'], ['assets', 'الأصول'], ['nabd', 'نبض السوق'], ['insights', 'تحليلاتي']];
 // المرحلة 2: لا «المزيد». صفحاته الفرعية تبقى بمساراتها نفسها (go('more', x)) لكنها تتبع زراً واضحاً في الشريط، ورجوعها إليه.
@@ -658,6 +690,7 @@ function renderView() {
   const app = $('#app'); app.replaceChildren(); const scr = SCREENS[view.tab] || SCREENS.home, bb = S.x.openDate && view.sub !== 'backup' ? backupBanner() : null; app.append(...[integBanner(), bb, scr(view.sub, view.p)].filter(Boolean)); // append(null) في المتصفح يكتب النص null
   if (S.x.openDate && !sessionDismiss && FB.status(S).level === 'block') { sessionDismiss = true; if (confirm('مضى أكثر من 14 يوماً على آخر نسخة احتياطية. فتح صفحة النسخ الآن؟')) { view = { tab: 'more', sub: 'backup', p: {} }; return render(); } }
   $('#nav').replaceChildren(...TABS.map(([k, t]) => h('button', { class: k === navTab() ? 'on' : '', onclick: () => go(k) }, t)));
+  privApply();
 }
 // شاشة خطأ الإقلاع: تحل محل «…» عند أي فشل. للقراءة فقط: لا تكتب في التخزين ولا تحذف شيئاً، إلا إذا اخترتَ الاستعادة بنفسك
 let bootErr = false;
@@ -696,7 +729,7 @@ function bootFail(why, e) {
     if (lockOn()) showLock(); else unlocked = true;
     if (S.x.openDate) { try { await FStore.run(BE, S, () => L.snapMonths(S)); } catch (e) {} }
     try { integ = L.integrity(S); } catch (e) { integ = ['تعذّر تشغيل فحص السلامة: ' + (e.message || e)]; }
-    setTimeout(() => prebuild(), 2500); renderView(); // الإقلاع يبقى كما اعتُمد: خطأ الشاشة الأولى يذهب إلى bootFail
+    privObs = new MutationObserver(() => privApply()); setTimeout(() => prebuild(), 2500); renderView(); // الإقلاع يبقى كما اعتُمد: خطأ الشاشة الأولى يذهب إلى bootFail
     addEventListener('error', ev => globalErr(ev.error || ev.message)); addEventListener('unhandledrejection', ev => globalErr(ev.reason));
   } catch (e) { bootFail('خطأ أثناء عرض الشاشة', e); }
 })();
