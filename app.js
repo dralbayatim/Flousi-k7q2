@@ -4,7 +4,7 @@ const $ = s => document.querySelector(s);
 const h = (t, a, ...k) => { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (n === 'class') e.className = v; else if (n.startsWith('on')) e[n] = v; else if (v !== false && v != null) e.setAttribute(n, v === true ? '' : v); }
   k.flat(9).forEach(c => { if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(c)); }); return e; };
 // إن نقص ملف أو تلف فلا يتوقف هذا الملف هنا؛ الإقلاع في الأسفل يكشف ذلك ويعرض شاشة خطأ بدل «…»
-const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.11'; // ارفع VER مع V في sw.js عند كل إصدار
+const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.12'; // ارفع VER مع V في sw.js عند كل إصدار
 let S, BE, view = { tab: 'home', sub: null, p: {} }, sessionDismiss = false, integ = [], persist = null; // persist: نتيجة طلب التخزين الدائم (8.1): true مثبّت، false مرفوض، 'na' غير مدعوم، null لم يُعرف بعد // integ: نتيجة فحوصات السلامة (4.4) عند الفتح
 const money = n => L.fmt(n) + ' د.ع';
 const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, bad ? 5000 : Math.max(2200, m.length * 70)); };
@@ -614,6 +614,30 @@ function alertsEl() { const A = (S.x.set.palerts || []), hits = FP.alertsCheck(S
     h('div', { class: 'two' }, h('label', { class: 'f' }, h('span', {}, 'المؤشر'), kSel), h('label', { class: 'f' }, h('span', {}, 'الشرط'), oSel)), h('label', { class: 'f' }, h('span', {}, 'الحد'), vIn),
     btn('أضف التنبيه', async () => { const v = Number(L.norm(String(st.v || '')) || NaN); const ok = await act(() => { FP.alertAdd(S, { k: st.k, op: st.op, v }); return true; }, 'أُضيف التنبيه'); if (ok) { st.v = ''; render(); } }, 'alt mini'),
     h('p', { class: 'mut' }, 'يُفحص فقط عندما تكون الأسعار حالية؛ السعر القديم لا يطلق تنبيهاً. التنبيه داخل التطبيق فقط.')); }
+// ===== أرشيف السوق ومحرك الاكتشافات (f1-v4.12): المحرك اختياري ومتوقف افتراضياً، ولا يعمل فعلياً قبل 90 يوماً من السجل =====
+const DISC_KEY = 'flousi-disc', discLoad = () => { try { return JSON.parse(localStorage.getItem(DISC_KEY) || 'null'); } catch (e) { return null; } }, discSave = l => { try { localStorage.setItem(DISC_KEY, JSON.stringify(l)); } catch (e) { /* لا بأس */ } };
+const DST = { held: ['صمد', 'okc'], fail: ['لم يصمد', 'bad'], wait: ['ينتظر بيانات', ''], na: ['—', ''] };
+function nabdArchive() {
+  const D = FP._days(), ks = Object.keys(D).sort(), cnt = k => ks.filter(d => D[d][k] != null).length, on = !!S.x.set.discOn, n = ks.length, need = FX.MIN_DAYS;
+  let log = discLoad();
+  if (on && n >= need && (!log || log.lastRun !== L.today())) { try { log = FX.update(log, D, L.today()); discSave(log); } catch (e) { /* لا يُسقط الصفحة */ } }
+  const items = log ? Object.values(log.items).sort((a, b) => a.first < b.first ? 1 : -1) : [];
+  return [h('p', {}, btn('رجوع إلى نبض السوق', () => go('nabd', null, { t: 'why' }), 'alt mini')),
+    sect('أرشيف السوق', n ? h('div', {}, row('أيام مسجّلة', String(n)), row('من', nWhen(ks[0])), row('إلى', nWhen(ks[n - 1])),
+      row('أيام الذهب والفضة', String(cnt('xau_usd'))), row('أيام الدولار في بغداد', String(ks.filter(d => D[d].usd_iqd_ref != null || D[d].usd_iqd_parallel != null).length)), row('أيام السعر الرسمي', String(cnt('usd_iqd_official'))))
+      : h('p', { class: 'mut' }, 'لم يُحمَّل السجل بعد.'),
+      h('p', { class: 'mut' }, 'هذا ملخصه اليومي. الأرشيف الكامل (كل قيمة بوقتها، يُضاف إليه ولا يُحذف منه شيء، مع نسخة احتياطية يومية) محفوظ على GitHub ويكبر تلقائياً.')),
+    sect('محرك الاكتشافات (تجريبي)', h('div', { class: 'r' }, h('span', {}, 'تشغيل المحرك'), swBtn(on, () => act(() => { S.x.set.discOn = !on; }, on ? 'أُوقف المحرك' : 'شُغّل المحرك'), 'تشغيل محرك الاكتشافات')),
+      h('p', { class: 'mut' }, 'يبحث في السجل عن علاقات متكررة: الذهب والدولار، الدولار في بغداد، من يسبق من، أيام الأسبوع، فجوة الدولار، ما بعد الأيام الحادة، الفضة مقابل الذهب. كل علاقة تمر بتصحيح للاختبارات المتعددة، وحد أدنى لحجم الأثر و8 حالات، و3 اكتشافات في الأسبوع كحد أقصى، ثم يُعاد اختبارها بعد 30 و90 يوماً على بيانات جديدة.'),
+      h('div', { class: 'lbar' }, h('div', { class: 'r' }, h('span', {}, 'الأيام المتجمّعة من ' + need), h('b', {}, String(Math.min(n, need)))), h('div', { class: 'lt' }, h('i', { style: 'width:' + Math.min(100, n / need * 100).toFixed(1) + '%' }))),
+      n < need ? h('p', { class: 'warnc' }, 'لا ينفع قبل ' + need + ' يوماً من السجل: بقي ' + (need - n) + ' يوماً تقريباً. ' + (on ? 'المحرك مفعّل وسيبدأ وحده عند اكتمالها.' : 'يمكنك تفعيله الآن ليبدأ وحده عند اكتمالها.')) : null,
+      on && n >= need && log && log.lastScan ? h('p', { class: 'mut' }, 'آخر فحص ' + nWhen(log.lastRun) + ': اختُبرت ' + log.lastScan.tested + ' علاقة، واجتاز الضوابط ' + log.lastScan.found + '.') : null,
+      on && n >= need && !items.length ? h('p', { class: 'mut' }, 'لا اكتشاف اجتاز الضوابط بعد. هذا طبيعي ومقصود: المحرك لا يعرض إلا ما يصمد إحصائياً.') : null,
+      items.map(it => h('div', { class: 'mem' }, h('div', { class: 'r' }, h('span', {}, h('b', {}, FX.FAM_AR[it.fam] || it.fam), ' ', h('small', { class: 'mut' }, nWhen(it.first))), kb('model')),
+        h('p', {}, it.text), h('p', { class: 'mut' }, it.n + ' حالة · احتمال الصدفة ' + (it.p < 0.001 ? 'أقل من 0.1%' : (Math.round(it.p * 1000) / 10) + '%')),
+        h('p', { class: 'mut' }, [30, 90].map(k => 'بعد ' + k + ' يوماً: ' + (it.ev[k] ? DST[it.ev[k].st][0] : 'لم يحن')).join(' · ')))),
+      h('p', { class: 'mut' }, 'الاكتشاف وصف لما حدث في الماضي، وليس توقعاً ولا نصيحة شراء أو بيع.'))];
+}
 function nabdMine() {
   return [privEl(sect('أثر السوق على أموالك اليوم', impactEl())), privEl(sect('راتبك بالمثقال والدولار', salaryPowerEl())), sect('تنبيهاتك', alertsEl()), nabdAdvice()];
 }
@@ -700,7 +724,8 @@ SCREENS.insights = (sub) => {
   if (sub === 'whatif') return whatIfScreen();
   if (sub === 'path') return pathScreen(view.p.h);
   if (sub === 'wrap') return wrapScreen(view.p.k);
-  if (!S.x.openDate) return h('div', {}, h('h1', {}, 'تحليلاتي'), h('p', {}, 'سجّل الرصيد الافتتاحي أولاً.'));
+  if (!S.x.openDate) return h('div', {}, h('h1', {}, 'تحليلاتي'), sect('المسار المالي', emptyState('🌴', 'يظهر بعد تسجيل الرصيد الافتتاحي', 'المسار المالي (آلة الزمن، رحلتك المالية، نخلتك المالية) وكل تحليلاتك تُحسب من أرقامك الفعلية. سجّل ما تملكه اليوم لتبدأ.', ['سجّل الرصيد الافتتاحي', () => go('accts', 'open')])),
+    sect('', h('div', { class: 'quick' }, btn('هل أشتري؟', () => go('insights', 'buy'), 'alt'), btn('قائمة الرغبات', () => go('more', 'wish'), 'alt')))); // f1-v4.12: بطاقة واضحة بدل سطر، حتى لا يبدو المسار مفقوداً
   if (!NB.tried) { NB.tried = true; Promise.all([FN.load(), FN.loadAux()]).then(() => { if (['home', 'nabd', 'insights'].includes(view.tab)) render(); }); }
   return h('div', {}, h('h1', {}, 'تحليلاتي'), monthCard(), pathCard(), ...insightsMain());
 };
@@ -768,7 +793,7 @@ SCREENS.nabd = () => {
   const head = h('div', {}, h('h1', {}, 'نبض السوق'), h('p', { class: 'mut' }, M ? 'آخر تحديث للبيانات: ' + nWhen(M.generated_at) + ' · يتحدّث تلقائياً' : (FN.err() ? 'تعذّر تحميل بيانات السوق' : 'جارٍ التحميل…'),
     ' ', h('button', { class: 'mini alt', onclick: async () => { const g0 = (FN.get() || {}).generated_at; await Promise.all([FN.load(true), FN.loadAux(true)]); render(); const g1 = (FN.get() || {}).generated_at; toast(FN.err() ? 'تعذّر التحديث: ' + FN.err() : g1 && g1 === g0 ? 'لا توجد بيانات أحدث الآن · آخر ملف ' + nWhen(g1) + ' · يتجدد الملف عند تشغيل الجالب على GitHub' : 'حُدّثت البيانات', !!FN.err()); } }, 'تحديث')));
   if (!M) return h('div', {}, head, sect('', h('p', {}, FN.err() ? 'لا تتوفر بيانات السوق الآن. تحقق من الاتصال ثم اضغط «تحديث». بياناتك المالية لم تتأثر.' : '…')));
-  return h('div', { class: 'pub' }, head, seg([['now', 'الآن'], ['why', 'لماذا تحرّك'], ['mine', 'أموالي']], tab, k => go('nabd', null, { t: k })), ...(tab === 'why' ? nabdWhy() : tab === 'mine' ? nabdMine() : nabdNow()));
+  return h('div', { class: 'pub' }, head, seg([['now', 'الآن'], ['why', 'لماذا تحرّك'], ['mine', 'أموالي']], tab, k => go('nabd', null, { t: k })), ...(tab === 'archive' ? nabdArchive() : tab === 'why' ? nabdWhy() : tab === 'mine' ? nabdMine() : nabdNow()), tab !== 'archive' ? sect('', btn('🗄 أرشيف السوق ومحرك الاكتشافات', () => go('nabd', null, { t: 'archive' }), 'alt')) : null);
 };
 // ===== الخصوصية (f1-v3.1): «إخفاء الثروة» يخفي كل الأرقام المالية بصرياً في كل الشاشات، مثل تطبيقات البنوك =====
 // بصري فقط: يغيّر النص المعروض على الشاشة، ولا يلمس الحسابات ولا البيانات ولا التقارير ولا المستشار.
