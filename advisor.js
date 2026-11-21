@@ -170,10 +170,8 @@ const FA = (() => {
       if (par && par.live === 'current' && pw != null && pw >= 3) R('M8', 'warn', 3, pw / 100, 'قفزة في الدولار المحلي', [`الدولار المحلي ارتفع ${r1(pw)}% خلال أسبوع. القفزات المحلية غالباً مؤقتة: لا تشترِ دولاراً تحت ضغط الذعر.`, 'ضغط على الدينار هذا الأسبوع. ذهبك بالدينار يرتفع معه، وهذا يحمي ما تملكه.'], ['nabd', null, { t: 'analysis' }]);
       if (par && par.live === 'current' && pw != null && pw <= -3) R('M9', 'info', 3, 0, 'الدولار المحلي ينخفض', [`الدولار المحلي نزل ${r1(-pw)}% خلال أسبوع. إن كنت تحتاج دولاراً فالسعر أفضل الآن.`], ['nabd', null, { t: 'analysis' }]);
       const gap = FN.der('official_parallel_gap'); if (gap && gap.live === 'current' && gap.value > 15) R('M10', 'warn', 7, gap.value / 100, 'اتساع فجوة الدولار', [`الفجوة بين الدولار الرسمي والمحلي ${gap.value}%. اتساعها ضغط اقتصادي محلي؛ توقّع ارتفاع أسعار السلع.`], ['nabd', null, { t: 'analysis' }]);
-      const nh = FN.ind('gold21_mithqal_nahr'), mk = FN.der('gold_expected_with_making'); if (nh && nh.live === 'current' && mk && mk.live === 'current' && nh.value && mk.value) { const d = (nh.value.sell / mk.value.mithqal21 - 1) * 100;
-        if (d > 3) R('M11', 'warn', 3, d / 100, 'الذهب المحلي أغلى من المتوقع', [`مثقال شارع النهر (${fmt(nh.value.sell)}) أعلى من المتوقع مع المصنعية (${fmt(mk.value.mithqal21)}) بـ ${r1(d)}%. السوق المحلي مرتفع الآن، والانتظار أياماً قد يكون أفضل.`], ['nabd', null, { t: 'analysis' }]); }
+      // M11 و M14 (أسعار الصاغة المحلية) أُزيلتا في f1-v4.11: البوابة لا تعرض أسعار صاغة ولا مصنعية (قرار المستخدم)
       const ft = FN.fredS('FEDTARU'); for (let i = Math.max(1, ft.length - 3); i < ft.length; i++) if (ft[i][1] !== ft[i - 1][1] && days(ft[i][0], today) <= 5 && days(ft[i][0], today) >= 0) R('M12', 'info', 0, 0, 'قرار فائدة أمريكي جديد', [`الفدرالي ${ft[i][1] > ft[i - 1][1] ? 'رفع' : 'خفّض'} الفائدة إلى ${ft[i][1]}% (الحد الأعلى). الرفع يضغط على الذهب عادةً، والخفض يدعمه.`], ['nabd', null, { t: 'analysis' }]);
-      const nhs = FN.ind('gold21_mithqal_nahr'); if (nhs && nhs.value && nhs.live === 'stale') R('M14', 'info', 1, 0, 'سعر الذهب المحلي قديم', [`آخر سعر محلي فعلي من ${(nhs.data_time || '').slice(0, 10)}، فلا تعتمد عليه لقرار اليوم. المحسوب من السعر العالمي حالي.`], ['nabd', null, { t: 'analysis' }]);
       c.verdictNow = A.verdict;
     }
     // ===== ي. العادات =====

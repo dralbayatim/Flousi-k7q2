@@ -58,7 +58,6 @@ const GROUPS = {
   metals: { every_min: 30, label: 'الذهب والفضة العالمي' },
   dxy: { every_min: 1 * H, label: 'مؤشر الدولار الأمريكي DXY' },
   shafaq_usd: { every_min: 30, label: 'الدولار في السوق العراقي (الموازي)' },
-  shafaq_gold: { every_min: 1 * H, label: 'الذهب المحلي الفعلي (مسح السوق)' },
   cbi: { every_min: 6 * H, label: 'الدولار الرسمي العراقي' },
   treasury: { every_min: 1 * D, label: 'عوائد الخزانة (خلفية للتحليل)' },
   fred_daily: { every_min: 6 * H, label: 'FRED اليومية (الفائدة الرسمية، توقعات التضخم، الدولار الموسّع)' },
@@ -71,8 +70,6 @@ const IND = [
   { id: 'xag_usd', group: 'metals', label: 'الفضة — أونصة', unit: 'USD/oz', src: 'goldapi', max_age_min: 3 * H, market: true, jump_pct: 12, range: [5, 500] },
   { id: 'usd_iqd_parallel', group: 'shafaq_usd', label: 'الدولار المحلي (السوق الموازي/السوداء) — بورصة الكفاح والحارثية', unit: 'IQD/100 USD', src: 'shafaq', max_age_min: 36 * H, jump_pct: 10, range: [100000, 400000] },
   { id: 'usd_iqd_shops_baghdad', group: 'shafaq_usd', label: 'الدولار — صيرفات بغداد (بيع/شراء)', unit: 'IQD/100 USD', src: 'shafaq', max_age_min: 36 * H },
-  { id: 'gold21_mithqal_nahr', group: 'shafaq_gold', label: 'ذهب 21 خليجي — مثقال، شارع النهر بالجملة (بيع/شراء) — سعر فعلي', unit: 'IQD/mithqal', src: 'shafaq', max_age_min: 48 * H, jump_pct: 12 },
-  { id: 'gold21_mithqal_iraqi', group: 'shafaq_gold', label: 'ذهب 21 عراقي — مثقال (بيع/شراء) — سعر فعلي', unit: 'IQD/mithqal', src: 'shafaq', max_age_min: 48 * H },
   { id: 'usd_iqd_official', group: 'cbi', label: 'الدولار الرسمي (البنك المركزي العراقي)', unit: 'IQD/USD', src: 'cbi', max_age_min: 8 * D, jump_pct: 25, range: [1000, 3000] },
   { id: 'ust10y', group: 'treasury', label: 'عائد سندات 10 سنوات', unit: '%', src: 'tsy', max_age_min: 5 * D },
   { id: 'ust2y', group: 'treasury', label: 'عائد سندات سنتين', unit: '%', src: 'tsy', max_age_min: 5 * D },
@@ -145,17 +142,7 @@ F.shafaq_usd = async () => {
   if (a.shop && a.shop.sell >= a.shop.buy) out.usd_iqd_shops_baghdad = { value: a.shop, data_time: a.published, link: a.link };
   return out;
 };
-F.shafaq_gold = async () => {
-  const a = await newestParsed((t) => /gold/i.test(t) && /Baghdad|Erbil/i.test(t), (t) => {
-    const nahr = t.match(new RegExp(`Al-Nahr[^]{0,260}?(?:selling price|sold for|sold at)[^\\d]{0,30}${N}[^]{0,160}?(?:buying price|bought at|buying)[^\\d]{0,30}${N}`, 'i')); if (!nahr) return null;
-    const iraqi = t.match(new RegExp(`(?:21-carat Iraqi gold|Iraqi 21-carat gold)[^\\d]{0,80}${N}[^]{0,120}?(?:buying|bought)[^\\d]{0,30}${N}`, 'i'));
-    const v = { sell: toNum(nahr[1]), buy: toNum(nahr[2]) }; if (!(v.sell > 200000 && v.sell < 5000000 && v.buy <= v.sell && v.buy > v.sell * 0.9)) return null;
-    return { nahr: v, iraqi: iraqi ? { sell: toNum(iraqi[1]), buy: toNum(iraqi[2]) } : null };
-  });
-  const out = { gold21_mithqal_nahr: { value: a.nahr, data_time: a.published, link: a.link } };
-  if (a.iraqi && a.iraqi.buy <= a.iraqi.sell) out.gold21_mithqal_iraqi = { value: a.iraqi, data_time: a.published, link: a.link };
-  return out;
-};
+// f1-v4.11: لا جلب لأسعار الصاغة المحلية (قرار المستخدم: الذهب بالدينار محسوب من العالمي فقط)
 F.cbi = async () => {
   const t = normDigits(fullText((await http('https://cbi.iq/')).text()));
   const m = t.match(/USD[^\d]{0,40}(\d[\d,]*\.?\d*)/); if (!m) throw new Error('لم أجد سعر USD في الصفحة');
@@ -322,19 +309,24 @@ const mk = (id, label, unit, inputs, fn, note) => {
   const ts = ins.map((x) => Date.parse(x.data_time || x.fetched_ok_at)).filter(Number.isFinite); d.time_gap_hours = ts.length > 1 ? r2((Math.max(...ts) - Math.min(...ts)) / 3600000, 1) : 0;
   derived.push(d);
 };
-const OZ = 31.1035;
+const OZ = 31.1034768;
+// السعر المرجعي (قرار المستخدم): متوسط بيع وشراء صيرفات بغداد من النشرة نفسها، وإلا سعر البورصة. البيع والشراء يبقيان منفصلين
+(() => { const p = I.usd_iqd_parallel, sh = I.usd_iqd_shops_baghdad, same = sh && sh.value && p && sh.data_time && sh.data_time === p.data_time && sh.value.buy > 0 && sh.value.sell >= sh.value.buy;
+  const v = same ? Math.round((sh.value.buy + sh.value.sell) / 2) : p?.value ?? null, base = same ? sh : p;
+  I.usd_iqd_ref = { id: 'usd_iqd_ref', value: v, status: v == null ? 'unavailable' : base.status, data_time: base?.data_time ?? null, fetched_ok_at: base?.fetched_ok_at ?? null };
+  derived.push({ id: 'usd_iqd_ref', label: 'السعر المرجعي للدولار (متوسط البيع والشراء)', unit: 'IQD/100 USD', source: SRC.calc, basis: v == null ? null : same ? 'mid' : 'bourse', buy: same ? sh.value.buy : null, sell: same ? sh.value.sell : null,
+    inputs: Object.fromEntries([p, same ? sh : null].filter(Boolean).map((x) => [x.id, { value: x.value, data_time: x.data_time, status: x.status }])), value: v, status: I.usd_iqd_ref.status, status_ar: v == null ? 'غير متاحة' : I.usd_iqd_ref.status === 'current' ? 'حالية' : 'قديمة', time_gap_hours: 0 }); })();
 mk('gsr', 'نسبة الذهب إلى الفضة', 'ratio', ['xau_usd', 'xag_usd'], (g, s) => r2(g / s));
-const conv = (id, label, inputs, perOz, note) => mk(id, label, 'USD & IQD', inputs, (m, p) => { const usd = m * perOz; return { usd: r2(usd), iqd: Math.round(usd * p / 100) }; }, note || 'تحويل حسابي من السعر العالمي بسعر الدولار الموازي. لا يشمل المصنعية');
-conv('gold_ounce_iqd', 'الذهب — أونصة', ['xau_usd', 'usd_iqd_parallel'], 1);
-conv('gold24_gram', 'ذهب عيار 24 — غرام', ['xau_usd', 'usd_iqd_parallel'], 1 / OZ);
-conv('gold21_gram', 'ذهب عيار 21 — غرام', ['xau_usd', 'usd_iqd_parallel'], 0.875 / OZ);
-conv('gold21_mithqal', 'ذهب عيار 21 — مثقال (5 غرام)', ['xau_usd', 'usd_iqd_parallel'], 0.875 * 5 / OZ);
-conv('silver_ounce_iqd', 'الفضة — أونصة', ['xag_usd', 'usd_iqd_parallel'], 1);
-conv('silver999_kg', 'فضة 999 — كيلو', ['xag_usd', 'usd_iqd_parallel'], 1000 * 0.999 / OZ);
-const MAKING = 5000; // مصنعية الذهب الثابتة للغرام (قرار المستخدم)
-mk('gold_expected_with_making', 'الذهب: المتوقع مع المصنعية (5,000 د/غرام)', 'IQD', ['xau_usd', 'usd_iqd_parallel'], (g, p) => { const g24 = g * (p / 100) / OZ, g21 = g24 * 0.875; return { gram24: Math.round(g24 + MAKING), gram21: Math.round(g21 + MAKING), mithqal21: Math.round(g21 * 5 + MAKING * 5), making_per_gram: MAKING }; }, 'المحسوب + مصنعية ثابتة. قيمة البيع = المحسوب بلا مصنعية');
-mk('local_vs_calc_gold21', 'الذهب المحلي الفعلي مقارنةً بالمحسوب (مثقال 21)', 'IQD', ['gold21_mithqal_nahr', 'xau_usd', 'usd_iqd_parallel'], (n, g, p) => { const calc = g * (p / 100) / OZ * 0.875 * 5; return { actual_sell: n.sell, calc: Math.round(calc), diff_mithqal: Math.round(n.sell - calc), diff_gram: Math.round((n.sell - calc) / 5), diff_pct: r2((n.sell / calc - 1) * 100) }; }, 'الفعلي (شارع النهر) مقابل المحسوب (المتوقع). الفرق يتأثر بفرق التوقيت بين السعرين؛ انظر time_gap_hours');
-mk('official_parallel_gap', 'فجوة الدولار الرسمي العراقي عن الموازي', '%', ['usd_iqd_official', 'usd_iqd_parallel'], (o, p) => r2((p / 100 / o - 1) * 100));
+const conv = (id, label, inputs, perOz, note) => mk(id, label, 'USD & IQD', inputs, (m, p) => { const usd = m * perOz; return { usd: r2(usd), iqd: Math.round(usd * p / 100) }; }, note || 'تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية');
+conv('gold_ounce_iqd', 'الذهب — أونصة', ['xau_usd', 'usd_iqd_ref'], 1);
+conv('gold24_gram', 'ذهب عيار 24 — غرام', ['xau_usd', 'usd_iqd_ref'], 1 / OZ);
+conv('gold21_gram', 'ذهب عيار 21 — غرام', ['xau_usd', 'usd_iqd_ref'], 0.875 / OZ);
+conv('gold21_mithqal', 'ذهب عيار 21 — مثقال (5 غرام)', ['xau_usd', 'usd_iqd_ref'], 0.875 * 5 / OZ);
+conv('gold24_mithqal', 'ذهب عيار 24 — مثقال (5 غرام)', ['xau_usd', 'usd_iqd_ref'], 5 / OZ);
+conv('silver_ounce_iqd', 'الفضة — أونصة', ['xag_usd', 'usd_iqd_ref'], 1);
+conv('silver999_kg', 'فضة 999 — كيلو', ['xag_usd', 'usd_iqd_ref'], 1000 * 0.999 / OZ);
+// f1-v4.11: لا «المتوقع مع المصنعية» ولا مقارنة بسعر صاغة محلي في نبض السوق (قرار المستخدم)
+mk('official_parallel_gap', 'فجوة الدولار الرسمي العراقي عن الموازي (السعر المرجعي)', '%', ['usd_iqd_official', 'usd_iqd_ref'], (o, p) => r2((p / 100 / o - 1) * 100));
 mk('fed_target_range', 'نطاق الفائدة الأمريكية الرسمي', '%', ['fed_target_lower', 'fed_target_upper'], (l, u) => `${l}–${u}`);
 
 const market = {
@@ -353,15 +345,21 @@ if (SERIES) { const sj = redact(JSON.stringify(SERIES)); for (const sct of SECRE
 const HIST = join(dirname(OUT), 'history.json');
 const hist = (() => { try { return JSON.parse(readFileSync(HIST, 'utf8')); } catch { return { schema: 'nabd-history/1', note: 'لقطة يومية بتوقيت بغداد؛ القيم الحالية فقط', days: {} }; } })();
 const day = new Date(NOW.getTime() + 3 * 3600000).toISOString().slice(0, 10);
-const snap = hist.days[day] || {};
-for (const id of ['xau_usd', 'xag_usd', 'usd_iqd_parallel', 'usd_iqd_official', 'gold21_mithqal_nahr', 'dxy', 'fed_target_upper', 'cpi_yoy', 'unrate', 'real10y', 'ust10y']) { const x = I[id]; if (x && x.status === 'current') snap[id] = x.value; }
+const snap = hist.days[day] || {}; delete snap.gold21_mithqal_nahr; // لا أسعار صاغة (f1-v4.11)
+for (const id of ['xau_usd', 'xag_usd', 'usd_iqd_parallel', 'usd_iqd_ref', 'usd_iqd_official', 'dxy', 'fed_target_upper', 'cpi_yoy', 'unrate', 'real10y', 'ust10y']) { const x = I[id]; if (x && x.status === 'current') snap[id] = x.value; }
 const gsrD = derived.find((d) => d.id === 'gsr'); if (gsrD?.status === 'current') snap.gsr = gsrD.value;
+const shb = I.usd_iqd_shops_baghdad; if (shb?.status === 'current' && shb.value) { snap.usd_buy = shb.value.buy; snap.usd_sell = shb.value.sell; }
 const cg = I.cot_gold; if (cg?.status === 'current') snap.cot_gold_net = cg.value.net_noncommercial;
 // لقطات ضمن اليوم (آخر 8 أيام) لمنحنى «يوم» و«أسبوع»: تُضاف فقط عند جلب جديد ناجح
 hist.intraday = hist.intraday || {};
 const addIntra = (k, x) => { if (!x || x.status !== 'current' || x.update !== 'ok' || !groupsState[x.group].ran) return; const a = hist.intraday[k] = hist.intraday[k] || []; const t = x.data_time || x.fetched_ok_at; if (!a.length || a[a.length - 1][0] !== t) a.push([t, typeof x.value === 'number' ? x.value : x.value.sell]); const cut = iso(NOW.getTime() - 8 * 864e5); hist.intraday[k] = a.filter((p) => p[0] >= cut); };
 addIntra('xau_usd', I.xau_usd); addIntra('xag_usd', I.xag_usd); addIntra('usd_iqd_parallel', I.usd_iqd_parallel); addIntra('dxy', I.dxy);
+// لا حدّ لعدد الأيام في الأرشيف الكامل (archive/)؛ هذا السجل الخفيف للتطبيق فقط ويحتفظ بآخر 1100 يوم
 if (Object.keys(snap).length) { hist.days[day] = snap; const keys = Object.keys(hist.days).sort(); for (const k of keys.slice(0, Math.max(0, keys.length - 1100))) delete hist.days[k]; }
 const hjson = redact(JSON.stringify(hist)); for (const sct of SECRETS) if (hjson.includes(sct)) throw new Error('توقف: سرّ داخل السجل'); writeFileSync(HIST, hjson + '\n');
 const cnt = (st) => indicators.filter((x) => x.status === st).length;
 console.log(redact(`market.json: ${cnt('current')} حالية، ${cnt('stale')} قديمة، ${cnt('unavailable')} غير متاحة\n` + runLog.join('\n')));
+
+// الأرشيف الكامل (f1-v4.11): إضافة فقط، بلا حد زمني، مع المصدر ووقت البيانات ووقت الجلب لكل قيمة، وبصمة تكامل
+import('./archive.mjs').then(({ appendRun }) => { const r = appendRun({ root: process.env.ARCHIVE_DIR || 'archive', indicators, groupsState, now: NOW });
+  console.log(`archive: +${r.added} سجل في ${r.files.join(', ') || '—'}`); }).catch((e) => { console.error('archive: ' + redact(e.message)); process.exitCode = 2; });

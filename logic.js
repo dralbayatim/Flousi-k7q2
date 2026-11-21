@@ -85,14 +85,14 @@ const FL = {};
   const undo = (S, id, date) => { E.reverse(S, id, date); audit(S, 'reverse', id); };
 
   const LABEL = { opening: 'رصيد افتتاحي', income: 'دخل', expense: 'مصروف', transfer: 'تحويل', convert: 'تحويل عملة', buy_metal: 'شراء معدن', sell_metal: 'بيع معدن', lend: 'إقراض', borrow: 'اقتراض',
-    repay_in: 'سداد لي', repay_out: 'سداد مني', debt_fee: 'فائدة/رسوم دين', jam_pay: 'قسط جمعية', jam_receive: 'قبض جمعية', reconcile: 'مطابقة', reversal: 'عكس', buy_usd: 'شراء دولار', opening_fix: 'تصحيح افتتاحي' };
-  function describe(S, t) {
-    const ps = S.post.filter(p => p.tx === t.id), nm = id => S.acc[id].name || id, ids = k => [...new Set(ps.filter(p => k(p.iqd)).map(p => nm(p.a)))].join('، ');
+    repay_in: 'سداد لي', repay_out: 'سداد مني', debt_fee: 'فائدة/رسوم دين', jam_pay: 'قسط جمعية', jam_receive: 'قبض جمعية', reconcile: 'مطابقة', reversal: 'عكس', buy_usd: 'شراء دولار', opening_fix: 'تصحيح افتتاحي', buy_stock: 'شراء أسهم', sell_stock: 'بيع أسهم' };
+  function describe(S, t, ix) {
+    const ps = ix ? (ix.get(t.id) || []) : S.post.filter(p => p.tx === t.id), nm = id => S.acc[id].name || id, ids = k => [...new Set(ps.filter(p => k(p.iqd)).map(p => nm(p.a)))].join('، ');
     const usd = ps.find(p => S.acc[p.a].cur === 'USD');
     return { id: t.id, date: t.date, label: LABEL[t.type] || t.type, amount: ps.reduce((s, p) => s + Math.max(p.iqd, 0), 0), usd: usd ? Math.abs(usd.n) : 0, rate: usd ? usd.rate : null,
       from: ids(v => v < 0), to: ids(v => v > 0), note: t.note || '', voided: t.voided, reversal: !!t.reverses };
   }
-  const listTx = S => S.tx.map(t => describe(S, t)).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id);
+  const listTx = S => { const ix = new Map(); S.post.forEach(p => { const a = ix.get(p.tx); a ? a.push(p) : ix.set(p.tx, [p]); }); return S.tx.map(t => describe(S, t, ix)).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id); };
 
   const nwv = (S, s) => S.x.set.valuation === 'cost' ? s.nwc : s.nw;
   const at = (S, d) => E.snapAt(S, d, rateAt(S, d), priceAt(S, d), valsAt(S, d));
@@ -252,7 +252,7 @@ const FL = {};
   const E = typeof FE !== 'undefined' ? FE : require('./engine.js');
   const live = (S, p) => { const t = S.tx[p.tx - 1]; return !t.voided && !t.reverses; };
   const inMonth = (p, k) => FL.mkey(p.date) === k;
-  const FLOW = { income: 'دخل', expense: 'مصروف', transfer: 'تحويلات داخلية', convert: 'تحويل عملة', buy_metal: 'شراء معادن', sell_metal: 'بيع معادن', lend: 'إقراض', borrow: 'اقتراض', repay_in: 'سداد لي', repay_out: 'سداد مني', debt_fee: 'رسوم الديون', jam_pay: 'أقساط الجمعيات', jam_receive: 'قبض جمعية', reconcile: 'مطابقة', opening: 'رصيد افتتاحي' };
+  const FLOW = { income: 'دخل', expense: 'مصروف', transfer: 'تحويلات داخلية', convert: 'تحويل عملة', buy_metal: 'شراء معادن', sell_metal: 'بيع معادن', lend: 'إقراض', borrow: 'اقتراض', repay_in: 'سداد لي', repay_out: 'سداد مني', debt_fee: 'رسوم الديون', jam_pay: 'أقساط الجمعيات', jam_receive: 'قبض جمعية', reconcile: 'مطابقة', opening: 'رصيد افتتاحي', buy_stock: 'شراء أسهم', sell_stock: 'بيع أسهم' };
   // تقرير شهر: الدخل والمصروف حسب الفئة، المحقق، المطابقة، جسر صافي الثروة، حركة السيولة
   function monthReport(S, k) {
     const od = S.x.openDate; if (!od || k < FL.mkey(od)) throw new Error('هذا الشهر قبل بدء التسجيل');

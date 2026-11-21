@@ -22,7 +22,7 @@ const FM = (() => {
   }
   // ---- قيمة المعادن من نبض السوق (قيمة البيع: المحسوب بلا مصنعية). null إن لم يكن السعر «حالياً» ----
   function metalsNow(S) {
-    if (typeof FN === 'undefined' || !FN.get()) return null; const g = FN.ind('xau_usd'), s = FN.ind('xag_usd'), p = FN.ind('usd_iqd_parallel');
+    if (typeof FN === 'undefined' || !FN.get()) return null; const g = FN.ind('xau_usd'), s = FN.ind('xag_usd'), p = FN.ref ? FN.ref() : FN.ind('usd_iqd_parallel'); // سعر التحويل المرجعي: متوسط البيع والشراء (f1-v4.11)
     if (!g || !s || !p || g.live !== 'current' || s.live !== 'current' || p.live !== 'current') return null;
     const rate = p.value / 100, out = { gold: 0, silver: 0, goldGrams: 0, silverGrams: 0 };
     L.pieces(S).filter(x => x.held).forEach(x => { const pure = x.mg / 1000 * x.fine / 10000, v = pure * (x.metal === 'G' ? g.value : s.value) / OZ * rate; if (x.metal === 'G') { out.gold += v; out.goldGrams += x.mg / 1000; } else { out.silver += v; out.silverGrams += x.mg / 1000; } });
@@ -30,12 +30,12 @@ const FM = (() => {
   }
   // ---- توزيع الأصول (بالدينار) ----
   function alloc(S) {
-    const A = L.accountsView(S).filter(a => a.kind === 'asset' && !S.acc[a.id].hidden), V = {}; L.valuations(S).forEach(v => { if (v.last && v.book !== 0) V[v.id] = v.value; });
+    const A = L.accountsView(S).filter(a => a.kind === 'asset' && !S.acc[a.id].hidden).map(a => ({ ...a, type: S.acc[a.id].type })), V = {}; L.valuations(S).forEach(v => { if (v.last && v.book !== 0) V[v.id] = v.value; });
     const sum = f => A.filter(f).reduce((t, a) => t + (a.cur === 'USD' ? a.iqd : V[a.id] != null ? V[a.id] : a.bal), 0);
     const P = L.pieces(S).filter(p => p.held), mn = metalsNow(S);
     const parts = [['نقد وحسابات', sum(a => a.liquid && a.cur === 'IQD'), '#5fc4bb'], ['دولار', sum(a => a.cur === 'USD'), '#7cc4f0'],
       ['ذهب', mn ? mn.gold : P.filter(p => p.metal === 'G').reduce((t, p) => t + p.theo, 0), '#c9a227'], ['فضة', mn ? mn.silver : P.filter(p => p.metal === 'S').reduce((t, p) => t + p.theo, 0), '#9aa7ad'],
-      ['عقار وأصول أخرى', sum(a => !a.liquid && a.cur === 'IQD'), '#a78bda']].filter(p => p[1] > 0);
+      ['أسهم', typeof FSK !== 'undefined' ? FSK.view(S).filter(x => !x.hidden).reduce((t, x) => t + x.mkt, 0) : 0, '#e08a5f'], ['عقار وأصول أخرى', sum(a => !a.liquid && a.cur === 'IQD' && a.type !== 'stock'), '#a78bda']].filter(p => p[1] > 0);
     const total = parts.reduce((t, p) => t + p[1], 0);
     return { parts: parts.map(([n, v, c]) => ({ n, v, c, p: total ? r1(v / total * 100) : 0 })), total, metalsLive: !!mn };
   }
@@ -83,7 +83,7 @@ const FM = (() => {
     }
     if (t === 'gold' || t === 'silver') {
       const grams = Number(inp.grams) || 0, karat = t === 'gold' ? Number(inp.karat) || 21 : null;
-      const m = mkt ? FN.ind(t === 'gold' ? 'xau_usd' : 'xag_usd') : null, p = mkt ? FN.ind('usd_iqd_parallel') : null;
+      const m = mkt ? FN.ind(t === 'gold' ? 'xau_usd' : 'xag_usd') : null, p = mkt ? (FN.ref ? FN.ref() : FN.ind('usd_iqd_parallel')) : null;
       if (grams > 0 && m && p && m.live === 'current' && p.live !== 'unavailable') {
         const pure = t === 'gold' ? grams * karat / 24 : grams * 0.999, sale = Math.round(pure * m.value / OZ * p.value / 100), expected = t === 'gold' ? sale + MAKING * grams : sale;
         facts.push([t === 'gold' ? 'المتوقع مع المصنعية (5,000 للغرام)' : 'قيمتها بالأونصة المحوّلة', expected], ['قيمة البيع الفوري (بلا مصنعية)', sale]);

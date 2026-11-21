@@ -45,6 +45,16 @@ const FN = (() => {
     return { ...d, live: st, inputsLive: ins };
   }
   const fileAgeMin = () => M ? Math.round((nowImpl() - iso(M.generated_at)) / 60000) : null;
+  // سعر التحويل المرجعي (قرار المستخدم، f1-v4.11): متوسط سعري البيع والشراء في صيرفات بغداد من النشرة نفسها، وإلا سعر البورصة.
+  // value = دينار لكل 100 دولار. kind: calc (متوسط محسوب) أو obs (مرصود كما نُشر). البيع والشراء يبقيان منفصلين للعرض والأرشيف
+  function ref() {
+    const p = ind('usd_iqd_parallel'), sh = ind('usd_iqd_shops_baghdad');
+    const okSh = sh && sh.value && sh.value.buy > 0 && sh.value.sell >= sh.value.buy && sh.live !== 'unavailable' && (!p || !p.data_time || sh.data_time === p.data_time || sh.live === 'current');
+    if (okSh) { const mid = Math.round((sh.value.buy + sh.value.sell) / 2), live = p && p.live === 'current' && sh.live !== 'current' ? 'stale' : sh.live;
+      return { value: mid, buy: sh.value.buy, sell: sh.value.sell, live, data_time: sh.data_time, fetched_ok_at: sh.fetched_ok_at, kind: 'calc', basis: 'mid' }; }
+    if (p && p.value != null) return { value: p.value, buy: null, sell: null, live: p.live, data_time: p.data_time, fetched_ok_at: p.fetched_ok_at, kind: 'obs', basis: 'bourse' };
+    return null;
+  }
 
   // ---- ملفات مساعدة للتحليل والأخبار: السلاسل، والسجل اليومي، ومراجع المستخدم التاريخية ----
   const AUX = { series: null, history: null, ref: null, err: null, at: 0 }; let auxPending = null;
@@ -110,11 +120,11 @@ const pctChange = (ser, days) => { if (ser.length < 2) return null; const last =
       add('cot', 'مراكز المضاربين (COT)', 10, sig, Math.round(pr) + '٪ من مدى 3 سنوات', sig > 0 ? 'المضاربون في أدنى مراكزهم تاريخياً: علامة استسلام' : sig < 0 ? 'المضاربون مزدحمون في الشراء: خطر تصحيح' : 'مراكز المضاربين في المنتصف');
     } else add('cot', 'مراكز المضاربين (COT)', 10, null, null, 'بيانات COT غير متاحة أو قديمة');
     // 6) السوق العراقي: استقرار الدولار المحلي وفرق الذهب المحلي عن المحسوب
-    const par = ind('usd_iqd_parallel'), lc = der('local_vs_calc_gold21');
+    const par = ind('usd_iqd_parallel'), lc = null; // لا أسعار صاغة محلية (قرار f1-v4.11)
     if (par && par.live === 'current') { const ps = (((AUX.history || {}).intraday || {}).usd_iqd_parallel || []).map(([t, v]) => [iso(t), v]), wk = pctChange(ps, 7) ?? pctChange(Object.entries((AUX.history || {}).days || {}).filter(([, x]) => x.usd_iqd_parallel).map(([d, x]) => [tOf(d), x.usd_iqd_parallel]), 7);
       const prem = lc && lc.live === 'current' && lc.value ? lc.value.diff_pct : null;
       const sig = (wk != null && wk > 3) || (prem != null && prem > 6) ? -1 : (wk == null || Math.abs(wk) < 1) && (prem == null || prem <= 3) ? 1 : 0;
-      add('iraq', 'السوق العراقي (الدولار المحلي والذهب المحلي)', 10, sig, [wk != null ? 'الدولار المحلي أسبوعياً ' + (wk >= 0 ? '+' : '') + r1(wk) + '%' : null, prem != null ? 'فرق الذهب المحلي ' + prem + '%' : null].filter(Boolean).join(' · ') || '—', sig < 0 ? 'ضغط محلي: قفزة في الدولار أو تضخم في سعر الذهب المحلي' : sig > 0 ? 'السوق المحلي مستقر ولا علاوة غير طبيعية' : 'السوق المحلي متحرك قليلاً');
+      add('iraq', 'السوق العراقي (الدولار المحلي)', 10, sig, [wk != null ? 'الدولار المحلي أسبوعياً ' + (wk >= 0 ? '+' : '') + r1(wk) + '%' : null, prem != null ? 'فرق الذهب المحلي ' + prem + '%' : null].filter(Boolean).join(' · ') || '—', sig < 0 ? 'ضغط محلي: قفزة في الدولار المحلي' : sig > 0 ? 'الدولار المحلي مستقر' : 'السوق المحلي متحرك قليلاً');
     } else add('iraq', 'السوق العراقي', 10, null, null, 'سعر الدولار المحلي غير متاح أو قديم');
     // 7) التضخم الأمريكي
     const cpi = fredS('CPI_YOY');
@@ -147,7 +157,7 @@ const pctChange = (ser, days) => { if (ser.length < 2) return null; const last =
     if (s && s.live === 'current') { const d1 = pctChange(ss, 1); if (d1 != null && Math.abs(d1) >= 1.5) push(`${d1 > 0 ? '🔺 الفضة ترتفع' : '🔻 الفضة تهبط'} ${r1(Math.abs(d1))}% إلى ${fx(s.value)}$`, s.data_time, 'Gold-API'); }
     const p = ind('usd_iqd_parallel'); if (p && p.value) { const ps = (((AUX.history || {}).intraday || {}).usd_iqd_parallel || []).map(([t, v]) => [iso(t), v]), d = ps.length > 1 ? ps[ps.length - 1][1] - ps[ps.length - 2][1] : null;
       push(`💵 الدولار المحلي ${p.value.toLocaleString('en-US')} لكل 100$` + (d ? ` (${d > 0 ? '+' : ''}${d.toLocaleString('en-US')} عن القراءة السابقة)` : ''), p.data_time, 'مسح السوق المحلي', p.live === 'current' ? 'info' : 'old'); }
-    const nh = ind('gold21_mithqal_nahr'), mk = der('gold_expected_with_making'); if (nh && nh.value) push(`🏅 مثقال 21 في شارع النهر ${nh.value.sell.toLocaleString('en-US')}` + (mk && mk.value ? ` (المتوقع مع المصنعية ${mk.value.mithqal21.toLocaleString('en-US')})` : ''), nh.data_time, 'مسح السوق المحلي', nh.live === 'current' ? 'info' : 'old');
+    // لا خبر لأسعار الصاغة المحلية (قرار f1-v4.11)
     const of = ind('usd_iqd_official'); if (of && of.value) push(`🏦 الدولار الرسمي ${of.value.toLocaleString('en-US')} دينار`, of.fetched_ok_at, 'البنك المركزي العراقي', 'info');
     const ft = fredS('FEDTARU'); for (let i = Math.max(1, ft.length - 3); i < ft.length; i++) if (ft[i][1] !== ft[i - 1][1] && nowImpl() - tOf(ft[i][0]) < 21 * DAY) push(`🇺🇸 الفدرالي ${ft[i][1] > ft[i - 1][1] ? 'يرفع' : 'يخفض'} الفائدة إلى ${ft[i][1]}% (الحد الأعلى)`, ft[i][0], 'FRED', 'warn');
     const cpi = fredS('CPI_YOY'); if (cpi.length > 1) push(`📊 التضخم الأمريكي ${cpi[cpi.length - 1][1]}% (${cpi[cpi.length - 1][0].slice(0, 7)}) — السابق ${cpi[cpi.length - 2][1]}%`, cpi[cpi.length - 1][0], 'FRED');
@@ -168,6 +178,6 @@ const pctChange = (ser, days) => { if (ser.length < 2) return null; const last =
   }
   // للاختبار في Node فقط
   const _test = { setFetch: f => { fetchImpl = f; }, setNow: f => { nowImpl = f; }, reset: () => { M = null; err = null; at = 0; pending = null; } };
-  return { load, get: () => M, err: () => err, ind, der, fileAgeMin, loadAux, aux: () => AUX, metalSeries, fredS, analyze, news, pctChange, _test: { ..._test, setAux: o => Object.assign(AUX, o, { at: nowImpl() }) } };
+  return { load, get: () => M, err: () => err, ind, der, ref, fileAgeMin, loadAux, aux: () => AUX, metalSeries, fredS, analyze, news, pctChange, _test: { ..._test, setAux: o => Object.assign(AUX, o, { at: nowImpl() }) } };
 })();
 if (typeof module !== 'undefined') module.exports = FN;

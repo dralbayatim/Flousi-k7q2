@@ -1,5 +1,6 @@
 name: market-fetcher
-# جالب «نبض السوق»: يحدّث data/*.json فقط. المفاتيح من GitHub Secrets ولا تُكتب في أي ملف.
+# جالب «نبض السوق»: يحدّث data/*.json ويضيف إلى الأرشيف الكامل archive/ (إضافة فقط). المفاتيح من GitHub Secrets ولا تُكتب في أي ملف.
+# المستودع عام، فدقائق GitHub Actions مجانية بلا حد. النسخة الاحتياطية المستقلة للأرشيف في الفرع nabd-archive-backup (مرة يومياً).
 on:
   schedule:
     - cron: '4,19,34,49 * * * *'   # كل 15 دقيقة؛ الجالب نفسه يقرر أي مصدر حان موعده
@@ -17,23 +18,49 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify archive before
+        run: node fetcher/archive.mjs verify archive || [ ! -d archive ]
       - name: Fetch
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           FORCE: ${{ inputs.force && '1' || '0' }}
         run: node fetcher/fetch-market.mjs
+      - name: Verify archive after (integrity + append-only)
+        run: |
+          node fetcher/archive.mjs verify archive
+          rm -rf /tmp/old && mkdir -p /tmp/old
+          if git cat-file -e HEAD:archive 2>/dev/null; then git archive HEAD archive | tar -x -C /tmp/old; node fetcher/archive.mjs append-only /tmp/old/archive archive; fi
       - name: Commit data if changed
         run: |
           git config user.name "nabd-fetcher"
           git config user.email "nabd-fetcher@users.noreply.github.com"
-          git add data/market.json data/history.json data/series.json
+          git add data/market.json data/history.json data/series.json archive
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -q -m "market.json $(date -u +%FT%TZ)"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
           exit 1
+      - name: Daily independent backup of the archive
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [ -d archive ] || exit 0
+          URL="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          rm -rf /tmp/bk
+          if git ls-remote --exit-code --heads "$URL" nabd-archive-backup >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch nabd-archive-backup "$URL" /tmp/bk
+            AGE=$(( $(date +%s) - $(git -C /tmp/bk log -1 --format=%ct) ))
+            if [ "$AGE" -lt 72000 ]; then echo "backup is recent ($AGE s)"; exit 0; fi
+            node fetcher/archive.mjs append-only /tmp/bk/archive archive
+          else
+            mkdir -p /tmp/bk && git -C /tmp/bk init -q -b nabd-archive-backup && git -C /tmp/bk remote add origin "$URL"
+          fi
+          rm -rf /tmp/bk/archive && cp -r archive /tmp/bk/archive
+          node fetcher/archive.mjs verify /tmp/bk/archive
+          cd /tmp/bk && git config user.name "nabd-fetcher" && git config user.email "nabd-fetcher@users.noreply.github.com"
+          git add -A && (git diff --cached --quiet || git commit -q -m "archive backup $(date -u +%FT%TZ)") && git push -q origin HEAD:nabd-archive-backup
