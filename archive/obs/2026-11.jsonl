@@ -5,3 +5,5 @@
 {"n":5,"id":"dxy","v":103.65,"t":"2026-11-20","at":"2026-11-21T17:40:29.731Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
 {"n":6,"id":"xau_usd","v":3539,"t":"2026-11-21T18:43:38.000Z","at":"2026-11-21T18:43:44.214Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":7,"id":"xag_usd","v":41.08,"t":"2026-11-21T18:43:37.000Z","at":"2026-11-21T18:43:44.214Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":8,"id":"xau_usd","v":3539,"t":"2026-11-21T19:32:08.000Z","at":"2026-11-21T19:32:37.597Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":9,"id":"xag_usd","v":41.08,"t":"2026-11-21T19:32:37.000Z","at":"2026-11-21T19:32:37.597Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
