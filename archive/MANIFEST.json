@@ -1,0 +1,13 @@
+{
+ "schema": "nabd-archive-manifest/1",
+ "files": {
+  "2026-11.jsonl": {
+   "lines": 5,
+   "bytes": 1028,
+   "sha256": "5fa03309bdbecff23e07af0e6d761c961b61f7189f12dbd34f5e2a0b1bd0df82"
+  }
+ },
+ "rtfx": {},
+ "count": 5,
+ "head": "b310d9ddc70bfb5826be3ea90600459fbfd2d0b52686c8b5175d35f1ed45a072"
+}
