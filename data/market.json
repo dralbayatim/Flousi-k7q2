@@ -1,12 +1,12 @@
 {
  "schema": "nabd-market/1",
- "generated_at": "2026-11-21T17:40:29.731Z",
+ "generated_at": "2026-11-21T17:57:20.413Z",
  "run": {
   "forced": false,
   "log": [
-   "metals: نجح",
-   "dxy: نجح",
-   "shafaq_usd: نجح",
+   "metals: لم يحن موعده",
+   "dxy: لم يحن موعده",
+   "shafaq_usd: لم يحن موعده",
    "cbi: لم يحن موعده",
    "treasury: لم يحن موعده",
    "fred_daily: لم يحن موعده",
@@ -31,7 +31,7 @@
    "last_attempt_at": "2026-11-21T17:40:29.731Z",
    "last_ok_at": "2026-11-21T17:40:29.731Z",
    "last_error": null,
-   "ran": true
+   "ran": false
   },
   "dxy": {
    "label": "مؤشر الدولار الأمريكي DXY",
@@ -39,7 +39,7 @@
    "last_attempt_at": "2026-11-21T17:40:29.731Z",
    "last_ok_at": "2026-11-21T17:40:29.731Z",
    "last_error": null,
-   "ran": true
+   "ran": false
   },
   "shafaq_usd": {
    "label": "الدولار في السوق العراقي (الموازي)",
@@ -47,7 +47,7 @@
    "last_attempt_at": "2026-11-21T17:40:29.731Z",
    "last_ok_at": "2026-11-21T17:40:29.731Z",
    "last_error": null,
-   "ran": true
+   "ran": false
   },
   "cbi": {
    "label": "الدولار الرسمي العراقي",
@@ -126,7 +126,7 @@
    "max_age_min": 180,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 0
+   "age_min": 17
   },
   {
    "id": "xag_usd",
@@ -151,7 +151,7 @@
    "max_age_min": 180,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 0
+   "age_min": 17
   },
   {
    "id": "usd_iqd_parallel",
@@ -176,7 +176,7 @@
    "max_age_min": 2160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 222
+   "age_min": 239
   },
   {
    "id": "usd_iqd_shops_baghdad",
@@ -204,7 +204,7 @@
    "max_age_min": 2160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 222
+   "age_min": 239
   },
   {
    "id": "usd_iqd_official",
@@ -229,7 +229,7 @@
    "max_age_min": 11520,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 197
+   "age_min": 214
   },
   {
    "id": "ust10y",
@@ -254,7 +254,7 @@
    "max_age_min": 7200,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2500
+   "age_min": 2517
   },
   {
    "id": "ust2y",
@@ -279,7 +279,7 @@
    "max_age_min": 7200,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2500
+   "age_min": 2517
   },
   {
    "id": "real10y",
@@ -304,7 +304,7 @@
    "max_age_min": 7200,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2500
+   "age_min": 2517
   },
   {
    "id": "fed_target_upper",
@@ -330,7 +330,7 @@
    "max_age_min": 8640,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 1060
+   "age_min": 1077
   },
   {
    "id": "fed_target_lower",
@@ -356,7 +356,7 @@
    "max_age_min": 8640,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 1060
+   "age_min": 1077
   },
   {
    "id": "dxy",
@@ -381,7 +381,7 @@
    "max_age_min": 5760,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2500
+   "age_min": 2517
   },
   {
    "id": "breakeven10y",
@@ -407,7 +407,7 @@
    "max_age_min": 8640,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2500
+   "age_min": 2517
   },
   {
    "id": "usd_broad",
@@ -433,7 +433,7 @@
    "max_age_min": 17280,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 12580
+   "age_min": 12597
   },
   {
    "id": "cpi_yoy",
@@ -459,7 +459,7 @@
    "max_age_min": 144000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 117700
+   "age_min": 117717
   },
   {
    "id": "fed_funds",
@@ -485,7 +485,7 @@
    "max_age_min": 144000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 74500
+   "age_min": 74517
   },
   {
    "id": "unrate",
@@ -511,7 +511,7 @@
    "max_age_min": 144000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 74500
+   "age_min": 74517
   },
   {
    "id": "gdp",
@@ -537,7 +537,7 @@
    "max_age_min": 288000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 206980
+   "age_min": 206997
   },
   {
    "id": "cot_gold",
@@ -566,7 +566,7 @@
    "max_age_min": 20160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 6820
+   "age_min": 6837
   },
   {
    "id": "cot_silver",
@@ -595,7 +595,7 @@
    "max_age_min": 20160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 6820
+   "age_min": 6837
   }
  ],
  "derived": [
