@@ -4,7 +4,7 @@ const $ = s => document.querySelector(s);
 const h = (t, a, ...k) => { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (n === 'class') e.className = v; else if (n.startsWith('on')) e[n] = v; else if (v !== false && v != null) e.setAttribute(n, v === true ? '' : v); }
   k.flat(9).forEach(c => { if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(c)); }); return e; };
 // إن نقص ملف أو تلف فلا يتوقف هذا الملف هنا؛ الإقلاع في الأسفل يكشف ذلك ويعرض شاشة خطأ بدل «…»
-const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.1'; // ارفع VER مع V في sw.js عند كل إصدار
+const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.3'; // ارفع VER مع V في sw.js عند كل إصدار
 let S, BE, view = { tab: 'home', sub: null, p: {} }, sessionDismiss = false, integ = [], persist = null; // persist: نتيجة طلب التخزين الدائم (8.1): true مثبّت، false مرفوض، 'na' غير مدعوم، null لم يُعرف بعد // integ: نتيجة فحوصات السلامة (4.4) عند الفتح
 const money = n => L.fmt(n) + ' د.ع';
 const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, bad ? 5000 : Math.max(2200, m.length * 70)); };
@@ -22,6 +22,12 @@ const sect = (title, ...k) => h('section', {}, title ? h('h2', {}, title) : null
 // قسم قابل للطيّ للنماذج النادرة (مطويّ افتراضياً؛ يُفتح فقط إن طُلب)
 const pubEl = e => { e.classList.add('pub'); return e; }, privEl = e => { e.classList.add('priv'); return e; }, pubSect = (...a) => pubEl(sect(...a)); // pub: أسعار سوق عامة لا تُخفى
 const fold = (title, open, ...k) => h('details', { class: 'fold', open: open ? true : null }, h('summary', {}, title), ...k);
+// أيقونات SVG ثابتة (نصوص مكتوبة هنا فقط، لا يدخلها أي إدخال من المستخدم)
+const ICO = { home: '<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>', ops: '<path d="M7 4v14M3 14l4 4 4-4M17 20V6M13 10l4-4 4 4"/>', accts: '<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18M16 15h2"/>', assets: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/>', nabd: '<path d="M3 12h4l3-8 4 16 3-8h4"/>', insights: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', salary: '<rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', tag: '<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.2"/>', food: '<path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v6M16 3c-2 2-2 6 0 8v10"/>', car: '<path d="M5 16V11l2-5h10l2 5v5M3 16h18M7 19v-3M17 19v-3"/>', bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', down: '<path d="M12 4v14M6 12l6 6 6-6"/>' };
+const ico = n => { const s = h('span', { class: 'ic', 'aria-hidden': 'true' }); s.innerHTML = '<svg viewBox="0 0 24 24">' + (ICO[n] || ICO.tag) + '</svg>'; return s; };
+const catIco = l => ico(/راتب|دخل/.test(l) ? 'down' : /تحويل|مطابقة/.test(l) ? 'ops' : /طعام|مطعم|مواد|غذاء/.test(l) ? 'food' : /سيارة|وقود|نقل|مواصلات/.test(l) ? 'car' : /فواتير|اتصالات|كهرباء|إنترنت/.test(l) ? 'bolt' : 'tag');
+const backBtn = f => { const b = h('button', { class: 'back', type: 'button', 'aria-label': 'رجوع', onclick: f }); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'; b.append(h('span', {}, 'رجوع')); return b; };
 const btn = (t, f, cls) => h('button', { class: cls || '', onclick: f }, t);
 // ===== f1-v3.2: شرح المصطلحات (ⓘ)، النسخ بضغطة، واعتماد سعر نبض السوق =====
 // GLOSS: شرح مختصر لكل مصطلح. لإضافة مصطلح جديد: أضفه هنا ثم استعمل ti('العنوان', 'المفتاح')
@@ -121,7 +127,7 @@ function opsForm(kind) {
 function txList(n = 40) {
   const xs = L.listTx(S).slice(0, n);
   return sect('آخر العمليات', xs.length ? xs.map(t => h('div', { class: 'tx' + (t.voided || t.reversal ? ' void' : '') },
-    h('div', { class: 'r' }, h('span', {}, t.date + ' · ' + t.label), h('b', {}, money(t.amount) + (t.usd ? ' (' + L.fmtUsd(t.usd) + ')' : ''))),
+    h('div', { class: 'r' }, h('span', {}, h('span', { class: 'cat' }, catIco(t.label)), t.date + ' · ' + t.label), h('b', {}, money(t.amount) + (t.usd ? ' (' + L.fmtUsd(t.usd) + ')' : ''))),
     h('div', { class: 'mut' }, (t.from ? t.from + ' ← ' : '') + t.to + (t.note ? ' — ' + t.note : '') + (t.voided ? ' (معكوسة)' : '')),
     (!t.voided && !t.reversal && t.label !== 'رصيد افتتاحي' && t.label !== 'تصحيح افتتاحي') ? btn('تراجع', () => { if (confirm('عكس هذه العملية؟ تبقى ظاهرة في السجل.')) act(() => { const o = S.tx.find(x => x.id === t.id); L.undo(S, t.id, L.today() > o.date ? L.today() : o.date); }, 'عُكست العملية'); }, 'mini') : null))
     : h('p', { class: 'mut' }, 'لا عمليات بعد.'));
@@ -340,11 +346,11 @@ function reportView(id) { const p = S.pieces[id]; let r; try { r = L.saleReport(
   return h('div', {}, h('h2', {}, pieceName(p)), row('تاريخ البيع', r.date), row('سعر الشراء الفعلي (التكلفة)', money(r.cost)), row('سعر البيع الفعلي', money(r.proceeds)), row('الربح/الخسارة المحققة', sg(r.total), r.total < 0 ? 'bad' : ''),
     sect('التفكيك', r.market == null ? h('p', { class: 'mut' }, 'لا يتوفر سعر أونصة وقت الشراء، فلا يمكن تفكيك النتيجة.') : null, row('أثر حركة السعر والصرف', sg(r.market)), row('أجور الصياغة الضائعة', sg(r.making == null ? null : -r.making)), row('خصم التاجر عن القيمة المعدنية', sg(r.dealer == null ? null : -r.dealer)),
       r.dealerBp != null ? row('نسبة خصم التاجر الفعلية', (r.dealerBp / 100).toFixed(2) + '%') : null, r.est ? h('p', { class: 'mut' }, 'تكلفة هذه القطعة تقديرية (قيمتها يوم البدء)، فالأجور الضائعة صفر بالتعريف.') : null),
-    row('ذهبت النقود إلى', r.to || '—'), r.note ? row('الغرض', r.note) : null, btn('رجوع', () => go('assets'), 'alt')); }
+    row('ذهبت النقود إلى', r.to || '—'), r.note ? row('الغرض', r.note) : null, backBtn(() => go('assets'))); }
 SCREENS.assets = (sub, p) => { if (!S.x.openDate) return h('div', {}, h('h1', {}, 'الأصول'), h('p', {}, 'سجّل الرصيد الافتتاحي أولاً.'));
-  if (sub === 'buy') return h('div', {}, btn('رجوع', () => go('assets'), 'alt mini'), h('h1', {}, 'شراء قطعة'), h('p', { class: 'mut' }, 'الدفع بالدينار. للشراء بالدولار حوّل الدولار إلى دينار أولاً.'), buyForm());
-  if (sub === 'old') return h('div', {}, btn('رجوع', () => go('assets'), 'alt mini'), h('h1', {}, 'قطعة موجودة قبل البدء'), h('p', { class: 'mut' }, 'تُسجَّل بتاريخ البدء ولا تُحسب دخلاً.'), oldForm());
-  if (sub === 'sell') return h('div', {}, btn('رجوع', () => go('assets'), 'alt mini'), h('h1', {}, 'بيع قطعة'), sellForm(p.id));
+  if (sub === 'buy') return h('div', {}, backBtn(() => go('assets')), h('h1', {}, 'شراء قطعة'), h('p', { class: 'mut' }, 'الدفع بالدينار. للشراء بالدولار حوّل الدولار إلى دينار أولاً.'), buyForm());
+  if (sub === 'old') return h('div', {}, backBtn(() => go('assets')), h('h1', {}, 'قطعة موجودة قبل البدء'), h('p', { class: 'mut' }, 'تُسجَّل بتاريخ البدء ولا تُحسب دخلاً.'), oldForm());
+  if (sub === 'sell') return h('div', {}, backBtn(() => go('assets')), h('h1', {}, 'بيع قطعة'), sellForm(p.id));
   if (sub === 'report') return h('div', {}, h('h1', {}, 'تقرير البيع'), reportView(p.id));
   return h('div', {}, h('h1', {}, 'الأصول'), sect('', h('button', { class: 'lnk', onclick: () => go('more', 'goals') }, 'الأهداف')), ratesBlock(p && p.open === 'prices'), usdBlock(), metalsBlock(), valsBlock()); };
 // التقييم اليدوي (عقار، أرض، سيارة): قيمتها التقديرية اليوم بالدينار. لا قيد ولا دخل: يغيّر التقييم فقط، والفرق عن التكلفة «غير محقق»
@@ -427,6 +433,11 @@ function availLevel(st) { if (st.avail < 0) return ['badc', 'المخصص للأ
 function rateBlock() { const has = S.x.rates.length > 0, usd = userAccts(a => a.cur === 'USD').length > 0;
   return pubSect('سعر الصرف', row('100 دولار', has ? L.fmtRate(S.rate) + ' د.ع' : (usd ? '⚠ لم يُدخل بعد' : 'لم يُدخل'), has || !usd ? '' : 'bad'),
     has ? h('p', { class: 'mut' }, 'آخر تحديث: ' + S.x.rates[S.x.rates.length - 1].d) : null, btn('حدّث السعر', () => go('assets', null, { open: 'prices' }), 'alt mini'), nabdRateBtn(saveNabdRate, 'أكّد واحفظ')); }
+const qk = (i, t, f, sec) => h('button', { class: 'qk' + (sec ? ' sec' : ''), onclick: f }, h('span', { class: 'qi' }, ico(i)), h('span', {}, t));
+// خط اتجاه صافي الثروة عند نهايات الأشهر المحفوظة: شكل فقط بلا أي رقم، ويُخفى عند إخفاء الثروة
+function nwTrend() { try { if (privHidden()) return null; const sn = S.x.snaps || {}, ks = Object.keys(sn).sort().slice(-12), ys = ks.map(k => sn[k].nw).filter(v => typeof v === 'number'); if (ys.length < 3) return null;
+  const W = 300, H = 46, lo = Math.min(...ys), hi = Math.max(...ys), sx = i => 4 + i * (W - 8) / (ys.length - 1), sy = v => 5 + (hi - v) / ((hi - lo) || 1) * (H - 12), d = ys.map((v, i) => (i ? 'L' : 'M') + sx(i).toFixed(1) + ',' + sy(v).toFixed(1)).join(' ');
+  const el = h('div', { class: 'trend', 'aria-hidden': 'true' }); el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="direction:ltr"><path d="' + d + ' L' + sx(ys.length - 1).toFixed(1) + ',' + H + ' L4,' + H + ' Z" fill="currentColor" opacity=".12"/><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>'; return el; } catch (e) { return null; } }
 SCREENS.home = () => {
   if (!S.x.openDate) return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'أهلاً بك في فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), h('p', { class: 'mut' }, 'ثلاث خطوات فقط لتبدأ. لديك نسخة احتياطية؟ ⚙ ثم «النسخ الاحتياطي» لاستعادتها.'),
     h('div', { class: 'card' }, h('h2', {}, '1. ما تملكه اليوم'), h('p', { class: 'mut' }, 'نقد، فيزا، دولار، بنك. تبدأ منها.'), btn('ابدأ الخطوة 1', () => go('accts', 'open'))),
@@ -434,11 +445,11 @@ SCREENS.home = () => {
     h('div', { class: 'card dim' }, h('h2', {}, '3. الذهب والفضة'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: تبويب «الأصول» ثم «قطعة موجودة قبل البدء».')));
   const st = L.status(S);
   return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), (ADV = advItems(st), tickers(ADV)),
-    (lv => sect(ti('المتاح للصرف'), h('div', { class: 'big ' + lv[0], onclick: () => go('more', 'reports') }, money(st.avail)), h('p', { class: 'mut ' + lv[0] }, lv[1]), row(ti('السائل'), money(st.liq)),
-      row('دخل هذا الشهر', money(st.income)), row('مصروف هذا الشهر', money(st.expense)), row('المتبقي من دخل الشهر', sgn(st.left))))(availLevel(st)),
+    (lv => { const el = sect(ti('المتاح للصرف'), h('div', { class: 'big ' + lv[0], onclick: () => go('more', 'reports') }, money(st.avail)), h('p', { class: 'mut ' + lv[0] }, lv[1]), nwTrend(), row(ti('السائل'), money(st.liq)),
+      row('دخل هذا الشهر', money(st.income)), row('مصروف هذا الشهر', money(st.expense)), row('المتبقي من دخل الشهر', sgn(st.left))); el.classList.add('hero'); return el; })(availLevel(st)),
     advisorHome(ADV),
     rateBlock(),
-    sect('اختصارات', h('div', { class: 'quick' }, btn('+ مصروف', () => go('ops', null, { kind: 'expense' })), btn('+ دخل', () => go('ops', null, { kind: 'income' })), btn('الراتب', () => go('more', 'recurring'), 'alt'), btn('الذهب والفضة', () => go('assets'), 'alt'))),
+    sect('اختصارات', h('div', { class: 'qgrid' }, qk('minus', '+ مصروف', () => go('ops', null, { kind: 'expense' })), qk('plus', '+ دخل', () => go('ops', null, { kind: 'income' })), qk('salary', 'الراتب', () => go('more', 'recurring'), 1), qk('assets', 'الذهب والفضة', () => go('assets'), 1))),
     nwBlock(), acctList());
 };
 const monthsList = () => { const od = S.x.openDate; if (!od) return []; const out = []; let k = L.mkey(od); const last = L.mkey(L.today()); for (let i = 0; i < 1200 && k <= last; i++, k = L.addMonths(k + '-01', 1).slice(0, 7)) out.push(k); return out.reverse(); };
@@ -465,8 +476,25 @@ MORE.push(['reports', 'التقارير والحدود', () => { const ms = mont
     : h('div', {}, h('label', { class: 'f' }, h('span', {}, 'الشهر'), h('select', { onchange: e => go('more', 'reports', { mode: 'month', k: e.target.value }) }, ms.map(m => h('option', { value: m, selected: m === k }, m)))), monthView(k));
   return h('div', {}, stale.length ? sect('أشهر تغيّرت بعد إغلاقها', stale.map(m => h('div', { class: 'r' }, h('span', {}, m + ' (' + sgn(S.x.snaps[m].stale.diff) + ')'), btn('اعتمد', () => act(() => L.acceptSnap(S, m), 'اعتُمد'), 'mini')))) : null, tabs, body); }]);
 // ===== ⚙ الإعدادات والأدوات: الإعدادات والاختبار الذاتي =====
+// المظهر والثيم: يغيّران الألوان والزخارف فقط (يُحفظان على هذا الجهاز ولا يدخلان بياناتك المالية)
+function themeSect() { const cur = FTheme.get(), box = h('div', { class: 'themes' });
+  const M = [['time', 'حسب الوقت', 'فاتح نهاراً وداكن ليلاً', 'LD'], ['sync', 'متزامن مع الهاتف', 'يتبع إعداد الآيفون', 'LD'], ['light', 'فاتح', 'دائماً', 'L'], ['dark', 'داكن', 'دائماً', 'D']];
+  M.forEach(([k, n, d, pv]) => { const p = h('div', { class: 'tpv' }); pv.split('').forEach(c => p.append(h('i', { class: c }))); box.append(h('button', { class: 'tcard' + (k === cur ? ' on' : ''), 'aria-pressed': k === cur ? 'true' : 'false', onclick: () => { FTheme.set(k); render(); toast('تم تغيير المظهر: ' + n); } }, p, h('span', { class: 'tn' }, n), h('span', { class: 'td' }, d))); });
+  return sect('المظهر (فاتح / داكن)', box); }
+function skinSect() { const c = FTheme.cfg(), rot = c.mode === 'rotate', now = FTheme.resolve(FTheme.get()) === 'dark' ? 'D' : 'L', box = h('div', { class: 'skins' });
+  const dateAr = d => nWhen(L.iso(d));
+  FTheme.IDS.forEach(id => { const k = FTheme.SKINS[id], on = rot ? c.set.includes(id) : c.skin === id, half = m => { const v = k[m]; return h('i', { style: 'background:' + v[0] }, h('b', { style: 'background:' + v[1] }), h('u', { style: 'background:' + v[2] })); };
+    box.append(h('button', { class: 'sk' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', 'data-skin': id, onclick: () => {
+      if (!rot) { FTheme.setCfg({ skin: id }); render(); return toast('الثيم: ' + k.name); }
+      const has = c.set.includes(id); if (has && c.set.length <= 2) return toast('اختر ثيمين على الأقل للتناوب', true);
+      FTheme.setCfg({ set: has ? c.set.filter(x => x !== id) : c.set.concat(id) }); render(); } },
+      on ? h('span', { class: 'ck' }, '✓') : null, h('div', { class: 'sp' }, half('L'), half('D')), h('span', { class: 'sn' }, k.name), h('span', { class: 'sd' }, k.desc))); });
+  return sect('الثيم', seg([['fixed', 'ثيم ثابت'], ['rotate', 'تناوب تلقائي']], c.mode, k => { FTheme.setCfg({ mode: k }); render(); toast(k === 'rotate' ? 'التناوب: اختر ثيمين أو أكثر' : 'ثيم ثابت'); }),
+    h('p', { class: 'mut' }, rot ? 'اختر الثيمات التي تريدها في التناوب (اثنان على الأقل)، ويتبدّل الثيم تلقائياً حسب المدة.' : 'اختر الثيم الذي يظهر به التطبيق.'),
+    rot ? seg([['day', 'كل يوم'], ['week', 'كل أسبوع'], ['month', 'كل شهر']], c.every, k => { FTheme.setCfg({ every: k }); render(); }) : null, box,
+    rot ? h('p', { class: 'mut' }, 'ثيم اليوم: ' + FTheme.SKINS[FTheme.pick(c)].name + ' · التغيير القادم: ' + dateAr(FTheme.nextChange(c)) + '. الترتيب كما في القائمة.') : null); }
 MORE.push(['settings', 'الإعدادات', () => { const st = S.x.set;
-  return h('div', {}, savingsSettings(), sect('طريقة التقييم', h('p', { class: 'mut' }, 'محافظ: المعادن بقيمتها النظرية والدولار بسعر التقييم. بالتكلفة: لا أرباح غير محققة.'),
+  return h('div', {}, skinSect(), themeSect(), savingsSettings(), sect('طريقة التقييم', h('p', { class: 'mut' }, 'محافظ: المعادن بقيمتها النظرية والدولار بسعر التقييم. بالتكلفة: لا أرباح غير محققة.'),
     seg([['conservative', 'محافظ'], ['cost', 'بالتكلفة']], st.valuation, k => act(() => { st.valuation = k; }, 'تم'))),
     sect('الخصوصية: إخفاء الثروة', h('p', { class: 'mut' }, 'عند التفعيل تُخفى كل أرقامك المالية في كل الشاشات (••••••). زر 👁 يُظهرها 5 ثوانٍ ثم تُخفى تلقائياً، وتُخفى فوراً عند مغادرة التطبيق. أسعار السوق العامة تبقى ظاهرة. الإخفاء بصري فقط ولا يغيّر أي حساب.'),
       seg([['1', 'مفعّل'], ['0', 'متوقف']], st.hideAll ? '1' : '0', k => act(() => { st.hideAll = k === '1'; PRIV.until = 0; }, k === '1' ? 'أُخفيت الأرقام' : 'ظهرت الأرقام'))),
@@ -481,8 +509,8 @@ MORE.push(['selftest', 'الاختبار الذاتي', () => { const box = h('d
     btn('شغّل الاختبارات', async () => { out.replaceChildren('…'); const r3 = typeof FSelfTest3 !== 'undefined' ? await FSelfTest3.run() : { results: [] }; show(FSelfTest.run(), await FSelfTest2.run(), r3); }),
     btn('انسخ النتيجة', async () => { if (out._txt) { try { await navigator.clipboard.writeText(out._txt); toast('نُسخت النتيجة'); } catch (e) { toast('تعذّر النسخ', true); } } }, 'alt'), out)); return box; }]);
 SCREENS.more = (sub) => { const m = MORE.find(x => x[0] === sub);
-  if (m) { const par = PARENT[sub]; return h('div', {}, btn('رجوع', () => par ? go(par) : go('more'), 'alt mini'), h('h1', {}, m[1]), m[2]()); }
-  return h('div', {}, btn('رجوع', () => go('home'), 'alt mini'), h('h1', {}, '⚙ الإعدادات والأدوات'), sect('', MORE.filter(x => !PARENT[x[0]]).map(x => h('button', { class: 'lnk', onclick: () => go('more', x[0]) }, x[1])))); };
+  if (m) { const par = PARENT[sub]; return h('div', {}, backBtn(() => par ? go(par) : go('more')), h('h1', {}, m[1]), m[2]()); }
+  return h('div', {}, backBtn(() => go('home')), h('h1', {}, '⚙ الإعدادات والأدوات'), sect('', MORE.filter(x => !PARENT[x[0]]).map(x => h('button', { class: 'lnk', onclick: () => go('more', x[0]) }, x[1])))); };
 // ===== نبض السوق (f1-v3، المرحلة 1): الأسعار والاقتصاد — عرض فقط، لا يكتب شيئاً في بياناتك =====
 const NB = { tried: false };
 const nI = n => Math.round(n).toLocaleString('en-US'), nD = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -628,7 +656,7 @@ function buyScreen() {
   const out = r ? sect('النتيجة', h('div', { class: 'adv a-' + r.lv }, h('b', {}, r.verdict), h('div', {}, r.head)), r.notes.map(t => h('p', {}, '• ' + t)),
     r.facts.map(([k, v]) => row(k, typeof v === 'number' ? money(v) : String(v), typeof v === 'number' && v < 0 ? 'bad' : '')), r.extra.length ? h('div', {}, h('h2', {}, 'رأي حسب النوع'), r.extra.map(t => h('p', {}, t))) : null,
     h('p', { class: 'mut' }, 'حساب فقط: لا يُسجَّل شيء. إن قرّرت الشراء فسجّله من «العمليات» أو «الأصول».')) : null;
-  return h('div', {}, btn('رجوع', () => { NB.buy = null; NB.buyIn = null; go('insights'); }, 'alt mini'), h('h1', {}, 'هل أشتري؟'), h('p', { class: 'mut' }, 'اكتب المبلغ واختر الغرض، فيقيّم المستشار أثره على سيولتك ومدخراتك وأهدافك. للذهب والفضة اكتب السعر الذي يعرضه البائع ووزنه.'), sect('', f), out);
+  return h('div', {}, backBtn(() => { NB.buy = null; NB.buyIn = null; go('insights'); }), h('h1', {}, 'هل أشتري؟'), h('p', { class: 'mut' }, 'اكتب المبلغ واختر الغرض، فيقيّم المستشار أثره على سيولتك ومدخراتك وأهدافك. للذهب والفضة اكتب السعر الذي يعرضه البائع ووزنه.'), sect('', f), out);
 }
 SCREENS.insights = (sub) => {
   if (sub === 'buy') return buyScreen();
@@ -673,7 +701,7 @@ function advisorHome(items) { const top = items.slice(0, 3);
     items.length > 3 ? btn('كل الاستشارات (' + items.length + ')', () => go('insights', 'advisor'), 'alt mini') : btn('صفحة المستشار', () => go('insights', 'advisor'), 'alt mini')); }
 function advisorScreen() { const items = advItems(), all = FA.run(S, { verdict: advLoad().verdict, vchg: advLoad().vchg }, L.today()).items.filter(x => x.id !== 'PRIO').length, own = items.filter(x => !x.sys && x.id !== 'PRIO').length, hidden = S.x.set.hideAdvice ? 0 : Math.max(0, all - own);
   const G = [['red', 'يحتاج انتباهاً'], ['warn', 'للمراجعة'], ['ok', 'إنجازات'], ['info', 'معلومات']];
-  return h('div', {}, btn('رجوع', () => go('insights'), 'alt mini'), h('h1', {}, 'المستشار'),
+  return h('div', {}, backBtn(() => go('insights')), h('h1', {}, 'المستشار'),
     h('p', { class: 'mut' }, 'يقرأ أرقامك ونبض السوق ويعلّق. «رأيته» يخفي الاستشارة مدة، وتعود فوراً إن ساء الرقم. ليست استشارة مالية ملزمة.'), advHiddenNote(),
     items.length ? G.map(([lv, t]) => { const xs = items.filter(x => x.lv === lv); return xs.length ? sect(t + ' (' + xs.length + ')', xs.map(x => advCard(x, true))) : null; }) : h('p', {}, 'لا استشارات الآن. وضعك مستقر.'),
     hidden ? sect('', h('p', { class: 'mut' }, hidden + ' استشارة مخفية مؤقتاً.'), btn('أظهر المخفية', () => { const st = advLoad(); advSave({ verdict: st.verdict, vchg: st.vchg }); render(); }, 'alt mini')) : null); }
@@ -837,27 +865,31 @@ const HELP = [
 ];
 MORE.unshift(['help', 'التعليمات', () => h('div', { class: 'help' }, h('p', { class: 'mut' }, 'شرح مختصر لاستعمال التطبيق في الإصدار ' + VER + '. اضغط أي عنوان لفتحه.'),
   HELP.map(([t, ps], i) => sect('', fold(t, i === 0, ps.map(x => x.startsWith('• ') ? h('p', { class: 'hb-i' }, x.slice(2)) : h('p', {}, x)))))) ]);
-// ===== f1-v3.2: التنقل بالسحب يميناً ويساراً =====
-// الترتيب: أقسام كل تبويب ثم التبويب التالي. السحب لليمين = التالي (اتجاه القراءة العربية)، ولليسار = السابق.
-// لا يعمل فوق خانات الإدخال والرسوم والجداول، ولا إن كانت الحركة عمودية، ولا في النماذج الفرعية (شراء، بيع، تخصيص...) حتى لا تضيع مدخلاتك
-const PAGES = [{ tab: 'home' }, ...['expense', 'income', 'transfer', 'reconcile', 'fx'].map(kind => ({ tab: 'ops', p: { kind } })),
-  { tab: 'accts' }, { tab: 'more', sub: 'debts' }, { tab: 'more', sub: 'jams' }, { tab: 'more', sub: 'recurring' },
-  { tab: 'assets' }, { tab: 'more', sub: 'goals' }, ...['prices', 'analysis', 'econ', 'news'].map(t => ({ tab: 'nabd', p: { t } })),
-  { tab: 'insights' }, { tab: 'insights', sub: 'buy' }, { tab: 'insights', sub: 'advisor' }, { tab: 'more', sub: 'reports' }];
-function pageIdx() { const v = view, p = v.p || {}; if (p.id || p.mode || p.confirm || p.off) return -1;
-  if (v.tab === 'accts' && v.sub) return -1; if (v.tab === 'assets' && v.sub) return -1;
-  return PAGES.findIndex(x => x.tab === v.tab && (x.sub || null) === (v.sub || null) && (x.tab !== 'ops' || (p.kind || 'expense') === x.p.kind) && (x.tab !== 'nabd' || (p.t || 'prices') === x.p.t)); }
+// ===== التنقل بالسحب (f1-v4.3) =====
+// السحب الأفقي يبدّل بين البوابات الست فقط (الرئيسية، العمليات، أموالي، الأصول، نبض السوق، تحليلاتي) وهو على صفحتها الأولى.
+// داخل أي بوابة أو صفحة فرعية لا يوجد سحب بين الأقسام. السحب لليمين = البوابة التالية (اتجاه القراءة العربية)، ولليسار = السابقة.
+// الرجوع من أي صفحة فرعية: زر «رجوع» الكبير بسهم، أو السحب من حافة الشاشة نحو الداخل (كما في الآيفون).
+// لا يعمل فوق خانات الإدخال والرسوم والجداول، ولا إن كانت الحركة عمودية.
+const PAGES = ['home', 'ops', 'accts', 'assets', 'nabd', 'insights'].map(tab => ({ tab }));
+function pageIdx() { const v = view; if (v.sub) return -1; return PAGES.findIndex(x => x.tab === v.tab); }
 function swipeGo(dir) { const i = pageIdx(); if (i < 0) return false; const j = i + dir; if (j < 0 || j >= PAGES.length) return false;
-  const x = PAGES[j]; go(x.tab, x.sub || null, x.p ? { ...x.p } : {}); const a = $('#app'); a.classList.remove('sw-n', 'sw-p'); void a.offsetWidth; a.classList.add(dir > 0 ? 'sw-n' : 'sw-p'); return true; }
-(() => { let x0 = 0, y0 = 0, t0 = 0, on = false;
+  go(PAGES[j].tab, null, {}); const a = $('#app'); a.classList.remove('sw-n', 'sw-p'); void a.offsetWidth; a.classList.add(dir > 0 ? 'sw-n' : 'sw-p'); return true; }
+function swipeBack() { const b = $('#app .back'); if (!b) return false; b.click(); return true; }
+(() => { let x0 = 0, y0 = 0, t0 = 0, on = false, edge = 0; const EDGE = 28;
   const NO = 'input,select,textarea,svg,.chart,table,#eye,#tipbox,.noswipe';
-  document.addEventListener('touchstart', e => { on = false; if (e.touches.length !== 1 || !S || bootErr || !unlocked) return; const lk = $('#lock'); if (lk && !lk.hidden) return;
+  document.addEventListener('touchstart', e => { on = false; edge = 0; if (e.touches.length !== 1 || !S || bootErr || !unlocked) return; const lk = $('#lock'); if (lk && !lk.hidden) return;
+    const p = e.touches[0], atL = p.clientX < EDGE, atR = p.clientX > innerWidth - EDGE;
+    if (atL || atR) { if ($('#app .back')) { edge = atL ? 1 : -1; x0 = p.clientX; y0 = p.clientY; t0 = Date.now(); on = true; } return; } // الحافة: رجوع فقط
     const t = e.target; if (t && t.closest && t.closest(NO)) return; const ae = document.activeElement; if (ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return;
-    const p = e.touches[0]; if (p.clientX < 24 || p.clientX > innerWidth - 24) return; /* الحافة محجوزة لإيماءة الرجوع في المتصفح */ x0 = p.clientX; y0 = p.clientY; t0 = Date.now(); on = true; }, { passive: true });
+    x0 = p.clientX; y0 = p.clientY; t0 = Date.now(); on = true; }, { passive: true });
   document.addEventListener('touchmove', e => { if (on && e.touches.length !== 1) on = false; }, { passive: true });
   document.addEventListener('touchcancel', () => { on = false; }, { passive: true });
   document.addEventListener('touchend', e => { if (!on) return; on = false; const p = e.changedTouches[0], dx = p.clientX - x0, dy = p.clientY - y0;
+    if (edge) { if (Date.now() - t0 < 900 && dx * edge >= 64 && Math.abs(dx) > 1.5 * Math.abs(dy)) swipeBack(); return; }
     if (Date.now() - t0 > 800 || Math.abs(dx) < 70 || Math.abs(dx) < 2 * Math.abs(dy)) return; swipeGo(dx > 0 ? 1 : -1); }, { passive: true });
+  // iOS: يمنع تكبير الصفحة بالقرص أو بالنقر المزدوج
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(n => document.addEventListener(n, e => e.preventDefault(), { passive: false }));
+  document.addEventListener('dblclick', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
 })();
 // ===== الإطار: التنقل والإقلاع =====
 const TABS = [['home', 'الرئيسية'], ['ops', 'العمليات'], ['accts', 'أموالي'], ['assets', 'الأصول'], ['nabd', 'نبض السوق'], ['insights', 'تحليلاتي']];
@@ -876,7 +908,7 @@ function screenFail(e) {
   $('#app').replaceChildren(h('h1', {}, 'تعذّر عرض هذه الشاشة'),
     sect('', h('p', {}, 'بياناتك المحفوظة لم تتأثر. انتقل إلى تبويب آخر أو أعد المحاولة.'), msg ? h('p', { class: 'mut', style: 'direction:ltr;text-align:left;word-break:break-word' }, msg) : null,
       home ? btn('أعد التشغيل', () => location.reload()) : btn('العودة إلى الرئيسية', () => go('home')), btn('انسخ تفاصيل الخطأ', copyInfo(errInfo(e)), 'alt')));
-  try { $('#nav').replaceChildren(...TABS.map(([k, t]) => h('button', { class: k === navTab() ? 'on' : '', onclick: () => go(k) }, t))); } catch (x) {}
+  try { $('#nav').replaceChildren(...TABS.map(([k, t]) => h('button', { class: k === navTab() ? 'on' : '', onclick: () => go(k) }, ico(k), h('span', {}, t)))); } catch (x) {}
 }
 // أخطاء لم يلتقطها أي جزء (زر أو مهمة غير متزامنة): رسالة قصيرة، والشاشة كما هي. تُفعَّل بعد نجاح الإقلاع فقط
 let lastErr = { m: '', t: 0 };
@@ -885,7 +917,7 @@ function globalErr(e) { if (bootErr) return; const m = (e && (e.message || Strin
 function renderView() {
   const app = $('#app'); app.replaceChildren(); const scr = SCREENS[view.tab] || SCREENS.home, bb = S.x.openDate && view.sub !== 'backup' ? backupBanner() : null; app.append(...[integBanner(), bb, scr(view.sub, view.p)].filter(Boolean)); // append(null) في المتصفح يكتب النص null
   if (S.x.openDate && !sessionDismiss && FB.status(S).level === 'block') { sessionDismiss = true; if (confirm('مضى أكثر من 14 يوماً على آخر نسخة احتياطية. فتح صفحة النسخ الآن؟')) { view = { tab: 'more', sub: 'backup', p: {} }; return render(); } }
-  $('#nav').replaceChildren(...TABS.map(([k, t]) => h('button', { class: k === navTab() ? 'on' : '', onclick: () => go(k) }, t)));
+  $('#nav').replaceChildren(...TABS.map(([k, t]) => h('button', { class: k === navTab() ? 'on' : '', onclick: () => go(k) }, ico(k), h('span', {}, t))));
   privApply();
 }
 // شاشة خطأ الإقلاع: تحل محل «…» عند أي فشل. للقراءة فقط: لا تكتب في التخزين ولا تحذف شيئاً، إلا إذا اخترتَ الاستعادة بنفسك

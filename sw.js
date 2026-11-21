@@ -1,6 +1,6 @@
-const V = 'f1-v4.1', C = 'flousi-' + V; // ارفع V مع VER في index.html عند كل إصدار
+const V = 'f1-v4.3', C = 'flousi-' + V; // ارفع V مع VER في index.html عند كل إصدار
 const D = 'flousi-data'; // بيانات السوق: من الشبكة أولاً، والنسخة المحفوظة عند انقطاع الإنترنت (الحالة تُحسب في التطبيق فلا يُعرض القديم كحالي)
-const F = ['./', './index.html', './core.js', './engine.js', './logic.js', './store.js', './backup.js', './selftest.js', './selftest2.js', './nabd.js', './mind.js', './advisor.js', './selftest3.js', './app.js', './register.js', './diagnostics.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-512.png'];
+const F = ['./', './index.html', './core.js', './engine.js', './logic.js', './store.js', './backup.js', './selftest.js', './selftest2.js', './theme.js', './nabd.js', './mind.js', './advisor.js', './selftest3.js', './app.js', './register.js', './diagnostics.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-512.png'];
 // reload: يتجاوز مخزن المتصفح المؤقت فلا يُخزَّن ملف قديم. لا بيانات للمستخدم هنا إطلاقاً (هي في IndexedDB).
 self.addEventListener('install', e => e.waitUntil(caches.open(C).then(c => c.addAll(F.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x.startsWith('flousi-') && x !== C && x !== D).map(x => caches.delete(x)))).then(() => self.clients.claim())));
