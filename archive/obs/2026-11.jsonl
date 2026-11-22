@@ -38,3 +38,7 @@
 {"n":38,"id":"xag_usd","v":41.08,"t":"2026-11-22T06:14:08.000Z","at":"2026-11-22T06:14:15.344Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":39,"id":"xau_usd","v":3539,"t":"2026-11-22T07:30:09.000Z","at":"2026-11-22T07:30:18.229Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":40,"id":"xag_usd","v":41.08,"t":"2026-11-22T07:30:08.000Z","at":"2026-11-22T07:30:18.229Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":41,"id":"xau_usd","v":3539,"t":"2026-11-22T08:27:39.000Z","at":"2026-11-22T08:27:47.634Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":42,"id":"xag_usd","v":41.08,"t":"2026-11-22T08:27:38.000Z","at":"2026-11-22T08:27:47.634Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":43,"id":"usd_iqd_parallel","v":170000,"t":"2026-11-22T08:03:50.000Z","at":"2026-11-22T08:27:47.634Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/Dollar-stabilizes-in-Baghdad-rises-in-Erbil-7-0","kind":"obs"}
+{"n":44,"id":"usd_iqd_shops_baghdad","v":{"sell":170500,"buy":169500},"t":"2026-11-22T08:03:50.000Z","at":"2026-11-22T08:27:47.634Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/Dollar-stabilizes-in-Baghdad-rises-in-Erbil-7-0","kind":"obs"}
