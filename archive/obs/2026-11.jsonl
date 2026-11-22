@@ -50,3 +50,14 @@
 {"n":50,"id":"xag_usd","v":41.08,"t":"2026-11-22T11:16:39.000Z","at":"2026-11-22T11:16:41.367Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":51,"id":"xau_usd","v":3539,"t":"2026-11-22T11:59:39.000Z","at":"2026-11-22T11:59:42.813Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":52,"id":"xag_usd","v":41.08,"t":"2026-11-22T11:59:39.000Z","at":"2026-11-22T11:59:42.813Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":53,"id":"xau_usd","v":3539,"t":"2026-11-22T12:50:40.000Z","at":"2026-11-22T12:51:04.471Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":54,"id":"xag_usd","v":41.08,"t":"2026-11-22T12:50:39.000Z","at":"2026-11-22T12:51:04.471Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":55,"id":"ust10y","v":4.92,"t":"2026-11-20","at":"2026-11-22T12:51:04.471Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":56,"id":"ust2y","v":4.63,"t":"2026-11-20","at":"2026-11-22T12:51:04.471Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":57,"id":"real10y","v":2.77,"t":"2026-11-20","at":"2026-11-22T12:51:04.471Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":58,"id":"cpi_yoy","v":3.72,"t":"2026-09-01","at":"2026-11-22T12:51:04.471Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":59,"id":"fed_funds","v":3.88,"t":"2026-10-01","at":"2026-11-22T12:51:04.471Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":60,"id":"unrate","v":4.1,"t":"2026-10-01","at":"2026-11-22T12:51:04.471Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":61,"id":"gdp","v":33010.036,"t":"2026-07-01","at":"2026-11-22T12:51:04.471Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":62,"id":"cot_gold","v":{"net_noncommercial":166132,"change_week":-23975,"open_interest":407834},"t":"2026-11-17","at":"2026-11-22T12:51:04.471Z","src":"CFTC Commitments of Traders","url":"https://www.cftc.gov","kind":"obs"}
+{"n":63,"id":"cot_silver","v":{"net_noncommercial":18291,"change_week":-1073,"open_interest":122945},"t":"2026-11-17","at":"2026-11-22T12:51:04.471Z","src":"CFTC Commitments of Traders","url":"https://www.cftc.gov","kind":"obs"}
