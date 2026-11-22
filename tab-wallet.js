@@ -51,7 +51,7 @@ function wAdd() { const f = buildForm([{ k: 'name', l: 'اسم الحساب', t:
 function walletMain() {
   const A = wAccts(), V = wVals(), p = L.panel(S), ex = exclInfo();
   const liq = wSort(A.filter(a => a.kind === 'asset' && a.liquid)), oth = wSort(A.filter(a => a.kind === 'asset' && !a.liquid)), lia = wSort(A.filter(a => a.kind === 'liab'));
-  const own = [fOn('metals') && assetsOn() ? goldCard() : null, fOn('stocks') && assetsOn() ? stocksCard() : null, ...oth.map(a => wCard(a, V))].filter(Boolean);
+  const own = [fOn('metals') && assetsOn() ? goldCard() : null, fOn('stocks') && assetsOn() && FSK.view(S).length ? stocksCard() : null, ...oth.map(a => wCard(a, V))].filter(Boolean);
   return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'أموالي'), h('small', { class: 'mut' }, ti('صافي الثروة') , ' ', h('b', {}, money(p.nw - ex.amt)))),
     wRow('المال السائل', liq.map(a => wCard(a, V))), own.length ? h('div', { class: 'wsec' }, h('h2', {}, 'ما تملكه'), h('div', { class: 'wown' }, own)) : null,
     wRow('الالتزامات', lia.map(a => wCard(a, V))), wTiles(), wAdd(),
@@ -111,7 +111,8 @@ const pieceIco = p => p.form === 'bullion' ? '▬' : p.metal === 'S' ? '◇' : '
 function goldBox() { const g = goldSummary(), sold = L.pieces(S).filter(p => !p.held && S.tx.some(t => t.type === 'sell_metal' && t.meta && t.meta.piece === p.id && !t.voided));
   return h('div', {}, backBtn(() => go('accts')), h('h1', {}, 'الصندوق الذهبي'),
     sect('', g.held.length ? [h('div', { class: 'big' }, money(g.now != null ? g.now : g.theo)), h('p', { class: 'mut' }, g.now != null ? 'بسعر السوق الآن (بلا مصنعية)' : 'بالأسعار المعتمدة'),
-      g.now != null ? row('بالأسعار المعتمدة', money(g.theo)) : null, row('التكلفة', money(g.cost)), row(ti('الفرق (غير محقق)', 'غير محقق'), sgn(g.unreal), g.unreal < 0 ? 'bad' : ''),
+      row('التكلفة', money(g.cost)), g.now != null ? row('الفرق عن التكلفة بسعر السوق', sgn(g.now - g.cost), g.now < g.cost ? 'bad' : '') : null,
+      g.now != null ? row('بأسعارك المعتمدة (المحتسبة في ثروتك)', money(g.theo)) : null, row(ti(g.now != null ? 'الفرق بأسعارك المعتمدة (غير محقق)' : 'الفرق (غير محقق)', 'غير محقق'), sgn(g.unreal), g.unreal < 0 ? 'bad' : ''),
       Object.entries(g.by).map(([k, mg]) => row(k, gramsOf(mg)))] : emptyState('🪙', 'الصندوق فارغ', 'سجّل قطعة اشتريتها، أو قطعة كانت عندك قبل البدء.'),
       h('div', { class: 'quick' }, btn('اشترِ', () => go('assets', 'buy')), btn('كانت عندي قبل البدء', () => go('assets', 'old'), 'alt'), btn('سجل الذهب', () => go('accts', 'goldlog'), 'alt'))),
     g.held.length ? sect('قطعك', h('div', { class: 'ptiles' }, g.held.map(p => h('button', { type: 'button', class: 'ptile', 'data-piece': p.id, onclick: () => go('accts', 'piece', { id: p.id }) },

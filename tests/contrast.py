@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# اختبار التباين (f1-v4.13): يفحص وضوح ألوان الكتابة على خلفياتها في كل ثيم بالوضعين الفاتح والداكن (12 حالة)، بمعيار WCAG AA.
+# اختبار التباين (f1-v4.13، وفي f1-v4.15 يقيس كل نقاط التدرّج): يفحص وضوح ألوان الكتابة على خلفياتها في كل ثيم بالوضعين الفاتح والداكن (12 حالة)، بمعيار WCAG AA.
 # f1-v4.13: وضع تقرير (يطبع المشكلات ولا يفشل). من f1-v4.14 يصبح شرطاً: --strict يجعل أي مشكلة فشلاً.
 import re, sys
 D = sys.argv[1]; STRICT = '--strict' in sys.argv
@@ -21,7 +21,7 @@ for k, v in B.items():
     s = re.search(r'skin=(\w+)\]\[data-theme=(\w+)', k)
     if s: sets[s.group(1) + '-' + s.group(2)] = {**(root if s.group(2) == 'light' else dark), **v}
 PAIRS = [('ink', 'bar', 4.5), ('mute', 'bar', 4.5), ('acc', 'bar', 4.5), ('ok', 'bar', 4.5), ('bad', 'bar', 4.5), ('wait', 'bar', 4.5), ('btnt', 'btn', 4.5), ('ink', 'bg', 4.5), ('mute', 'soft', 4.5), ('acc', 'soft', 4.5),
-         ('herot', 'hero', 4.5), ('hmute', 'hero', 4.5), ('hok', 'hero', 3), ('hbad', 'hero', 3), ('hwait', 'hero', 3), ('navfg', 'navbg', 4.5), ('navonfg', 'navonbg', 4.5)]
+         ('herot', 'hero', 4.5), ('hmute', 'hero', 4.5), ('hok', 'hero', 4.5), ('hbad', 'hero', 4.5), ('hwait', 'hero', 3), ('navfg', 'navbg', 4.5), ('navonfg', 'navonbg', 4.5)]
 FIXED = [('#C99A2E', 'hero', 4.5, 'ذهب بطاقة الشهر (لون ثابت)')]  # ألوان مكتوبة مباشرة في CSS تُفحص على خلفية كل ثيم
 LITERAL = [(r'\.c-na\{background:(#\w{6});color:(#\w{6})\}', 'شارة «غير متاح»'), (r'\.c-cur\{background:(#\w{6});color:(#\w{6})\}', 'شارة «حالي»'), (r'\.c-old\{background:(#\w{6});color:(#\w{6})\}', 'شارة «قديم»'),
   (r'\.rate-bad\{background:(#\w{6})!important;color:(#\w{6})!important\}', 'سعر قديم'), (r'button\.kb\.k-obs\{background:(#\w{6});color:(#\w{6})\}', 'شارة مرصود'), (r'button\.kb\.k-calc\{background:(#\w{6});color:(#\w{6})\}', 'شارة محسوب'),
@@ -34,8 +34,13 @@ for name, V in sets.items():
         return (blend(c, a, under) if a < 1 else c) if c else None
     for f, b, th in PAIRS:
         if f not in V or b not in V: continue
-        bc = get(b, bg); fc = get(f, bc)
-        if bc and fc and cr(fc, bc) < th: bad.append((name, f, b, round(cr(fc, bc), 2), th))
+        # f1-v4.15: الخلفية المتدرجة تُفحص عند كل نقطة لون فيها (الأسوأ يحكم)، لا عند الطرف الأول فقط
+        stops = re.findall(r'#[0-9a-fA-F]{6}|rgba?\([^)]*\)', V[b]) if 'gradient' in V[b] else [b]
+        worst = None
+        for st in stops:
+            bc = get(st, bg); fc = get(f, bc)
+            if bc and fc and (worst is None or cr(fc, bc) < worst): worst = cr(fc, bc)
+        if worst is not None and worst < th: bad.append((name, f, b, round(worst, 2), th))
     for f, b, th, label in FIXED:
         if f in css:
             bc = get(b, bg); fc = col(f)[0]

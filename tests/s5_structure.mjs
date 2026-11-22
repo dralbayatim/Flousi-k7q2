@@ -7,7 +7,7 @@ try {
   const { page, ev, W, txt } = A;
   await ev(() => { localStorage.removeItem('flousi-coach'); }); await A.boot(); await seed(ev); await ev(() => go('home')); await W(900);
   ok(await ev(() => !!document.getElementById('coach')), 'coach shows on opening home');
-  ok(await ev(() => { const n = document.querySelectorAll('#coach .cbub').length + document.querySelectorAll('#coach .cbelow li').length; return n >= 3 && n <= 5; }), 'coach 3–5 tips (visible + below)');
+  ok(await ev(() => { const s = (document.querySelector('#coach .cfoot small') || {}).textContent || '', m = s.match(/1 من (\d)/); return document.querySelectorAll('#coach .cbub').length === 1 && m && +m[1] >= 3 && +m[1] <= 5; }), 'coach stepper: one tip, 3–5 steps (v4.15)');
   await page.mouse.click(200, 300); await W(); ok(await ev(() => !document.getElementById('coach')), 'tap anywhere closes');
   await ev(() => go('ops')); await W(900); ok(await ev(() => !!document.getElementById('coach')), 'coach on ops');
   await page.click('#coach button:has-text("لا تُظهر شروح هذه الشاشة مجدداً")'); await W();
@@ -47,9 +47,9 @@ try {
   ok(!(await txt()).includes('إنجازاتي'), 'badges row moved out of settings'); ok((await txt()).includes('الشروح على الشاشات'), 'coach row in settings');
   await ev(() => act(() => { delete S.x.set.start; }));
   // التعليمات: كل الأقسام تُفتح بلا خطأ
-  await ev(() => go('more', 'help')); await W(); const ht = await txt(); ok(ht.includes('التبويبات الخمسة') && ht.includes('«يهمّك الآن» في الرئيسية') && ht.includes('طابق الرصيد و«الخُردة»') && ht.includes('المستشار وقراراتي') && ht.includes('f1-v4.14'), 'help sections');
+  await ev(() => go('more', 'help')); await W(); const ht = await txt(); ok(ht.includes('التبويبات الخمسة') && ht.includes('«يهمّك الآن» في الرئيسية') && ht.includes('طابق الرصيد و«الخُردة»') && ht.includes('المستشار وقراراتي') && ht.includes('f1-v4.15'), 'help sections');
   // الإصدار
-  eq(await ev(() => VER), 'f1-v4.14', 'version');
+  eq(await ev(() => VER), 'f1-v4.15', 'version');
   for (const tb of ['home', 'ops', 'accts', 'nabd', 'insights']) { await ev(x => go(x), tb); await W(); ok(!(await txt()).includes('تعذّر عرض'), 'tab renders ' + tb); }
   eq((await ev(() => L.integrity(S))).length, 0, 'integrity'); ok(B.errs.length === 0, 'no page errors', B.errs.slice(0, 3));
 } catch (e) { ok(false, 'CRASH ' + (e.stack || e)); }

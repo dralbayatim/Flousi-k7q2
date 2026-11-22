@@ -117,7 +117,7 @@ const FL = {};
     ks.forEach(k => { if (!Number.isSafeInteger(o[k]) || o[k] <= 0) throw new Error('سعر الأونصة غير صالح'); });
     const e = S.x.prices.find(x => x.d === d) || (S.x.prices.push({ d, G: null, S: null }), S.x.prices[S.x.prices.length - 1]); ks.forEach(k => { e[k] = o[k]; });
     S.x.prices.sort((a, b) => a.d < b.d ? -1 : 1); S.price = FL.priceAt(S, '9999-12-31'); }
-  const needRate = S => { if (!S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً (تبويب الأصول)'); };
+  const needRate = S => { if (!S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً («نبض السوق» ← «أسعارك المعتمدة»)'); };
   const needPrice = (S, metal) => { if (!S.x.prices.some(x => x[metal] != null)) throw new Error('أدخل سعر أونصة ' + (metal === 'G' ? 'الذهب' : 'الفضة') + ' أولاً'); };
   function buyPiece(S, o) { // شراء قطعة بدينار. السعر والصرف المستخدمان يُحفظان مع العملية فلا يتغيران لاحقاً
     const to = o.metal === 'G' ? 'gold' : 'silver', fa = S.acc[o.from]; if (!fa || fa.cur !== 'IQD') throw new Error('ادفع من حساب بالدينار (حوّل الدولار أولاً)');
@@ -206,7 +206,7 @@ const FL = {};
   const goalIqd = (S, id) => S.goals.filter(x => x.name === id).reduce((s, x) => s + x.amount, 0);
   function goalNew(S, o) { const name = need(o.name, 'اسم الهدف مطلوب'); posInt(o.target, 'المبلغ المستهدف يجب أن يكون موجباً'); date(o.targetDate); if (o.targetDate < FL.today()) throw new Error('موعد الهدف في الماضي');
     if (![1, 2, 3].includes(o.priority)) throw new Error('الأولوية من 1 إلى 3'); if (o.kind !== 'short' && o.kind !== 'long') throw new Error('نوع الهدف غير صالح');
-    const cur = o.cur || 'IQD'; if (cur !== 'IQD' && cur !== 'USD') throw new Error('عملة غير صالحة'); if (cur === 'USD' && !S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً (تبويب «الأصول»)');
+    const cur = o.cur || 'IQD'; if (cur !== 'IQD' && cur !== 'USD') throw new Error('عملة غير صالحة'); if (cur === 'USD' && !S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً («نبض السوق» ← «أسعارك المعتمدة»)');
     const id = 'g' + S.x.seq++, g = { id, name, target: o.target, targetDate: o.targetDate, priority: o.priority, kind: o.kind, created: FL.today(), skipped: 0 }; if (cur === 'USD') g.cur = 'USD'; S.x.goalsDef.push(g); return id; }
   function goalMove(S, o) { const g = S.x.goalsDef.find(x => x.id === o.id); if (!g) throw new Error('هدف غير معروف'); date(o.date);
     if (isUsdGoal(g)) return goalMoveUsd(S, g, o);
@@ -217,7 +217,7 @@ const FL = {};
   function goalMoveUsd(S, g, o) { if (!Number.isSafeInteger(o.amount) || o.amount <= 0) throw new Error('المبلغ يجب أن يكون موجباً'); const last = () => { S.goals[S.goals.length - 1].usd = o.release ? -o.amount : o.amount; };
     if (o.release) { const u = goalAlloc(S, g.id), iq = goalIqd(S, g.id); if (o.amount > u) throw new Error('المخصص للهدف (' + FL.fmtUsd(u) + ') أقل من المبلغ');
       const n = o.amount === u ? iq : Number(E.rd(BigInt(iq) * BigInt(o.amount), BigInt(u))); if (n > 0) E.goalRelease(S, g.id, n, o.date); else E.goalAlloc(S, g.id, 0, o.date); return last(); }
-    if (!S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً (تبويب «الأصول»)'); const iq = E.usdToIqd(o.amount, FL.rateAt(S, o.date)), avail = E.snap(S).avail;
+    if (!S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً («نبض السوق» ← «أسعارك المعتمدة»)'); const iq = E.usdToIqd(o.amount, FL.rateAt(S, o.date)), avail = E.snap(S).avail;
     if (iq > avail) throw new Error('المتاح للصرف (' + FL.fmt(avail) + ') أقل من ' + FL.fmt(iq) + ' (ما يعادل ' + FL.fmtUsd(o.amount) + ')'); E.goalAlloc(S, g.id, iq, o.date); return last(); }
   function goalSkip(S, id) { const g = S.x.goalsDef.find(x => x.id === id); if (!g) throw new Error('هدف غير معروف'); g.targetDate = FL.addMonths(g.targetDate, 1); g.skipped++; }
   function goalView(S, today = FL.today()) {

@@ -137,7 +137,7 @@ function decisionCard() { let sf; try { sf = FD.safe(S); } catch (e) { return nu
     h('div', { class: 'dnote ' + d.lv }, h('b', { class: LVC[d.lv] }, d.t), d.a ? h('p', {}, d.a) : null), how);
   el.classList.add('dcard'); el.dataset.lv = d.lv; return el; }
 function wealthStrip() { const p = L.panel(S), ex = exclInfo(), shown = p.nw - ex.amt, N = FD.wealthNotes(S), dm = p.dMonth;
-  const el = sect(ti('صافي الثروة'), h('div', { class: 'r wbig' }, animNum(h('b', {}), shown, 'nw', money), dm == null ? null : h('span', { class: dm < 0 ? 'badc' : 'okc' }, (dm > 0 ? '▲ +' : dm < 0 ? '▼ ' : '') + L.fmt(dm) + ' هذا الشهر')),
+  const el = sect(ti('صافي الثروة'), h('div', { class: 'r wbig' }, animNum(h('b', {}), shown, 'nw', money), !dm ? null : h('span', { class: dm < 0 ? 'badc' : 'okc' }, (dm > 0 ? '▲ +' : dm < 0 ? '▼ ' : '') + L.fmt(dm) + ' هذا الشهر')),
     ex.names.length ? h('p', { class: 'mut' }, 'دون: ' + ex.names.join('، ')) : null, monthsShield(), N.filter(n => FM.savings(S) || !n.t.startsWith('سيولتك تكفي')).map(n => h('p', { class: 'wn ' + (LVC[n.lv] || '') }, (n.lv === 'warn' ? '⚠ ' : n.lv === 'ok' ? '✓ ' : 'ℹ ') + n.t)));
   el.classList.add('wstrip'); return el; }
 function monthCard() { let m; try { m = FD.monthSummary(S); } catch (e) { return null; } if (!m) return null; const f = m.forecast, dec = m.decision;
@@ -352,7 +352,7 @@ function txRow(t, r) { return h('div', { class: 'tx' + (t.voided || t.reversal ?
   h('div', { class: 'r' }, h('span', {}, h('span', { class: 'cat' }, catIco(t.label)), t.date + ' · ' + t.label), h('b', {}, money(t.amount) + (t.usd ? ' (' + L.fmtUsd(t.usd) + ')' : ''))),
   h('div', { class: 'mut' }, (t.from ? t.from + ' ← ' : '') + t.to + (t.note ? ' — ' + t.note : '') + (t.voided ? ' (معكوسة)' : '')),
   (!t.voided && !t.reversal && t.label !== 'رصيد افتتاحي' && t.label !== 'تصحيح افتتاحي') ? h('div', { class: 'quick' }, editable(r) ? btn('تعديل', () => go('ops', 'edit', { id: t.id }), 'mini alt') : null,
-    btn('تراجع', () => { if (confirm('عكس هذه العملية؟ تبقى ظاهرة في السجل.')) act(() => { const o = S.tx.find(x => x.id === t.id); L.undo(S, t.id, L.today() > o.date ? L.today() : o.date); }, 'عُكست العملية'); }, 'mini')) : null); }
+    btn('تراجع', () => { if (confirm('عكس هذه العملية؟ تبقى ظاهرة في السجل.')) act(() => { const o = S.tx.find(x => x.id === t.id); L.undo(S, t.id, L.today() > o.date ? L.today() : o.date); }, 'عُكست العملية'); }, 'mini alt')) : null); }
 function txList2() { const all = L.listTx(S), raw = new Map(S.tx.map(t => [t.id, t])), list = h('div', {}), sum = h('p', { class: 'mut' });
   if (!all.filter(t => t.label !== 'رصيد افتتاحي').length) return sect('العمليات', emptyState('🧾', 'لا عمليات بعد', 'سجّل أول مصروف من الأعلى، وستظهر عملياتك هنا مع البحث والتصفية.'));
   const q = h('input', { type: 'search', placeholder: '🔍 ابحث: ملاحظة، مبلغ، فئة، حساب', value: TXF.q, autocomplete: 'off', 'aria-label': 'بحث في العمليات' });
@@ -400,7 +400,7 @@ const addWish = (name, amount, type) => act(() => { if (!String(name || '').trim
 const wishSet = (id, v) => act(() => { S.x.wish = wishes().map(w => w.id === id ? { ...w, done: v, at: L.today() } : w); }, v === 'skip' ? 'أحسنت: وفّرت بالتريث' : v === 'buy' ? 'سجّل المصروف الآن' : 'حُذف');
 const leftTxt = ms => { const h2 = Math.ceil(ms / 3600e3); return h2 >= 1 ? 'يُسأل بعد ' + h2 + ' ساعة' : 'يُسأل بعد دقائق'; };
 function wishBanner() { const r = wishReady(); if (!r.length) return null;
-  return h('div', { class: 'ticker nudge', onclick: () => go('more', 'wish') }, '🛍 مرّ يوم على «' + r[0].name + '» (' + money(r[0].amount) + '). ما زلت تريده؟' + (r.length > 1 ? ' و' + (r.length - 1) + ' غيره' : '') + ' ›'); }
+  return h('div', { class: 'ticker nudge', onclick: () => goFrom('more', 'wish') }, '🛍 مرّ يوم على «' + r[0].name + '» (' + money(r[0].amount) + '). ما زلت تريده؟' + (r.length > 1 ? ' و' + (r.length - 1) + ' غيره' : '') + ' ›'); }
 MORE.push(['wish', 'قائمة الرغبات', () => { const W = wishes(), pend = W.filter(w => !w.done), ready = pend.filter(w => Date.now() - w.t >= WAIT_MS), wait = pend.filter(w => Date.now() - w.t < WAIT_MS), past = W.filter(w => w.done).slice(-10).reverse(), sv = wishSaved();
   const buy = w => { QX.amt = String(w.amount); QX.note = w.name; QX.picked = false; wishSet(w.id, 'buy').then(() => go('ops', null, { kind: 'expense' })); };
   const f = buildForm([{ k: 'name', l: 'ماذا تريد أن تشتري؟', t: 'text', req: true }, { k: 'amount', l: 'سعره (د.ع)', t: 'num', req: true }], v => addWish(v.name, L.parseAmount(v.amount, 0)), 'انتظر يوماً');
@@ -408,7 +408,7 @@ MORE.push(['wish', 'قائمة الرغبات', () => { const W = wishes(), pend
     ready.length ? sect('حان وقت القرار', ready.map(w => h('div', { class: 'wish rdy' }, row(w.name, money(w.amount)), h('p', { class: 'mut' }, 'ما زلت تريده بعد يوم كامل؟'),
       h('div', { class: 'quick' }, btn('نعم، سأشتريه', () => buy(w), 'mini'), btn('لا، تراجعت', () => wishSet(w.id, 'skip'), 'mini alt'))))) : null,
     wait.length ? sect('في الانتظار', wait.map(w => h('div', { class: 'wish' }, row(w.name, money(w.amount)), h('div', { class: 'r' }, h('small', { class: 'mut' }, '⏳ ' + leftTxt(WAIT_MS - (Date.now() - w.t))), btn('احذف', () => wishSet(w.id, 'del'), 'mini alt'))))) : null,
-    !pend.length ? emptyState('🛍', 'لا رغبات منتظرة', 'قبل أي شراء غير ضروري أضفه هنا، أو اضغط «انتظر يوماً» في «هل أشتري؟».') : null,
+    !pend.length ? emptyState('🛍', 'لا رغبات منتظرة', 'قبل أي شراء غير ضروري أضفه هنا، أو اضغط «انتظر يوماً» في «قبل أن تصرف».') : null,
     sect('رغبة جديدة', f), past.length ? sect('القرارات السابقة', past.filter(w => w.done !== 'del').map(w => row(w.name + ' · ' + (w.done === 'skip' ? 'تراجعت ✓' : 'اشتريت'), money(w.amount), w.done === 'skip' ? 'okc' : ''))) : null); }]);
 // ---- يوم الراتب: ادفع لنفسك أولاً ← أقساط الأهداف ← الفواتير الثابتة ← ورقة الراتب ----
 function pyfDone() { const p = view.p; if (p.flow) go('more', 'payday', { salary: p.salary, acct: p.acct, date: p.date, step: 2 }); else go('home'); }

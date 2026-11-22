@@ -2,12 +2,13 @@
 // ===== f1-v4.14: «تحليلاتي» — خط ثروتك، قبل أن تصرف، شهري، المستشار الموحّد، قراراتي =====
 // كل ما هنا يُحسب من سجلك ولا يُخزَّن، عدا «قراراتي» (S.x.set.decs: سبب اختياري وتقييمك، لا يمس العمليات ولا القيود).
 // ---- خط ثروتك: صافي الثروة نهاية كل شهر مقسّماً، بنفس طريقة المحرك (snapAt) حتى يطابق مجموعُه صافيَ الثروة المحفوظ ----
-const WCOMP = [['cash', 'نقد وحسابات', 'var(--acc)'], ['usd', 'دولار', '#3b82c4'], ['metals', 'ذهب وفضة', '#c9a227'], ['stocks', 'أسهم', '#7b5ea7'], ['other', 'عقار وأصول أخرى', '#3a9d7a']];
+const WCOMP = [['cash', 'نقد وحسابات', 'var(--acc)'], ['usd', 'دولار', '#3b82c4'], ['metals', 'ذهب وفضة', '#c9a227'], ['stocks', 'أسهم', '#7b5ea7'], ['other', 'عقار وأصول أخرى', '#9c6b4e']];
 const valsAtD = d => { const o = {}; (S.x.vals || []).forEach(v => { if (v.d <= d) o[v.a] = v.v; }); return o; }; // مثل valsAt في logic.js (غير مُصدَّرة)
 function wealthAt(d) { const S2 = { acc: S.acc, tx: S.tx.filter(t => t.date <= d), post: S.post.filter(p => p.date <= d), pieces: S.pieces, goals: [], rate: L.rateAt(S, d) || S.rate, price: L.priceAt(S, d) || S.price, vals: valsAtD(d) };
-  const ok = new Set(S2.tx.filter(t => !t.voided && !t.reverses).map(t => t.id)), A = S2.post.filter(p => ok.has(p.tx)), dv = E.derive(S2), cost = S.x.set.valuation === 'cost';
-  const out = { cash: 0, usd: 0, metals: 0, stocks: 0, other: 0, liab: 0 };
-  for (const id in S.acc) { const a = S.acc[id], ps = A.filter(p => p.a === id); if (!ps.length) continue; const nat = ps.reduce((s, p) => s + p.n, 0), iq = ps.reduce((s, p) => s + p.iqd, 0);
+  const ok = new Set(S2.tx.filter(t => !t.voided && !t.reverses).map(t => t.id)), dv = E.derive(S2), cost = S.x.set.valuation === 'cost';
+  const out = { cash: 0, usd: 0, metals: 0, stocks: 0, other: 0, liab: 0 }, G = {}; // f1-v4.15: تجميع القيود حسب الحساب في مرور واحد (نفس الجمع وبنفس الترتيب)
+  for (const p of S2.post) if (ok.has(p.tx)) { const g = G[p.a] || (G[p.a] = { n: 0, iqd: 0 }); g.n += p.n; g.iqd += p.iqd; }
+  for (const id in S.acc) { const a = S.acc[id], g = G[id]; if (!g) continue; const nat = g.n, iq = g.iqd;
     if (a.kind === 'asset') {
       if (a.cur === 'USD') out.usd += cost ? Number(dv.usd[id] ? dv.usd[id].C : 0n) : E.usdToIqd(nat, S2.rate);
       else if (a.metal) { if (cost) out.metals += iq; }
@@ -15,8 +16,12 @@ function wealthAt(d) { const S2 = { acc: S.acc, tx: S.tx.filter(t => t.date <= d
     } else if (a.kind === 'liab') out.liab += -iq; }
   if (!cost) for (const pid in S.pieces) { const p = S.pieces[pid]; if (E.pieceCost(S2, pid) !== 0) out.metals += E.metalIqd(p.mg, p.fine, S2.price[p.metal], S2.rate); }
   out.nw = out.cash + out.usd + out.metals + out.stocks + out.other - out.liab; return out; }
-function wealthSeries(n) { const od = S.x.openDate; if (!od) return []; const out = [], last = L.mkey(L.today()); let k = L.mkey(od);
-  for (let i = 0; i < 1200 && k <= last; i++, k = L.addMonths(k + '-01', 1).slice(0, 7)) { const d = k === last ? L.today() : L.monthEnd(k); out.push({ k, d, ...wealthAt(d) }); } return out.slice(-n); }
+// f1-v4.15: تُحسب الأشهر المطلوبة فقط (لا كل الأشهر ثم القص)، والأشهر المكتملة تُحفظ في الذاكرة حتى أي تعديل (DGEN)
+let WS_MEMO = { g: -1, v: null, m: {} };
+function wealthSeries(n) { const od = S.x.openDate; if (!od) return []; const out = [], last = L.mkey(L.today()), from = L.addMonths(last + '-01', -(n - 1)).slice(0, 7); let k = L.mkey(od); if (from > k) k = from;
+  if (WS_MEMO.g !== DGEN || WS_MEMO.v !== S.x.set.valuation) WS_MEMO = { g: DGEN, v: S.x.set.valuation, m: {} };
+  for (let i = 0; i < 1200 && k <= last; i++, k = L.addMonths(k + '-01', 1).slice(0, 7)) { const d = k === last ? L.today() : L.monthEnd(k);
+    let w = k < last ? WS_MEMO.m[k] : null; if (!w) { w = { k, d, ...wealthAt(d) }; if (k < last) WS_MEMO.m[k] = w; } out.push(w); } return out.slice(-n); }
 function wealthLine(per) { const ms = wealthSeries(per === 'all' ? 1200 : per === 'm' ? 2 : 12); if (!ms.length) return null;
   const sel = ms.find(m => m.k === view.p.wm) || ms[ms.length - 1], prev = ms[ms.indexOf(sel) - 1], W = 320, H = 130, top = Math.max(1, ...ms.map(m => WCOMP.reduce((s, [k]) => s + Math.max(0, m[k]), 0))), bw = Math.max(6, Math.min(34, (W - 10) / ms.length - 4));
   const svg = h('div', { class: 'wl noswipe' }); let g = '';
@@ -36,7 +41,7 @@ const stripHead = el => { const b = el.querySelector(':scope > .back'), t = el.q
 function beforeSpend(mode) { const m = mode === 'whatif' ? 'whatif' : 'buy';
   return h('div', {}, backBtn(() => go('insights')), h('h1', {}, 'قبل أن تصرف'), h('p', { class: 'mut' }, 'اكتب المبلغ قبل أن تقرر، فترى أثره على شهرك وأهدافك.'),
     seg([['buy', 'شراء الآن'], ['whatif', 'التزام أو تغيّر في الدخل']], m, k => go('insights', k)), stripHead(m === 'buy' ? buyScreen() : whatIfScreen()),
-    sect('', btn('قائمة الرغبات (انتظر يوماً)', () => go('more', 'wish'), 'alt mini'))); }
+    sect('', btn('قائمة الرغبات (انتظر يوماً)', () => goFrom('more', 'wish'), 'alt mini'))); }
 // ---- «شهري»: بطاقة الشهر + التفاصيل والسنوي والحدود + الخُردة + الإنجازات ----
 function khurda(k) { let s = 0, u = 0; S.tx.forEach(t => { if (t.voided || t.reverses || t.type !== 'reconcile' || t.date.slice(0, 7) !== k) return; postsOf(t.id).forEach(p => { if (S.acc[p.a] && S.acc[p.a].kind === 'recon') { if (p.iqd > 0) s += p.iqd; else u -= p.iqd; } }); }); return { s, u }; }
 function shahri() { const ms = monthsList(), p = view.p, tab = p.tab || 'card', k = p.k && ms.includes(p.k) ? p.k : ms[0] || L.mkey(L.today()), y = p.y || +L.today().slice(0, 4);
@@ -50,7 +55,7 @@ function shahri() { const ms = monthsList(), p = view.p, tab = p.tab || 'card', 
     : stripHead(wrapScreen(p.k));
   return h('div', {}, backBtn(() => go('insights')), h('h1', {}, 'شهري'), stale.length ? sect('أشهر تغيّرت بعد إغلاقها', stale.map(m => h('div', { class: 'r' }, h('span', {}, m + ' (' + sgn(S.x.snaps[m].stale.diff) + ')'), btn('اعتمد', () => act(() => L.acceptSnap(S, m), 'اعتُمد'), 'mini')))) : null,
     seg([['card', 'بطاقة الشهر'], ['month', 'التفاصيل'], ['year', 'سنوي'], ['limits', 'الحدود']], tab, t => go('insights', 'wrap', { tab: t, k: p.k, y })), body,
-    sect('', h('button', { type: 'button', class: 'lnk srow', onclick: () => go('more', 'badges') }, h('span', {}, '🏅 إنجازاتي'), h('b', { class: 'sv' }, got + ' من ' + BADGES.length)))); }
+    sect('', h('button', { type: 'button', class: 'lnk srow', onclick: () => goFrom('more', 'badges') }, h('span', {}, '🏅 إنجازاتي'), h('b', { class: 'sv' }, got + ' من ' + BADGES.length)))); }
 // ---- المستشار الموحّد: المال والسوق (من advItems) + المسار المالي ----
 function advisorAll() { const el = advisorScreen(); let A = []; try { A = pathAdv(60); } catch (e) {}
   if (A.length && !S.x.set.hideAdvice) el.append(sect('من المسار المالي (5 سنوات)', A.slice(0, 5).map(a => h('div', { class: 'adv a-' + (a.lv === 'info' ? 'info' : a.lv) }, h('b', {}, ADVT.dial[a.k] || ''), h('p', { class: 'advt' }, a.body), a.step ? h('p', { class: 'mut' }, 'الخطوة: ' + a.step) : null)),
@@ -92,7 +97,7 @@ SCREENS.insights = (sub) => {
   if (sub === 'wrap') return shahri();
   if (sub === 'decisions') return decisionsScreen();
   if (!S.x.openDate) return h('div', {}, h('h1', {}, 'تحليلاتي'), sect('المسار المالي', emptyState('🌴', 'يظهر بعد تسجيل الرصيد الافتتاحي', 'المسار المالي (آلة الزمن، رحلتك المالية، نخلتك المالية) وكل تحليلاتك تُحسب من أرقامك الفعلية. سجّل ما تملكه اليوم لتبدأ.', ['سجّل الرصيد الافتتاحي', () => go('accts', 'open')])),
-    sect('', h('div', { class: 'quick' }, btn('قبل أن تصرف', () => go('insights', 'buy'), 'alt'), btn('قائمة الرغبات', () => go('more', 'wish'), 'alt'))));
+    sect('', h('div', { class: 'quick' }, btn('قبل أن تصرف', () => go('insights', 'buy'), 'alt'), btn('قائمة الرغبات', () => goFrom('more', 'wish'), 'alt'))));
   if (!NB.tried) { NB.tried = true; Promise.all([FN.load(), FN.loadAux()]).then(() => { if (['home', 'nabd', 'insights'].includes(view.tab)) render(); }); }
   const M = insightsMain(), per = view.p.per || 'y', nDec = decDue().length;
   // insightsMain: [0] الفترة، [1] أزرار قديمة، [2] منحنى صافي الثروة القديم — يُستبدلان بالأزرار الجديدة و«خط ثروتك»

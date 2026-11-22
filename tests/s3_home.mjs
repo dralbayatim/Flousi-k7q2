@@ -5,7 +5,7 @@ const { page, ev, W, txt, errs, close } = await open(DIR, PORT, { time: '2026-11
 try {
   const id = await seed(ev);
   await ev(() => go('home')); await W(600); let t = await txt();
-  ok(t.includes('تستطيع أن تصرف اليوم') && t.includes('صافي الثروة') && t.includes('دخل هذا الشهر'), 'hero');
+  ok(t.includes('المتاح للصرف') && t.includes('صافي الثروة') && t.includes('دخل هذا الشهر'), 'hero');
   ok(!t.includes('العالم') && !(await ev(() => !!document.querySelector('.ticker.tk'))), 'world ticker removed');
   eq(await ev(() => [...document.querySelectorAll('.qhome .qk')].map(b => b.textContent).join('|')), 'مصروف|دخل|تحويل|طابق', 'four shortcuts');
   ok(t.includes('يهمّك الآن'), 'upn section');

@@ -28,7 +28,7 @@ const FA = (() => {
     const { S, today, sn, sal, cur, prev, done, last3, sv, moves, mkt, al } = c;
     // ===== أ. المدخرات (= الطوارئ). تُقاس بهدفك أنت =====
     if (!sv) R('S0', 'info', 14, 0, 'حدّد هدف المدخرات', [
-      'لم تحدد هدفاً للمدخرات بعد. من «الأصول» ← الأهداف أنشئ هدفاً (المبلغ والموعد)، ثم علّمه «مدخرات» في ⚙ الإعدادات، فيبدأ المستشار بقياس أمانك المالي عليه.',
+      'لم تحدد هدفاً للمدخرات بعد. من «أموالي» ← «+ إضافة» ← «هدف» أنشئ هدفاً (المبلغ والموعد)، ثم علّمه «مدخرات» في ⚙ الإعدادات، فيبدأ المستشار بقياس أمانك المالي عليه.',
       'المدخرات هي وسادة أمانك. حدّد مبلغها وموعدها بنفسك في «الأهداف»، واجعله «هدف المدخرات» من الإعدادات، وسأتابعه معك شهرياً.'], ['more', 'goals']);
     if (sv && sal) {
       const m = sv.amount / sal.amount, gap = Math.max(0, sv.target - sv.amount), mon = sv.monthly > 0 ? Math.ceil(gap / sv.monthly) : null;
@@ -104,7 +104,7 @@ const FA = (() => {
         `تصاعد مستمر في «${cat}». راجعه قبل أن يصبح المعتاد الجديد.`], ['more', 'reports']); }); }
     const big = c.sal ? S.tx.filter(t => t.type === 'expense' && !t.voided && days(t.date, today) <= 3 && days(t.date, today) >= 0) : [];
     big.forEach(t => { const amt = Math.abs((S.post.find(p => p.tx === t.id && S.acc[p.a] && S.acc[p.a].kind === 'expense') || {}).iqd || 0); if (amt > c.sal.amount * 0.2) R('E7:' + t.id, 'info', 30, 0, 'مصروف كبير في عملية واحدة', [
-      `مصروف واحد بـ ${fmt(amt)} (${Math.round(amt / c.sal.amount * 100)}% من راتبك). في المرة القادمة جرّب «هل أشتري؟» قبله.`,
+      `مصروف واحد بـ ${fmt(amt)} (${Math.round(amt / c.sal.amount * 100)}% من راتبك). في المرة القادمة جرّب «قبل أن تصرف» (في «تحليلاتي») قبله.`,
       'مبلغ كبير في عملية واحدة. تأكد من فئته وملاحظته لتبقى تقاريرك واضحة.'], ['ops']); });
     if (prev && done.length >= 6 && prev.expense > 0 && prev.expense <= Math.min(...done.slice(-6).map(m => m.expense))) R('E9', 'ok', 30, 0, 'أقل شهر إنفاقاً منذ نصف سنة', [
       `أقل شهر إنفاقاً منذ ستة أشهر (${fmt(prev.expense)}). أحسنت الانضباط.`, `شهر مقتصد: ${fmt(prev.expense)}. لو نقلت الفرق إلى المدخرات صار أثره دائماً.`]);
@@ -136,7 +136,7 @@ const FA = (() => {
     if (al.total > 0) { const big = al.parts.filter(p => p.n !== 'عقار وأصول أخرى' && p.p > 50)[0]; if (big) R('W4', 'warn', 30, big.p / 100, `تركّز في «${big.n}»`, [
       `${big.n} يمثل ${big.p}% من أصولك. لا داعي للبيع، لكن وجّه الإضافات الجديدة إلى غيره تدريجياً.`, `تركّز مرتفع في ${big.n} (${big.p}%). التنويع يقلل أثر أي هبوط.`], ['assets']);
       const liq = al.parts.filter(p => p.n === 'نقد وحسابات' || p.n === 'دولار').reduce((a, p) => a + p.p, 0); if (liq < 10) R('W5', 'warn', 30, 0, 'السيولة أقل من 10% من أصولك', [`معظم أصولك غير سائلة؛ النقد ${r1(liq)}% فقط. هذا يصعّب مواجهة الطوارئ دون بيع أصل.`], ['accts']); }
-    L.valuations(S).filter(v => v.book !== 0 && !v.hidden).forEach(v => { const d = v.last ? v.last.d : S.x.openDate; if (d && days(d, today) > 183) R('W6:' + v.id, 'info', 30, 0, `تقييم «${v.name}» قديم`, [`آخر تقييم لـ «${v.name}» قبل ${nMon(Math.floor(days(d, today) / 30))}. حدّثه من «الأصول» ليبقى صافي ثروتك واقعياً.`], ['assets']); });
+    L.valuations(S).filter(v => v.book !== 0 && !v.hidden).forEach(v => { const d = v.last ? v.last.d : S.x.openDate; if (d && days(d, today) > 183) R('W6:' + v.id, 'info', 30, 0, `تقييم «${v.name}» قديم`, [`آخر تقييم لـ «${v.name}» قبل ${nMon(Math.floor(days(d, today) / 30))}. حدّثه من «أموالي» (اضغط بطاقته) ليبقى صافي ثروتك واقعياً.`], ['assets']); });
     // ===== ز. ذهبك وفضتك =====
     const P = L.pieces(S).filter(p => p.held), mn = M.metalsNow(S);
     if (P.length && mn) { const cost = P.reduce((a, p) => a + p.cost, 0), val = mn.total, diff = val - cost, pp = cost ? diff / cost * 100 : 0;
@@ -178,7 +178,7 @@ const FA = (() => {
     const lastTx = c.lastTx;
     if (lastTx && days(lastTx, today) >= 3) R('H1', 'info', 2, 0, 'لا عمليات مسجّلة منذ أيام', [`لم تسجّل شيئاً منذ ${nDays(days(lastTx, today))}. التسجيل اليومي يجعل كل التحليل أدق.`, 'هل فاتتك مصاريف لم تُسجَّل؟ دقيقتان الآن توفّر عليك ارتباك نهاية الشهر.'], ['ops']);
     if (mkt && S.x.rates.length) { const p = FN.ind('usd_iqd_parallel'), lastR = S.x.rates[S.x.rates.length - 1]; if (p && p.live === 'current' && (days(lastR.d, today) > 14 || Math.abs(p.value / 100 - S.rate / 10000) / (S.rate / 10000) > 0.03))
-      R('H3', 'warn', 2, 0, 'سعر الصرف المسجّل يحتاج تحديثاً', [`سعر الدولار المسجّل عندك ${L.fmtRate(S.rate)} لكل 100$ (${lastR.d})، والسوق المحلي الآن ${fmt(p.value)}. حدّثه من «الأصول» إن كان هذا ما تتعامل به.`], ['assets', null, { open: 'prices' }]); }
+      R('H3', 'warn', 2, 0, 'سعر الصرف المسجّل يحتاج تحديثاً', [`سعر الدولار المسجّل عندك ${L.fmtRate(S.rate)} لكل 100$ (${lastR.d})، والسوق المحلي الآن ${fmt(p.value)}. حدّثه من «نبض السوق» ← «أسعارك المعتمدة» إن كان هذا ما تتعامل به.`], ['assets', null, { open: 'prices' }]); }
     if (c.day <= 2 && prev) R('H4', 'info', 3, 0, 'شهر جديد', [`شهر جديد. الشهر الماضي: دخل ${fmt(prev.income)}، ومصروف ${fmt(prev.expense)}، وادخار ${prev.rate != null ? prev.rate + '%' : '—'}.`], ['insights']);
     return out;
   }

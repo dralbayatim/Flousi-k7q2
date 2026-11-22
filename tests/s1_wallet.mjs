@@ -6,7 +6,7 @@ try {
   const id = await seed(ev);
   await ev(() => go('accts')); await W(); let t = await txt();
   ok(t.includes('المال السائل') && t.includes('ما تملكه') && t.includes('الالتزامات'), 'wallet sections');
-  ok(await ev(() => !!document.querySelector('[data-gold]') && !!document.querySelector('[data-stocks]')), 'gold & stocks cards');
+  ok(await ev(() => !!document.querySelector('[data-gold]') && !document.querySelector('[data-stocks]')), 'gold card; stocks card hidden until first stock (v4.15)');
   ok(t.includes('الصندوق الذهبي') && t.includes('ذهب 21') && t.includes('فضة'), 'gold summary by karat');
   ok(await ev(() => document.querySelectorAll('.wrow button.wcard').length) >= 4, 'account cards (liquid + liab)');
   ok(t.includes('يحتاج متابعتك') && t.includes('الديون') && t.includes('الأهداف') && t.includes('المتكررات والراتب'), 'tiles shown when relevant');

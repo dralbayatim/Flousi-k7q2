@@ -35,7 +35,7 @@ function txList(n = 40) {
   return sect('آخر العمليات', xs.length ? xs.map(t => h('div', { class: 'tx' + (t.voided || t.reversal ? ' void' : '') },
     h('div', { class: 'r' }, h('span', {}, h('span', { class: 'cat' }, catIco(t.label)), t.date + ' · ' + t.label), h('b', {}, money(t.amount) + (t.usd ? ' (' + L.fmtUsd(t.usd) + ')' : ''))),
     h('div', { class: 'mut' }, (t.from ? t.from + ' ← ' : '') + t.to + (t.note ? ' — ' + t.note : '') + (t.voided ? ' (معكوسة)' : '')),
-    (!t.voided && !t.reversal && t.label !== 'رصيد افتتاحي' && t.label !== 'تصحيح افتتاحي') ? btn('تراجع', () => { if (confirm('عكس هذه العملية؟ تبقى ظاهرة في السجل.')) act(() => { const o = S.tx.find(x => x.id === t.id); L.undo(S, t.id, L.today() > o.date ? L.today() : o.date); }, 'عُكست العملية'); }, 'mini') : null))
+    (!t.voided && !t.reversal && t.label !== 'رصيد افتتاحي' && t.label !== 'تصحيح افتتاحي') ? btn('تراجع', () => { if (confirm('عكس هذه العملية؟ تبقى ظاهرة في السجل.')) act(() => { const o = S.tx.find(x => x.id === t.id); L.undo(S, t.id, L.today() > o.date ? L.today() : o.date); }, 'عُكست العملية'); }, 'mini alt') : null))
     : h('p', { class: 'mut' }, 'لا عمليات بعد.'));
 }
 SCREENS.ops = (sub, p) => { if (sub === 'edit') return editScreen(view.p.id); const kind = view.p.kind || 'expense';
@@ -57,7 +57,7 @@ function openingWizard() {
       const data = [...rows.children].map(r => { const f = r._f, cur = f.cur.value, kind = L.TYPES[f.type.value][1]; if (!f.amount.value.trim()) return null;
         if (cur === 'USD' && kind === 'liab') throw new Error('الالتزام بالدولار غير مدعوم'); return { name: f.name.value, type: f.type.value, cur, amount: L.parseAmount(f.amount.value, cur === 'USD' ? 2 : 0), r: cur === 'USD' ? (f.rate.value.trim() || rate.value.trim() ? L.parseAmount(f.rate.value || rate.value, 2) : (() => { throw new Error('اكتب سعر الصرف اليوم (كم دينار يساوي 100 دولار): مطلوب لحساب «' + f.name.value + '»'); })()) : null }; }).filter(Boolean);
       if (!data.length) throw new Error('أدخل رصيد حساب واحد على الأقل'); const hasUsd = data.some(d => d.cur === 'USD');
-      act(() => { if (hasUsd) L.setRate(S, date.value, L.parseAmount(rate.value, 2)); L.opening(S, date.value, data); }, 'سُجّل. الآن أضف الراتب والذهب من الصفحة الرئيسية').then(() => { if (S.x.openDate) go('home'); /* عند الفشل يبقى المعالج بمدخلاته */ }); } catch (e) { toast(e.message, true); } })));
+      act(() => { if (hasUsd) L.setRate(S, date.value, L.parseAmount(rate.value, 2)); L.opening(S, date.value, data); }, 'سُجّل. الآن أضف الراتب والذهب من «أموالي»').then(() => { if (S.x.openDate) go('home'); /* عند الفشل يبقى المعالج بمدخلاته */ }); } catch (e) { toast(e.message, true); } })));
 }
 SCREENS.accts = (sub) => {
   if (sub === 'open' || !S.x.openDate && sub !== 'list') return h('div', {}, h('h1', {}, 'الحسابات'), openingWizard());
@@ -211,6 +211,10 @@ MORE.push(['integrity', 'فحص السلامة', () => h('div', {},
     btn('أعد الفحص الآن', () => { integ = L.integrity(S); toast(integ.length ? 'وُجدت مشاكل' : 'كل الفحوصات سليمة', !!integ.length); render(); }, 'alt'),
     integ.length ? btn('انسخ التفاصيل', async () => { try { await navigator.clipboard.writeText(VER + '\n' + integ.join('\n')); toast('نُسخت'); } catch (e) { toast('تعذّر النسخ', true); } }, 'alt') : null),
   integ.length ? sect('التفاصيل', integ.map(m => h('div', { class: 'tx bad' }, m))) : null)]);
+// f1-v4.15: بند متكرر يُنشأ في شهر البدء وموعده في يوم البدء أو قبله: كان داخلاً في الرصيد الافتتاحي، فلا يُسأل عنه هذا الشهر (وإلا قد يُحسب مرتين)
+let RECUR_NEXT = null;
+function recurFromNext(id) { RECUR_NEXT = null; const r = S.x.recur.find(x => x.id === id), od = S.x.openDate, k = L.mkey(L.today()); if (!r || !od || L.mkey(od) !== k) return id;
+  if (k + '-' + String(r.day).padStart(2, '0') <= od) { L.recurSkip(S, id); RECUR_NEXT = id; } return id; }
 // ===== المرحلة 4: تبويب الأصول (الأسعار، الدولار، الذهب والفضة) =====
 const gramsTxt = mg => Math.trunc(mg / 1000) + '.' + String(mg % 1000).padStart(3, '0') + ' غ';
 const fineTxt = p => p.metal === 'G' ? 'عيار ' + Math.round(p.fine * 24 / 100) / 100 : 'نقاوة ' + p.fine / 10;
@@ -333,5 +337,5 @@ MORE.push(['recurring', 'المتكررات والراتب', () => { const p = v
   const add = sect('بند جديد', buildForm([{ k: 'kind', l: 'النوع', t: 'select', opts: [['expense', 'مصروف متكرر'], ['income', 'دخل متكرر (راتب)']] }, { k: 'name', l: 'الاسم', t: 'text', req: true }, { k: 'amount', l: 'المبلغ المتوقع', t: 'num', req: true },
     { k: 'acct', l: 'الحساب', t: 'select', opts: iqOpts() }, { k: 'cat', l: 'الفئة', t: 'select', opts: L.CATS.map(c => [c[0], c[1]]), show: v => v.kind === 'expense' }, { k: 'src', l: 'المصدر', t: 'select', opts: [['inc_salary', 'الراتب'], ['inc_other', 'دخل آخر']], show: v => v.kind === 'income' },
     { k: 'day', l: 'يوم الشهر (1 إلى 28)', t: 'num', req: true }, { k: 'remind', l: 'التذكير قبل كم يوماً (0 إلى 7)', t: 'num', v: '2', req: true }, { k: 'salary', l: 'هل هو الراتب؟', t: 'select', opts: [['0', 'لا'], ['1', 'نعم']], show: v => v.kind === 'income' }],
-    v => act(() => L.recurNew(S, { kind: v.kind, name: v.name, amount: n0(v.amount), acct: v.acct, cat: v.kind === 'expense' ? v.cat : null, src: v.kind === 'income' ? v.src : null, day: Number(L.norm(v.day)), remind: Number(L.norm(v.remind)), salary: v.kind === 'income' && v.salary === '1' }), 'أُضيف البند'), 'أضف'));
+    v => act(() => recurFromNext(L.recurNew(S, { kind: v.kind, name: v.name, amount: n0(v.amount), acct: v.acct, cat: v.kind === 'expense' ? v.cat : null, src: v.kind === 'income' ? v.src : null, day: Number(L.norm(v.day)), remind: Number(L.norm(v.remind)), salary: v.kind === 'income' && v.salary === '1' })), 'أُضيف البند').then(id => { if (id && RECUR_NEXT === id) toast('موعده هذا الشهر في يوم بدء التسجيل أو قبله، أي أنه داخل في رصيدك الافتتاحي؛ لذا يبدأ من الشهر القادم'); }), 'أضف'));
   return h('div', {}, conf, due, all, add); }]);

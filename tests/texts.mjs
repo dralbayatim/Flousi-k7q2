@@ -20,4 +20,10 @@ const SET = hs.slice(hs.indexOf('function setRows()'), hs.indexOf('function setP
 for (const m of HELP.matchAll(/⚙ ← «([^»]+)»/g)) ok(SET.includes("'" + m[1] + "'") || UI.includes("MORE.push(['" ) && new RegExp("\\['[a-z]+', '" + m[1] + "'").test(UI), 'settings entry exists: ' + m[1]);
 // 4) لا يُذكر «الأصول» كتبويب في التبويبات
 ok(!/\['assets', 'الأصول'\]/.test(src['ui-boot.js']), 'TABS has no assets');
+// 5) f1-v4.15: كل نصوص التطبيق (رسائل الخطأ، المستشار، الأزرار...) في كل ملفات JS: لا تذكر ما أُلغي. يُفحص ما بين علامات الاقتباس فقط، لا التعليقات
+const strip = t => t.split('\n').map(l => { let q = null; for (let i = 0; i < l.length; i++) { const ch = l[i]; if (q) { if (ch === '\\') i++; else if (ch === q) q = null; } else if (ch === "'" || ch === '"' || ch === '`') q = ch; else if (ch === '/' && l[i + 1] === '/') return l.slice(0, i); } return l; }).join('\n');
+const lits = t => [...strip(t).matchAll(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g)].map(m => m[0]);
+const OLD = [/تبويب الأصول/, /تبويب «الأصول»/, /من «الأصول»/, /في «الأصول»/, /أو «الأصول»/, /«الأصول» ←/, /«هل أشتري؟»/, /من الصفحة الرئيسية/, /شريط «لك»/, /شريط «العالم»/];
+let nl = 0; for (const [f, t] of Object.entries(src)) for (const l of lits(t)) { nl++; for (const g of OLD) ok(!g.test(l), 'string in ' + f + ' does not mention removed ' + g.source, l.slice(0, 90)); }
+ok(nl > 3000, 'scanned all string literals (' + nl + ')');
 console.log(`PASS ${pass}  FAIL ${fail}`); errs.forEach(e => console.log('  ✗ ' + e)); process.exit(fail ? 1 : 0);

@@ -18,7 +18,7 @@ function insightsMain() {
   const inc = ms.reduce((a, m) => a + m.income, 0), exp = ms.reduce((a, m) => a + m.expense, 0), rate = inc > 0 ? Math.round((inc - exp) / inc * 100) : null;
   const mn = FM.metalsNow(S);
   return [seg([['m', 'هذا الشهر'], ['y', 'سنة'], ['all', 'الكل']], per, k => go('insights', null, { per: k })),
-    sect('', h('div', { class: 'quick' }, btn('هل أشتري؟', () => go('insights', 'buy')), btn('ماذا لو؟', () => go('insights', 'whatif')), btn('قائمة الرغبات', () => go('more', 'wish'), 'alt'), btn('بطاقة الشهر', () => go('insights', 'wrap'), 'alt'), btn('إنجازاتي', () => go('more', 'badges'), 'alt'), btn('المستشار', () => go('insights', 'advisor'), 'alt'), btn('التقارير والحدود', () => go('more', 'reports'), 'alt'))),
+    sect('', h('div', { class: 'quick' }, btn('هل أشتري؟', () => go('insights', 'buy')), btn('ماذا لو؟', () => go('insights', 'whatif')), btn('قائمة الرغبات', () => goFrom('more', 'wish'), 'alt'), btn('بطاقة الشهر', () => go('insights', 'wrap'), 'alt'), btn('إنجازاتي', () => goFrom('more', 'badges'), 'alt'), btn('المستشار', () => go('insights', 'advisor'), 'alt'), btn('التقارير والحدود', () => go('more', 'reports'), 'alt'))),
     sect('صافي الثروة', h('div', { class: 'big' }, cur ? money(cur.nw) : '—'), nwCh != null && ms.length > 1 ? row('التغيّر خلال الفترة', (nwCh >= 0 ? '+' : '') + nwCh.toFixed(1) + '%', nwCh < 0 ? 'bad' : 'okc') : null,
       ms.length > 1 ? lineChart(nwPts, { color: 'var(--acc)', fmt: v => (v / 1e6).toFixed(1) + 'م', labels: [[nwPts[0][0], kLab(ms[0].k)], [nwPts[nwPts.length - 1][0], kLab(cur.k)]] }) : h('p', { class: 'mut' }, 'يظهر المنحنى بعد مرور شهرين من التسجيل.')),
     sect('الدخل والمصروف', barsChart(per === 'm' ? ms.slice(-1) : ms.slice(-12)), h('div', { class: 'lg' }, h('span', {}, h('i', { style: 'background:var(--ok)' }), 'الدخل'), h('span', {}, h('i', { style: 'background:var(--bad)' }), 'المصروف')),
@@ -27,7 +27,7 @@ function insightsMain() {
       ms.filter(m => m.rate != null).length > 2 && per !== 'm' ? h('div', {}, h('p', { class: 'mut' }, 'نسبة الادخار شهرياً'), spark(ms.filter(m => m.rate != null).map(m => [Date.parse(m.k + '-15'), m.rate]), 'var(--ok)')) : null),
     sect('المصروف حسب الفئة' + (per === 'm' ? ' — هذا الشهر' : ''), cats.length ? hbars(cats) : h('p', { class: 'mut' }, 'لا مصروفات في الفترة.')),
     sect(ti('توزيع الأصول'), al.parts.length ? h('div', { class: 'dn' }, donut(al.parts), h('div', { class: 'lg col' }, al.parts.map(p => h('span', {}, h('i', { style: 'background:' + p.c }), p.n + ' ' + p.p + '%')))) : h('p', { class: 'mut' }, 'لا أصول بعد.'),
-      mn ? h('p', { class: 'mut' }, 'الذهب والفضة بقيمة البيع المحسوبة الآن من نبض السوق: ' + money(mn.total) + ' (عرض فقط؛ لا يغيّر أسعارك المسجّلة).') : h('p', { class: 'mut' }, 'الذهب والفضة بالأسعار المسجّلة في «الأصول».')),
+      mn ? h('p', { class: 'mut' }, 'الذهب والفضة بقيمة البيع المحسوبة الآن من نبض السوق: ' + money(mn.total) + ' (عرض فقط؛ لا يغيّر أسعارك المسجّلة).') : h('p', { class: 'mut' }, 'الذهب والفضة بأسعارك المعتمدة («نبض السوق» ← «أسعارك المعتمدة»).')),
     sect('الأهداف', G.length ? G.map(g => h('div', { class: 'hb' }, h('div', { class: 'r' }, h('span', {}, g.name + (sv && sv.id === g.id ? ' (المدخرات)' : '')), h('b', {}, g.pct + '%')), h('div', { class: 'hbt' }, h('div', { class: 'hbf' + (g.behind > 0 && !g.firstMonth ? ' late' : ''), style: 'width:' + Math.min(100, g.pct) + '%' })))) : emptyState('🎯', 'لا أهداف بعد', 'الهدف يحوّل الادخار إلى خطة: مبلغ وموعد وقسط شهري.'),
       sv && sal ? row('المدخرات تعادل', sv.salaries + ' راتب') : null),
     (D => D.length ? sect('الديون والالتزامات', D.map(d => row((d.dir === 'lent' ? 'لي عند ' : 'عليّ لـ ') + d.person, money(d.remaining), d.overdue ? 'bad' : ''))) : null)(L.debts(S).filter(d => !d.settled))];
@@ -40,8 +40,8 @@ function buyScreen() {
     async v => { const amt = L.parseAmount(v.amount, 0); NB.buy = FM.buyCheck(S, { amount: amt, type: v.type, grams: v.grams ? Number(L.norm(v.grams)) : 0, karat: v.karat ? Number(L.norm(v.karat)) : 21, from: v.from || 'avail' }); NB.buyIn = { ...v, amount: amt }; render(); }, 'افحص القرار');
   const out = r ? sect('النتيجة', h('div', { class: 'adv a-' + r.lv }, h('b', {}, r.verdict), h('div', {}, r.head)), r.notes.map(t => h('p', {}, '• ' + t)),
     r.facts.map(([k, v]) => row(k, typeof v === 'number' ? money(v) : String(v), typeof v === 'number' && v < 0 ? 'bad' : '')), r.extra.length ? h('div', {}, h('h2', {}, 'رأي حسب النوع'), r.extra.map(t => h('p', {}, t))) : null,
-    h('p', { class: 'mut' }, 'حساب فقط: لا يُسجَّل شيء. إن قرّرت الشراء فسجّله من «العمليات» أو «الأصول».'),
-    btn('⏳ انتظر يوماً (قائمة الرغبات)', () => addWish(I.note || (FM.TYPES.find(t => t[0] === I.type) || [0, 'شراء'])[1], I.amount, I.type).then(() => go('more', 'wish')), 'alt')) : null;
+    h('p', { class: 'mut' }, 'حساب فقط: لا يُسجَّل شيء. إن قرّرت الشراء فسجّله من «العمليات»، أو من «أموالي» ← «الصندوق الذهبي» للذهب والفضة.'),
+    btn('⏳ انتظر يوماً (قائمة الرغبات)', () => addWish(I.note || (FM.TYPES.find(t => t[0] === I.type) || [0, 'شراء'])[1], I.amount, I.type).then(() => goFrom('more', 'wish')), 'alt')) : null;
   return h('div', {}, backBtn(() => { NB.buy = null; NB.buyIn = null; go('insights'); }), h('h1', {}, 'هل أشتري؟'), h('p', { class: 'mut' }, 'اكتب المبلغ واختر الغرض، فيقيّم المستشار أثره على سيولتك ومدخراتك وأهدافك. للذهب والفضة اكتب السعر الذي يعرضه البائع ووزنه.'), sect('', f), out);
 }
 SCREENS.insights = (sub) => {
@@ -51,7 +51,7 @@ SCREENS.insights = (sub) => {
   if (sub === 'path') return pathScreen(view.p.h);
   if (sub === 'wrap') return wrapScreen(view.p.k);
   if (!S.x.openDate) return h('div', {}, h('h1', {}, 'تحليلاتي'), sect('المسار المالي', emptyState('🌴', 'يظهر بعد تسجيل الرصيد الافتتاحي', 'المسار المالي (آلة الزمن، رحلتك المالية، نخلتك المالية) وكل تحليلاتك تُحسب من أرقامك الفعلية. سجّل ما تملكه اليوم لتبدأ.', ['سجّل الرصيد الافتتاحي', () => go('accts', 'open')])),
-    sect('', h('div', { class: 'quick' }, btn('هل أشتري؟', () => go('insights', 'buy'), 'alt'), btn('قائمة الرغبات', () => go('more', 'wish'), 'alt')))); // f1-v4.12: بطاقة واضحة بدل سطر، حتى لا يبدو المسار مفقوداً
+    sect('', h('div', { class: 'quick' }, btn('هل أشتري؟', () => go('insights', 'buy'), 'alt'), btn('قائمة الرغبات', () => goFrom('more', 'wish'), 'alt')))); // f1-v4.12: بطاقة واضحة بدل سطر، حتى لا يبدو المسار مفقوداً
   if (!NB.tried) { NB.tried = true; Promise.all([FN.load(), FN.loadAux()]).then(() => { if (['home', 'nabd', 'insights'].includes(view.tab)) render(); }); }
   return h('div', {}, h('h1', {}, 'تحليلاتي'), monthCard(), pathCard(), ...insightsMain());
 };
@@ -70,7 +70,7 @@ function advItems0(st) {
   const sys = (st || L.status(S)).alerts.filter(a => a.go[1] !== 'backup').map((a, i) => ({ id: 'AL' + i, lv: a.lv === 'info' ? 'info' : a.lv, title: a.t, text: a.t, go: a.go, sys: true }));
   const O = { red: 0, warn: 1, ok: 2, info: 3 }, prio = r.items.filter(x => x.id === 'PRIO');
   ADV = prio.concat([...sys, ...r.items.filter(x => x.id !== 'PRIO')].sort((a, b) => O[a.lv] - O[b.lv])); return ADV; }
-const advGo = it => it.go ? go(it.go[0], it.go[1] || null, it.go[2] || {}) : null;
+const advGo = it => !it.go ? null : it.go[0] === 'assets' && !it.go[1] && it.go[2] && it.go[2].open === 'prices' ? go('nabd') : go(it.go[0], it.go[1] || null, it.go[2] || {}); // f1-v4.15: الأسعار المعتمدة صارت في «نبض السوق»
 function advSeen(it) { if (it.sys || it.id === 'PRIO') return; advSave(FA.markSeen(advLoad(), it.id, L.today(), it.sev || 0, it.v)); toast('أُخفيت مؤقتاً، وتعود إن تغيّر الوضع'); render(); }
 function advCard(it, full) { return h('div', { class: 'adv a-' + it.lv }, h('b', {}, (it.lv === 'red' ? '⛔ ' : it.lv === 'warn' ? '⚠ ' : it.lv === 'ok' ? '✓ ' : 'ℹ ') + it.title),
   it.text !== it.title ? h('p', { class: 'advt' }, it.text) : null,

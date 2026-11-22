@@ -19,7 +19,7 @@ SCREENS.home = () => {
   if (!S.x.openDate) return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'أهلاً بك في فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), h('p', { class: 'mut' }, 'ثلاث خطوات فقط لتبدأ. لديك نسخة احتياطية؟ ⚙ ثم «النسخ الاحتياطي والتصدير» لاستعادتها.'),
     h('div', { class: 'card' }, h('h2', {}, '1. ما تملكه اليوم'), h('p', { class: 'mut' }, 'نقد، فيزا، دولار. تبدأ منها.'), btn('ابدأ الخطوة 1', () => go('accts', 'open'))),
     h('div', { class: 'card dim' }, h('h2', {}, '2. الراتب'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: «أموالي» ثم «المتكررات والراتب».')),
-    h('div', { class: 'card dim' }, h('h2', {}, '3. الذهب والفضة'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: تبويب «الأصول» ثم «قطعة موجودة قبل البدء».')));
+    h('div', { class: 'card dim' }, h('h2', {}, '3. الذهب والفضة'), h('p', { class: 'mut' }, 'يُفتح بعد الخطوة 1: «أموالي» ← «الصندوق الذهبي» ← «كانت عندي قبل البدء».')));
   const st = L.status(S);
   return h('div', {}, h('div', { class: 'hdr' }, h('h1', {}, 'فلوسي'), h('button', { class: 'gear', 'aria-label': 'الإعدادات والأدوات', onclick: () => go('more') }, '⚙')), (ADV = advItems(st), tickers(ADV)), nudgeBanner(), reconBanner(), wishBanner(), wrapBanner(), decisionCard(),
     (lv => { const el = sect(ti('المتاح للصرف'), animNum(h('div', { class: 'big ' + lv[0], onclick: () => go('more', 'reports') }), st.avail, 'avail', money), h('p', { class: 'mut ' + lv[0] }, lv[1]), nwTrend(), row(ti('السائل'), money(st.liq)),
@@ -77,5 +77,5 @@ MORE.push(['selftest', 'الاختبار الذاتي', () => { const box = h('d
     btn('شغّل الاختبارات', async () => { out.replaceChildren('…'); const r3 = typeof FSelfTest3 !== 'undefined' ? await FSelfTest3.run() : { results: [] }; show(FSelfTest.run(), await FSelfTest2.run(), r3); }),
     btn('انسخ النتيجة', async () => { if (out._txt) { try { await navigator.clipboard.writeText(out._txt); toast('نُسخت النتيجة'); } catch (e) { toast('تعذّر النسخ', true); } } }, 'alt'), out)); return box; }]);
 SCREENS.more = (sub) => { if (sub === 'set') return setPanel(view.p.s); if (!sub || sub === 'settings') return settingsHome(); const m = MORE.find(x => x[0] === sub);
-  if (m) { const par = parOf(sub); return h('div', {}, backBtn(() => par ? go(par) : go('more')), h('h1', {}, m[1]), m[2]()); }
+  if (m) { const par = parOf(sub), fr = view.p && view.p.from; return h('div', {}, backBtn(() => fr ? go(fr[0], fr[1], fr[2]) : par ? go(par) : go('more')), h('h1', {}, m[1]), m[2]()); }
   return settingsHome(); };

@@ -4,10 +4,11 @@ const $ = s => document.querySelector(s);
 const h = (t, a, ...k) => { const e = document.createElement(t); for (const [n, v] of Object.entries(a || {})) { if (n === 'class') e.className = v; else if (n.startsWith('on')) e[n] = v; else if (v !== false && v != null) e.setAttribute(n, v === true ? '' : v); }
   k.flat(9).forEach(c => { if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(c)); }); return e; };
 // إن نقص ملف أو تلف فلا يتوقف هذا الملف هنا؛ الإقلاع في الأسفل يكشف ذلك ويعرض شاشة خطأ بدل «…»
-const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.14'; // ارفع VER مع V في sw.js عند كل إصدار
+const L = (() => { try { return FL; } catch (e) { return null; } })(), E = (() => { try { return FE; } catch (e) { return null; } })(), VER = 'f1-v4.15'; // ارفع VER مع V في sw.js عند كل إصدار
 let S, BE, view = { tab: 'home', sub: null, p: {} }, sessionDismiss = false, integ = [], persist = null; // persist: نتيجة طلب التخزين الدائم (8.1): true مثبّت، false مرفوض، 'na' غير مدعوم، null لم يُعرف بعد // integ: نتيجة فحوصات السلامة (4.4) عند الفتح
 const money = n => L.fmt(n) + ' د.ع';
 const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad on' : 'on'; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, bad ? 5000 : Math.max(2200, m.length * 70)); };
+const goFrom = (tab, sub) => go(tab, sub, { from: [view.tab, view.sub, view.p] }); // f1-v4.15: الرجوع إلى الصفحة التي فُتحت منها
 const go = (tab, sub, p) => { view = { tab, sub: sub || null, p: p || {} }; render(); window.scrollTo(0, 0); };
 // البند 9.2: لا عملية بتاريخ في المستقبل. يوم واحد سماحاً لفروق التوقيت. يُفحص داخل المعاملة فيُلغى كل شيء إن فشل
 const futureLim = () => L.iso(new Date(Date.now() + 864e5));

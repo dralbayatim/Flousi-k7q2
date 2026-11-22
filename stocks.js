@@ -28,7 +28,7 @@ const FSK = (() => {
   const okDate = (S, id, d) => { if (!E.okDate(d)) throw new Error('تاريخ غير صالح'); if (S.x.openDate && d < S.x.openDate) throw new Error('التاريخ قبل بدء التسجيل (' + S.x.openDate + ')');
     const lo = lastOp(S, id); if (lo && d < lo) throw new Error('آخر عملية على هذا السهم بتاريخ ' + lo + '. سجّل بتاريخ مساوٍ أو بعده حتى يبقى متوسط التكلفة صحيحاً.'); };
   const payAcc = (S, id) => { const a = S.acc[id]; if (!a || a.kind !== 'asset' || a.metal || a.type === 'stock' || !a.liquid) throw new Error('اختر حساباً سائلاً (نقد، فيزا، دولار...)'); return a; };
-  const needRate = (S, st) => { if (st.cur === 'USD' && !S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً (تبويب «الأصول»)'); };
+  const needRate = (S, st) => { if (st.cur === 'USD' && !S.x.rates.length) throw new Error('أدخل سعر صرف الدولار أولاً («نبض السوق» ← «أسعارك المعتمدة»)'); };
   function setPrice(S, id, d, p) { const st = get(S, id); if (!E.okDate(d)) throw new Error('تاريخ غير صالح'); okPrice(p);
     st.prices = st.prices.filter(x => x.d !== d).concat([{ d, p }]).sort((a, b) => a.d < b.d ? -1 : 1); regen(S, id); }
   function add(S, { name, cur }) { ensure(S); name = String(name || '').trim(); if (!name) throw new Error('اسم السهم مطلوب'); if (cur !== 'IQD' && cur !== 'USD') throw new Error('عملة غير صالحة');
