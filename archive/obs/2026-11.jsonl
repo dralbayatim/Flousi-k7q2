@@ -103,3 +103,7 @@
 {"n":103,"id":"xag_usd","v":42.21,"t":"2026-11-23T05:19:40.000Z","at":"2026-11-23T05:19:40.874Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":104,"id":"xau_usd","v":3618.4,"t":"2026-11-23T06:42:11.000Z","at":"2026-11-23T06:42:12.246Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":105,"id":"xag_usd","v":42.5,"t":"2026-11-23T06:42:10.000Z","at":"2026-11-23T06:42:12.246Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":106,"id":"xau_usd","v":3603.55,"t":"2026-11-23T08:14:11.000Z","at":"2026-11-23T08:14:26.151Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":107,"id":"xag_usd","v":42.27,"t":"2026-11-23T08:14:10.000Z","at":"2026-11-23T08:14:26.151Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":108,"id":"usd_iqd_parallel","v":167950,"t":"2026-11-23T08:05:16.000Z","at":"2026-11-23T08:14:26.151Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/Dollar-falls-in-Baghdad-Erbil-markets-0-9","kind":"obs"}
+{"n":109,"id":"usd_iqd_shops_baghdad","v":{"sell":168500,"buy":167500},"t":"2026-11-23T08:05:16.000Z","at":"2026-11-23T08:14:26.151Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/Dollar-falls-in-Baghdad-Erbil-markets-0-9","kind":"obs"}
