@@ -130,3 +130,5 @@
 {"n":130,"id":"xag_usd","v":43.2,"t":"2026-11-23T18:22:41.000Z","at":"2026-11-23T18:23:09.795Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":131,"id":"fed_target_upper","v":4,"t":"2026-11-23","at":"2026-11-23T18:23:09.795Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
 {"n":132,"id":"fed_target_lower","v":3.75,"t":"2026-11-23","at":"2026-11-23T18:23:09.795Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":133,"id":"xau_usd","v":3648.35,"t":"2026-11-23T19:34:42.000Z","at":"2026-11-23T19:34:43.571Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":134,"id":"xag_usd","v":43.06,"t":"2026-11-23T19:34:41.000Z","at":"2026-11-23T19:34:43.571Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
