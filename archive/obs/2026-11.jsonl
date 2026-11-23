@@ -119,3 +119,5 @@
 {"n":119,"id":"xag_usd","v":43.4,"t":"2026-11-23T14:10:11.000Z","at":"2026-11-23T14:10:23.780Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":120,"id":"usd_iqd_parallel","v":168900,"t":"2026-11-23T13:54:25.000Z","at":"2026-11-23T14:10:23.780Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/US-dollar-rises-in-Baghdad-and-Erbil-3","kind":"obs"}
 {"n":121,"id":"usd_iqd_shops_baghdad","v":{"sell":169500,"buy":168500},"t":"2026-11-23T13:54:25.000Z","at":"2026-11-23T14:10:23.780Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/US-dollar-rises-in-Baghdad-and-Erbil-3","kind":"obs"}
+{"n":122,"id":"xau_usd","v":3676.8,"t":"2026-11-23T15:25:12.000Z","at":"2026-11-23T15:25:24.501Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":123,"id":"xag_usd","v":43.6,"t":"2026-11-23T15:25:11.000Z","at":"2026-11-23T15:25:24.501Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
