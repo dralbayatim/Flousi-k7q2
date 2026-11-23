@@ -126,3 +126,7 @@
 {"n":126,"id":"dxy","v":104.09,"t":"2026-11-23","at":"2026-11-23T16:29:32.099Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
 {"n":127,"id":"xau_usd","v":3663.85,"t":"2026-11-23T17:28:42.000Z","at":"2026-11-23T17:28:45.892Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":128,"id":"xag_usd","v":43.42,"t":"2026-11-23T17:28:42.000Z","at":"2026-11-23T17:28:45.892Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":129,"id":"xau_usd","v":3652.45,"t":"2026-11-23T18:22:42.000Z","at":"2026-11-23T18:23:09.795Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":130,"id":"xag_usd","v":43.2,"t":"2026-11-23T18:22:41.000Z","at":"2026-11-23T18:23:09.795Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":131,"id":"fed_target_upper","v":4,"t":"2026-11-23","at":"2026-11-23T18:23:09.795Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":132,"id":"fed_target_lower","v":3.75,"t":"2026-11-23","at":"2026-11-23T18:23:09.795Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
