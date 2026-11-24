@@ -171,3 +171,9 @@
 {"n":171,"id":"ust10y","v":4.92,"t":"2026-11-23","at":"2026-11-24T13:13:30.522Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
 {"n":172,"id":"ust2y","v":4.63,"t":"2026-11-23","at":"2026-11-24T13:13:30.522Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
 {"n":173,"id":"real10y","v":2.79,"t":"2026-11-23","at":"2026-11-24T13:13:30.522Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":174,"id":"xau_usd","v":3616.9,"t":"2026-11-24T14:29:44.000Z","at":"2026-11-24T14:29:49.146Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":175,"id":"xag_usd","v":42.06,"t":"2026-11-24T14:29:43.000Z","at":"2026-11-24T14:29:49.146Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":176,"id":"usd_iqd_parallel","v":168900,"t":"2026-11-24T14:13:14.000Z","at":"2026-11-24T14:29:49.146Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/ar/Economy/Dollar-falls-in-Baghdad-Erbil-markets-1","kind":"obs"}
+{"n":177,"id":"usd_iqd_shops_baghdad","v":{"sell":169500,"buy":168500},"t":"2026-11-24T14:13:14.000Z","at":"2026-11-24T14:29:49.146Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/ar/Economy/Dollar-falls-in-Baghdad-Erbil-markets-1","kind":"obs"}
+{"n":178,"id":"fed_target_upper","v":4,"t":"2026-11-24","at":"2026-11-24T14:29:49.146Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":179,"id":"fed_target_lower","v":3.75,"t":"2026-11-24","at":"2026-11-24T14:29:49.146Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
