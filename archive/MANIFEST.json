@@ -2,12 +2,12 @@
  "schema": "nabd-archive-manifest/1",
  "files": {
   "2026-11.jsonl": {
-   "lines": 142,
-   "bytes": 23823,
-   "sha256": "5f51ed53749300f83a154acc4b9372901042ba90d690be0bc5b96c1e009e88a4"
+   "lines": 146,
+   "bytes": 24515,
+   "sha256": "70503c3568e20776c8f255816818df59489a2a305cff32ae0afb6a688a825aaf"
   }
  },
  "rtfx": {},
- "count": 142,
- "head": "eaa26e080cbbe01179200b7d97d9f259c8c4fcaed379c839f4664d9b1bef28ac"
+ "count": 146,
+ "head": "6e814cf34a2d0d4f32acc82263d5a945ce0582cb1e5e94906d5b27a7208b1ebe"
 }
