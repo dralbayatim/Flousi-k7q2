@@ -111,3 +111,48 @@
 {"n":111,"id":"xag_usd","v":42.46,"t":"2026-11-23T09:42:11.000Z","at":"2026-11-23T09:42:18.710Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":112,"id":"xau_usd","v":3617.75,"t":"2026-11-23T10:47:41.000Z","at":"2026-11-23T10:48:09.642Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":113,"id":"xag_usd","v":42.4,"t":"2026-11-23T10:47:41.000Z","at":"2026-11-23T10:48:09.642Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":114,"id":"xau_usd","v":3621.5,"t":"2026-11-23T11:38:11.000Z","at":"2026-11-23T11:38:20.230Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":115,"id":"xag_usd","v":42.41,"t":"2026-11-23T11:38:11.000Z","at":"2026-11-23T11:38:20.230Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":116,"id":"xau_usd","v":3618.85,"t":"2026-11-23T12:48:12.000Z","at":"2026-11-23T12:48:24.634Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":117,"id":"xag_usd","v":42.04,"t":"2026-11-23T12:48:11.000Z","at":"2026-11-23T12:48:24.634Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":118,"id":"xau_usd","v":3663.85,"t":"2026-11-23T14:10:12.000Z","at":"2026-11-23T14:10:23.780Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":119,"id":"xag_usd","v":43.4,"t":"2026-11-23T14:10:11.000Z","at":"2026-11-23T14:10:23.780Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":120,"id":"usd_iqd_parallel","v":168900,"t":"2026-11-23T13:54:25.000Z","at":"2026-11-23T14:10:23.780Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/US-dollar-rises-in-Baghdad-and-Erbil-3","kind":"obs"}
+{"n":121,"id":"usd_iqd_shops_baghdad","v":{"sell":169500,"buy":168500},"t":"2026-11-23T13:54:25.000Z","at":"2026-11-23T14:10:23.780Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/US-dollar-rises-in-Baghdad-and-Erbil-3","kind":"obs"}
+{"n":122,"id":"xau_usd","v":3676.8,"t":"2026-11-23T15:25:12.000Z","at":"2026-11-23T15:25:24.501Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":123,"id":"xag_usd","v":43.6,"t":"2026-11-23T15:25:11.000Z","at":"2026-11-23T15:25:24.501Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":124,"id":"xau_usd","v":3671.25,"t":"2026-11-23T16:29:12.000Z","at":"2026-11-23T16:29:32.099Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":125,"id":"xag_usd","v":43.58,"t":"2026-11-23T16:29:11.000Z","at":"2026-11-23T16:29:32.099Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":126,"id":"dxy","v":104.09,"t":"2026-11-23","at":"2026-11-23T16:29:32.099Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
+{"n":127,"id":"xau_usd","v":3663.85,"t":"2026-11-23T17:28:42.000Z","at":"2026-11-23T17:28:45.892Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":128,"id":"xag_usd","v":43.42,"t":"2026-11-23T17:28:42.000Z","at":"2026-11-23T17:28:45.892Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":129,"id":"xau_usd","v":3652.45,"t":"2026-11-23T18:22:42.000Z","at":"2026-11-23T18:23:09.795Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":130,"id":"xag_usd","v":43.2,"t":"2026-11-23T18:22:41.000Z","at":"2026-11-23T18:23:09.795Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":131,"id":"fed_target_upper","v":4,"t":"2026-11-23","at":"2026-11-23T18:23:09.795Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":132,"id":"fed_target_lower","v":3.75,"t":"2026-11-23","at":"2026-11-23T18:23:09.795Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":133,"id":"xau_usd","v":3648.35,"t":"2026-11-23T19:34:42.000Z","at":"2026-11-23T19:34:43.571Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":134,"id":"xag_usd","v":43.06,"t":"2026-11-23T19:34:41.000Z","at":"2026-11-23T19:34:43.571Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":135,"id":"xau_usd","v":3645.7,"t":"2026-11-23T20:32:42.000Z","at":"2026-11-23T20:33:01.168Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":136,"id":"xag_usd","v":43.1,"t":"2026-11-23T20:32:42.000Z","at":"2026-11-23T20:33:01.168Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":137,"id":"xau_usd","v":3636.55,"t":"2026-11-23T21:27:12.000Z","at":"2026-11-23T21:27:18.824Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":138,"id":"xag_usd","v":42.92,"t":"2026-11-23T21:27:12.000Z","at":"2026-11-23T21:27:18.824Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":139,"id":"xau_usd","v":3634.4,"t":"2026-11-23T22:24:42.000Z","at":"2026-11-23T22:24:59.632Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":140,"id":"xag_usd","v":42.99,"t":"2026-11-23T22:24:42.000Z","at":"2026-11-23T22:24:59.632Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":141,"id":"xau_usd","v":3629.7,"t":"2026-11-23T23:25:43.000Z","at":"2026-11-23T23:25:57.056Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":142,"id":"xag_usd","v":43.06,"t":"2026-11-23T23:25:42.000Z","at":"2026-11-23T23:25:57.056Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":143,"id":"xau_usd","v":3637.4,"t":"2026-11-24T00:21:43.000Z","at":"2026-11-24T00:22:06.101Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":144,"id":"xag_usd","v":43.19,"t":"2026-11-24T00:21:42.000Z","at":"2026-11-24T00:22:06.101Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":145,"id":"breakeven10y","v":2.13,"t":"2026-11-23","at":"2026-11-24T00:22:06.101Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":146,"id":"usd_broad","v":123.5978,"t":"2026-11-20","at":"2026-11-24T00:22:06.101Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":147,"id":"xau_usd","v":3667,"t":"2026-11-24T01:51:43.000Z","at":"2026-11-24T01:51:48.649Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":148,"id":"xag_usd","v":43.29,"t":"2026-11-24T01:51:42.000Z","at":"2026-11-24T01:51:48.649Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":149,"id":"xau_usd","v":3637.6,"t":"2026-11-24T02:53:43.000Z","at":"2026-11-24T02:53:46.077Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":150,"id":"xag_usd","v":42.74,"t":"2026-11-24T02:53:42.000Z","at":"2026-11-24T02:53:46.077Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":151,"id":"xau_usd","v":3631.75,"t":"2026-11-24T03:57:13.000Z","at":"2026-11-24T03:57:41.780Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":152,"id":"xag_usd","v":42.49,"t":"2026-11-24T03:57:42.000Z","at":"2026-11-24T03:57:41.780Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":153,"id":"xau_usd","v":3634.05,"t":"2026-11-24T05:03:13.000Z","at":"2026-11-24T05:03:38.227Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":154,"id":"xag_usd","v":42.56,"t":"2026-11-24T05:03:42.000Z","at":"2026-11-24T05:03:38.227Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":155,"id":"xau_usd","v":3628.8,"t":"2026-11-24T06:03:43.000Z","at":"2026-11-24T06:03:58.881Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":156,"id":"xag_usd","v":42.21,"t":"2026-11-24T06:03:42.000Z","at":"2026-11-24T06:03:58.881Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":157,"id":"xau_usd","v":3618.15,"t":"2026-11-24T07:20:43.000Z","at":"2026-11-24T07:20:47.772Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":158,"id":"xag_usd","v":42.12,"t":"2026-11-24T07:20:42.000Z","at":"2026-11-24T07:20:47.772Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
