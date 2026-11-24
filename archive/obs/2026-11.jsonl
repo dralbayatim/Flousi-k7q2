@@ -177,3 +177,6 @@
 {"n":177,"id":"usd_iqd_shops_baghdad","v":{"sell":169500,"buy":168500},"t":"2026-11-24T14:13:14.000Z","at":"2026-11-24T14:29:49.146Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/ar/Economy/Dollar-falls-in-Baghdad-Erbil-markets-1","kind":"obs"}
 {"n":178,"id":"fed_target_upper","v":4,"t":"2026-11-24","at":"2026-11-24T14:29:49.146Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
 {"n":179,"id":"fed_target_lower","v":3.75,"t":"2026-11-24","at":"2026-11-24T14:29:49.146Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":180,"id":"xau_usd","v":3591.7,"t":"2026-11-24T15:36:14.000Z","at":"2026-11-24T15:36:15.793Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":181,"id":"xag_usd","v":41.27,"t":"2026-11-24T15:36:13.000Z","at":"2026-11-24T15:36:15.793Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":182,"id":"dxy","v":103.88,"t":"2026-11-24","at":"2026-11-24T15:36:15.793Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
