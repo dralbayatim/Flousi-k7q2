@@ -166,3 +166,8 @@
 {"n":166,"id":"xag_usd","v":41.74,"t":"2026-11-24T10:55:13.000Z","at":"2026-11-24T10:55:20.716Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":167,"id":"xau_usd","v":3634.05,"t":"2026-11-24T11:57:14.000Z","at":"2026-11-24T11:57:20.793Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":168,"id":"xag_usd","v":42.21,"t":"2026-11-24T11:57:13.000Z","at":"2026-11-24T11:57:20.793Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":169,"id":"xau_usd","v":3627.85,"t":"2026-11-24T13:13:14.000Z","at":"2026-11-24T13:13:30.522Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":170,"id":"xag_usd","v":42.02,"t":"2026-11-24T13:13:13.000Z","at":"2026-11-24T13:13:30.522Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":171,"id":"ust10y","v":4.92,"t":"2026-11-23","at":"2026-11-24T13:13:30.522Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":172,"id":"ust2y","v":4.63,"t":"2026-11-23","at":"2026-11-24T13:13:30.522Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":173,"id":"real10y","v":2.79,"t":"2026-11-23","at":"2026-11-24T13:13:30.522Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
