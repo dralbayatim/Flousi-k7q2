@@ -180,3 +180,5 @@
 {"n":180,"id":"xau_usd","v":3591.7,"t":"2026-11-24T15:36:14.000Z","at":"2026-11-24T15:36:15.793Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":181,"id":"xag_usd","v":41.27,"t":"2026-11-24T15:36:13.000Z","at":"2026-11-24T15:36:15.793Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":182,"id":"dxy","v":103.88,"t":"2026-11-24","at":"2026-11-24T15:36:15.793Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
+{"n":183,"id":"xau_usd","v":3572.1,"t":"2026-11-24T16:48:44.000Z","at":"2026-11-24T16:49:12.208Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":184,"id":"xag_usd","v":40.81,"t":"2026-11-24T16:48:43.000Z","at":"2026-11-24T16:49:12.208Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
