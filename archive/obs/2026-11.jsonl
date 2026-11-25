@@ -234,3 +234,5 @@
 {"n":234,"id":"fed_target_upper","v":4,"t":"2026-11-25","at":"2026-11-25T15:36:19.237Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
 {"n":235,"id":"fed_target_lower","v":3.75,"t":"2026-11-25","at":"2026-11-25T15:36:19.237Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
 {"n":236,"id":"dxy","v":104.04,"t":"2026-11-25","at":"2026-11-25T15:36:19.237Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
+{"n":237,"id":"xau_usd","v":3455,"t":"2026-11-25T16:49:16.000Z","at":"2026-11-25T16:49:32.618Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":238,"id":"xag_usd","v":38.41,"t":"2026-11-25T16:49:15.000Z","at":"2026-11-25T16:49:32.618Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
