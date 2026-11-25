@@ -221,3 +221,11 @@
 {"n":221,"id":"xag_usd","v":39.65,"t":"2026-11-25T11:42:15.000Z","at":"2026-11-25T11:42:34.340Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":222,"id":"xau_usd","v":3515.1,"t":"2026-11-25T12:51:16.000Z","at":"2026-11-25T12:51:32.974Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":223,"id":"xag_usd","v":39.74,"t":"2026-11-25T12:51:15.000Z","at":"2026-11-25T12:51:32.974Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":224,"id":"xau_usd","v":3478.2,"t":"2026-11-25T14:23:46.000Z","at":"2026-11-25T14:23:54.921Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":225,"id":"xag_usd","v":39.24,"t":"2026-11-25T14:23:45.000Z","at":"2026-11-25T14:23:54.921Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":226,"id":"usd_iqd_parallel","v":169950,"t":"2026-11-25T13:50:46.000Z","at":"2026-11-25T14:23:54.921Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/US-dollar-climbs-in-Baghdad-and-Erbil-9-1","kind":"obs"}
+{"n":227,"id":"usd_iqd_shops_baghdad","v":{"sell":170500,"buy":169500},"t":"2026-11-25T13:50:46.000Z","at":"2026-11-25T14:23:54.921Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/US-dollar-climbs-in-Baghdad-and-Erbil-9-1","kind":"obs"}
+{"n":228,"id":"ust10y","v":4.91,"t":"2026-11-24","at":"2026-11-25T14:23:54.921Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":229,"id":"ust2y","v":4.63,"t":"2026-11-24","at":"2026-11-25T14:23:54.921Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":230,"id":"real10y","v":2.79,"t":"2026-11-24","at":"2026-11-25T14:23:54.921Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
+{"n":231,"id":"gdp","v":33056.203,"t":"2026-07-01","at":"2026-11-25T14:23:54.921Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
