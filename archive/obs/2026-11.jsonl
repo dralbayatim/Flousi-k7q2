@@ -213,3 +213,5 @@
 {"n":213,"id":"xag_usd","v":40.03,"t":"2026-11-25T08:18:15.000Z","at":"2026-11-25T08:18:35.256Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":214,"id":"usd_iqd_parallel","v":169150,"t":"2026-11-25T07:52:29.000Z","at":"2026-11-25T08:18:35.256Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/Dollar-slips-in-Baghdad-Erbil-markets-7","kind":"obs"}
 {"n":215,"id":"usd_iqd_shops_baghdad","v":{"sell":169500,"buy":168500},"t":"2026-11-25T07:52:29.000Z","at":"2026-11-25T08:18:35.256Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/Dollar-slips-in-Baghdad-Erbil-markets-7","kind":"obs"}
+{"n":216,"id":"xau_usd","v":3522.95,"t":"2026-11-25T09:39:15.000Z","at":"2026-11-25T09:39:38.085Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":217,"id":"xag_usd","v":40.02,"t":"2026-11-25T09:39:15.000Z","at":"2026-11-25T09:39:38.085Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
