@@ -1,17 +1,17 @@
 {
  "schema": "nabd-market/1",
- "generated_at": "2026-11-25T14:23:54.921Z",
+ "generated_at": "2026-11-25T15:36:19.237Z",
  "run": {
   "forced": false,
   "log": [
    "metals: نجح",
    "dxy: نجح",
    "shafaq_usd: نجح",
-   "cbi: لم يحن موعده",
-   "treasury: نجح",
-   "fred_daily: لم يحن موعده",
-   "fred_monthly: نجح",
-   "cot: نجح",
+   "cbi: نجح",
+   "treasury: لم يحن موعده",
+   "fred_daily: نجح",
+   "fred_monthly: لم يحن موعده",
+   "cot: لم يحن موعده",
    "series: لم يحن موعده"
   ]
  },
@@ -28,34 +28,34 @@
   "metals": {
    "label": "الذهب والفضة العالمي",
    "every_min": 30,
-   "last_attempt_at": "2026-11-25T14:23:54.921Z",
-   "last_ok_at": "2026-11-25T14:23:54.921Z",
+   "last_attempt_at": "2026-11-25T15:36:19.237Z",
+   "last_ok_at": "2026-11-25T15:36:19.237Z",
    "last_error": null,
    "ran": true
   },
   "dxy": {
    "label": "مؤشر الدولار الأمريكي DXY",
    "every_min": 60,
-   "last_attempt_at": "2026-11-25T14:23:54.921Z",
-   "last_ok_at": "2026-11-25T14:23:54.921Z",
+   "last_attempt_at": "2026-11-25T15:36:19.237Z",
+   "last_ok_at": "2026-11-25T15:36:19.237Z",
    "last_error": null,
    "ran": true
   },
   "shafaq_usd": {
    "label": "الدولار في السوق العراقي (الموازي)",
    "every_min": 30,
-   "last_attempt_at": "2026-11-25T14:23:54.921Z",
-   "last_ok_at": "2026-11-25T14:23:54.921Z",
+   "last_attempt_at": "2026-11-25T15:36:19.237Z",
+   "last_ok_at": "2026-11-25T15:36:19.237Z",
    "last_error": null,
    "ran": true
   },
   "cbi": {
    "label": "الدولار الرسمي العراقي",
    "every_min": 360,
-   "last_attempt_at": "2026-11-25T09:39:38.085Z",
-   "last_ok_at": "2026-11-25T09:39:38.085Z",
+   "last_attempt_at": "2026-11-25T15:36:19.237Z",
+   "last_ok_at": "2026-11-25T15:36:19.237Z",
    "last_error": null,
-   "ran": false
+   "ran": true
   },
   "treasury": {
    "label": "عوائد الخزانة (خلفية للتحليل)",
@@ -63,15 +63,15 @@
    "last_attempt_at": "2026-11-25T14:23:54.921Z",
    "last_ok_at": "2026-11-25T14:23:54.921Z",
    "last_error": null,
-   "ran": true
+   "ran": false
   },
   "fred_daily": {
    "label": "FRED اليومية (الفائدة الرسمية، توقعات التضخم، الدولار الموسّع)",
    "every_min": 360,
-   "last_attempt_at": "2026-11-25T09:39:38.085Z",
-   "last_ok_at": "2026-11-25T09:39:38.085Z",
+   "last_attempt_at": "2026-11-25T15:36:19.237Z",
+   "last_ok_at": "2026-11-25T15:36:19.237Z",
    "last_error": null,
-   "ran": false
+   "ran": true
   },
   "fred_monthly": {
    "label": "FRED الشهرية والفصلية",
@@ -79,7 +79,7 @@
    "last_attempt_at": "2026-11-25T14:23:54.921Z",
    "last_ok_at": "2026-11-25T14:23:54.921Z",
    "last_error": null,
-   "ran": true
+   "ran": false
   },
   "cot": {
    "label": "COT الأسبوعي",
@@ -87,7 +87,7 @@
    "last_attempt_at": "2026-11-25T14:23:54.921Z",
    "last_ok_at": "2026-11-25T14:23:54.921Z",
    "last_error": null,
-   "ran": true
+   "ran": false
   },
   "series": {
    "label": "السلاسل التاريخية للتحليل (series.json)",
@@ -109,18 +109,18 @@
     "url": "https://gold-api.com",
     "reliability": "عالية (تطابق مع مصدرين للمقارنة)"
    },
-   "value": 3478.2,
-   "data_time": "2026-11-25T14:23:46.000Z",
-   "fetched_at": "2026-11-25T14:23:54.921Z",
-   "fetched_ok_at": "2026-11-25T14:23:54.921Z",
+   "value": 3449.1,
+   "data_time": "2026-11-25T15:36:16.000Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
    "link": null,
    "check": {
     "source": "Swissquote (مقارنة داخلية)",
-    "mid": 3478.98,
-    "diff_pct": -0.02
+    "mid": 3452.97,
+    "diff_pct": -0.11
    },
    "every_min": 30,
    "max_age_min": 180,
@@ -138,10 +138,10 @@
     "url": "https://gold-api.com",
     "reliability": "عالية (تطابق مع مصدرين للمقارنة)"
    },
-   "value": 39.24,
-   "data_time": "2026-11-25T14:23:45.000Z",
-   "fetched_at": "2026-11-25T14:23:54.921Z",
-   "fetched_ok_at": "2026-11-25T14:23:54.921Z",
+   "value": 38.39,
+   "data_time": "2026-11-25T15:36:15.000Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -165,8 +165,8 @@
    },
    "value": 169950,
    "data_time": "2026-11-25T13:50:46.000Z",
-   "fetched_at": "2026-11-25T14:23:54.921Z",
-   "fetched_ok_at": "2026-11-25T14:23:54.921Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -176,7 +176,7 @@
    "max_age_min": 2160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 33
+   "age_min": 106
   },
   {
    "id": "usd_iqd_shops_baghdad",
@@ -193,8 +193,8 @@
     "buy": 169500
    },
    "data_time": "2026-11-25T13:50:46.000Z",
-   "fetched_at": "2026-11-25T14:23:54.921Z",
-   "fetched_ok_at": "2026-11-25T14:23:54.921Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -204,7 +204,7 @@
    "max_age_min": 2160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 33
+   "age_min": 106
   },
   {
    "id": "usd_iqd_official",
@@ -218,8 +218,8 @@
    },
    "value": 1510,
    "data_time": null,
-   "fetched_at": "2026-11-25T09:39:38.085Z",
-   "fetched_ok_at": "2026-11-25T09:39:38.085Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": "الصفحة لا تذكر تاريخ النشرة؛ وقت البيانات = وقت الجلب",
@@ -229,7 +229,7 @@
    "max_age_min": 11520,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 284
+   "age_min": 0
   },
   {
    "id": "ust10y",
@@ -254,7 +254,7 @@
    "max_age_min": 7200,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 2376
   },
   {
    "id": "ust2y",
@@ -279,7 +279,7 @@
    "max_age_min": 7200,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 2376
   },
   {
    "id": "real10y",
@@ -304,7 +304,7 @@
    "max_age_min": 7200,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 2376
   },
   {
    "id": "fed_target_upper",
@@ -318,9 +318,9 @@
     "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
    },
    "value": 4,
-   "data_time": "2026-11-24",
-   "fetched_at": "2026-11-25T09:39:38.085Z",
-   "fetched_ok_at": "2026-11-25T09:39:38.085Z",
+   "data_time": "2026-11-25",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -330,7 +330,7 @@
    "max_age_min": 8640,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 936
   },
   {
    "id": "fed_target_lower",
@@ -344,9 +344,9 @@
     "attribution": "This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis."
    },
    "value": 3.75,
-   "data_time": "2026-11-24",
-   "fetched_at": "2026-11-25T09:39:38.085Z",
-   "fetched_ok_at": "2026-11-25T09:39:38.085Z",
+   "data_time": "2026-11-25",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -356,7 +356,7 @@
    "max_age_min": 8640,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 936
   },
   {
    "id": "dxy",
@@ -368,10 +368,10 @@
     "url": "https://www.ecb.europa.eu",
     "reliability": "رسمية؛ DXY هنا تقريب بمعادلة ICE (الفرق عادةً أقل من 0.3%)"
    },
-   "value": 103.88,
-   "data_time": "2026-11-24",
-   "fetched_at": "2026-11-25T14:23:54.921Z",
-   "fetched_ok_at": "2026-11-25T14:23:54.921Z",
+   "value": 104.04,
+   "data_time": "2026-11-25",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": "يُحدَّث مرة يومياً بعد نشر أسعار البنك المركزي الأوروبي (~16:00 بتوقيت أوروبا)",
@@ -381,7 +381,7 @@
    "max_age_min": 5760,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 936
   },
   {
    "id": "breakeven10y",
@@ -396,8 +396,8 @@
    },
    "value": 2.12,
    "data_time": "2026-11-24",
-   "fetched_at": "2026-11-25T09:39:38.085Z",
-   "fetched_ok_at": "2026-11-25T09:39:38.085Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -407,7 +407,7 @@
    "max_age_min": 8640,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 2304
+   "age_min": 2376
   },
   {
    "id": "usd_broad",
@@ -422,8 +422,8 @@
    },
    "value": 123.5978,
    "data_time": "2026-11-20",
-   "fetched_at": "2026-11-25T09:39:38.085Z",
-   "fetched_ok_at": "2026-11-25T09:39:38.085Z",
+   "fetched_at": "2026-11-25T15:36:19.237Z",
+   "fetched_ok_at": "2026-11-25T15:36:19.237Z",
    "update": "ok",
    "error": null,
    "note": null,
@@ -433,7 +433,7 @@
    "max_age_min": 17280,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 8064
+   "age_min": 8136
   },
   {
    "id": "cpi_yoy",
@@ -459,7 +459,7 @@
    "max_age_min": 144000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 123264
+   "age_min": 123336
   },
   {
    "id": "fed_funds",
@@ -485,7 +485,7 @@
    "max_age_min": 144000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 80064
+   "age_min": 80136
   },
   {
    "id": "unrate",
@@ -511,7 +511,7 @@
    "max_age_min": 144000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 80064
+   "age_min": 80136
   },
   {
    "id": "gdp",
@@ -537,7 +537,7 @@
    "max_age_min": 288000,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 212544
+   "age_min": 212616
   },
   {
    "id": "cot_gold",
@@ -566,7 +566,7 @@
    "max_age_min": 20160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 12384
+   "age_min": 12456
   },
   {
    "id": "cot_silver",
@@ -595,7 +595,7 @@
    "max_age_min": 20160,
    "status": "current",
    "status_ar": "حالية",
-   "age_min": 12384
+   "age_min": 12456
   }
  ],
  "derived": [
@@ -642,17 +642,17 @@
    },
    "inputs": {
     "xau_usd": {
-     "value": 3478.2,
-     "data_time": "2026-11-25T14:23:46.000Z",
+     "value": 3449.1,
+     "data_time": "2026-11-25T15:36:16.000Z",
      "status": "current"
     },
     "xag_usd": {
-     "value": 39.24,
-     "data_time": "2026-11-25T14:23:45.000Z",
+     "value": 38.39,
+     "data_time": "2026-11-25T15:36:15.000Z",
      "status": "current"
     }
    },
-   "value": 88.64,
+   "value": 89.84,
    "status": "current",
    "status_ar": "حالية",
    "time_gap_hours": 0
@@ -668,8 +668,8 @@
    },
    "inputs": {
     "xau_usd": {
-     "value": 3478.2,
-     "data_time": "2026-11-25T14:23:46.000Z",
+     "value": 3449.1,
+     "data_time": "2026-11-25T15:36:16.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -680,12 +680,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 3478.2,
-    "iqd": 5912940
+    "usd": 3449.1,
+    "iqd": 5863470
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.6
+   "time_gap_hours": 1.8
   },
   {
    "id": "gold24_gram",
@@ -698,8 +698,8 @@
    },
    "inputs": {
     "xau_usd": {
-     "value": 3478.2,
-     "data_time": "2026-11-25T14:23:46.000Z",
+     "value": 3449.1,
+     "data_time": "2026-11-25T15:36:16.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -710,12 +710,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 111.83,
-    "iqd": 190105
+    "usd": 110.89,
+    "iqd": 188515
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.6
+   "time_gap_hours": 1.8
   },
   {
    "id": "gold21_gram",
@@ -728,8 +728,8 @@
    },
    "inputs": {
     "xau_usd": {
-     "value": 3478.2,
-     "data_time": "2026-11-25T14:23:46.000Z",
+     "value": 3449.1,
+     "data_time": "2026-11-25T15:36:16.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -740,12 +740,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 97.85,
-    "iqd": 166342
+    "usd": 97.03,
+    "iqd": 164951
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.6
+   "time_gap_hours": 1.8
   },
   {
    "id": "gold21_mithqal",
@@ -758,8 +758,8 @@
    },
    "inputs": {
     "xau_usd": {
-     "value": 3478.2,
-     "data_time": "2026-11-25T14:23:46.000Z",
+     "value": 3449.1,
+     "data_time": "2026-11-25T15:36:16.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -770,12 +770,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 489.24,
-    "iqd": 831711
+    "usd": 485.15,
+    "iqd": 824753
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.6
+   "time_gap_hours": 1.8
   },
   {
    "id": "gold24_mithqal",
@@ -788,8 +788,8 @@
    },
    "inputs": {
     "xau_usd": {
-     "value": 3478.2,
-     "data_time": "2026-11-25T14:23:46.000Z",
+     "value": 3449.1,
+     "data_time": "2026-11-25T15:36:16.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -800,12 +800,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 559.13,
-    "iqd": 950527
+    "usd": 554.46,
+    "iqd": 942575
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.6
+   "time_gap_hours": 1.8
   },
   {
    "id": "silver_ounce_iqd",
@@ -818,8 +818,8 @@
    },
    "inputs": {
     "xag_usd": {
-     "value": 39.24,
-     "data_time": "2026-11-25T14:23:45.000Z",
+     "value": 38.39,
+     "data_time": "2026-11-25T15:36:15.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -830,12 +830,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 39.24,
-    "iqd": 66708
+    "usd": 38.39,
+    "iqd": 65263
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.5
+   "time_gap_hours": 1.8
   },
   {
    "id": "silver999_kg",
@@ -848,8 +848,8 @@
    },
    "inputs": {
     "xag_usd": {
-     "value": 39.24,
-     "data_time": "2026-11-25T14:23:45.000Z",
+     "value": 38.39,
+     "data_time": "2026-11-25T15:36:15.000Z",
      "status": "current"
     },
     "usd_iqd_ref": {
@@ -860,12 +860,12 @@
    },
    "note": "تحويل حسابي من السعر العالمي بالسعر المرجعي للدولار (متوسط البيع والشراء). لا يشمل المصنعية",
    "value": {
-    "usd": 1260.33,
-    "iqd": 2142567
+    "usd": 1233.03,
+    "iqd": 2096156
    },
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 0.5
+   "time_gap_hours": 1.8
   },
   {
    "id": "official_parallel_gap",
@@ -891,7 +891,7 @@
    "value": 12.58,
    "status": "current",
    "status_ar": "حالية",
-   "time_gap_hours": 4.2
+   "time_gap_hours": 1.8
   },
   {
    "id": "fed_target_range",
@@ -905,12 +905,12 @@
    "inputs": {
     "fed_target_lower": {
      "value": 3.75,
-     "data_time": "2026-11-24",
+     "data_time": "2026-11-25",
      "status": "current"
     },
     "fed_target_upper": {
      "value": 4,
-     "data_time": "2026-11-24",
+     "data_time": "2026-11-25",
      "status": "current"
     }
    },
