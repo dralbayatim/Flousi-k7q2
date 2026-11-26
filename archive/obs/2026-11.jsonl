@@ -269,3 +269,5 @@
 {"n":269,"id":"usd_iqd_shops_baghdad","v":{"sell":170000,"buy":169000},"t":"2026-11-26T07:53:12.000Z","at":"2026-11-26T08:14:57.682Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/USD-IQD-edges-up-in-Baghdad-and-Erbil-1","kind":"obs"}
 {"n":270,"id":"xau_usd","v":3572.8,"t":"2026-11-26T09:31:17.000Z","at":"2026-11-26T09:31:23.818Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":271,"id":"xag_usd","v":41.38,"t":"2026-11-26T09:31:17.000Z","at":"2026-11-26T09:31:23.818Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":272,"id":"xau_usd","v":3561.9,"t":"2026-11-26T10:34:17.000Z","at":"2026-11-26T10:34:17.947Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":273,"id":"xag_usd","v":41.26,"t":"2026-11-26T10:34:17.000Z","at":"2026-11-26T10:34:17.947Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
