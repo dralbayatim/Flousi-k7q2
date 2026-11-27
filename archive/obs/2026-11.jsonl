@@ -327,3 +327,6 @@
 {"n":327,"id":"xag_usd","v":43.95,"t":"2026-11-27T13:12:19.000Z","at":"2026-11-27T13:12:20.956Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":328,"id":"xau_usd","v":3637.8,"t":"2026-11-27T14:27:50.000Z","at":"2026-11-27T14:28:10.296Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":329,"id":"xag_usd","v":43.67,"t":"2026-11-27T14:27:49.000Z","at":"2026-11-27T14:28:10.296Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":330,"id":"xau_usd","v":3626.7,"t":"2026-11-27T15:30:20.000Z","at":"2026-11-27T15:30:27.926Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":331,"id":"xag_usd","v":43.32,"t":"2026-11-27T15:30:19.000Z","at":"2026-11-27T15:30:27.926Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":332,"id":"dxy","v":103.87,"t":"2026-11-27","at":"2026-11-27T15:30:27.926Z","src":"البنك المركزي الأوروبي (أسعار مرجعية عبر Frankfurter)","url":"https://www.ecb.europa.eu","kind":"obs"}
