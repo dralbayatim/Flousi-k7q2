@@ -334,3 +334,7 @@
 {"n":334,"id":"xag_usd","v":42.99,"t":"2026-11-27T16:39:19.000Z","at":"2026-11-27T16:39:24.861Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":335,"id":"xau_usd","v":3636.6,"t":"2026-11-27T17:39:50.000Z","at":"2026-11-27T17:40:01.800Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":336,"id":"xag_usd","v":43.17,"t":"2026-11-27T17:39:49.000Z","at":"2026-11-27T17:40:01.800Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":337,"id":"xau_usd","v":3638.9,"t":"2026-11-27T18:36:50.000Z","at":"2026-11-27T18:37:11.142Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":338,"id":"xag_usd","v":43.21,"t":"2026-11-27T18:36:50.000Z","at":"2026-11-27T18:37:11.142Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":339,"id":"fed_target_upper","v":4,"t":"2026-11-27","at":"2026-11-27T18:37:11.142Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
+{"n":340,"id":"fed_target_lower","v":3.75,"t":"2026-11-27","at":"2026-11-27T18:37:11.142Z","src":"FRED — Federal Reserve Bank of St. Louis","url":"https://fred.stlouisfed.org","kind":"obs"}
