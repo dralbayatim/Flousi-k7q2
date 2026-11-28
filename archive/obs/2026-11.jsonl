@@ -371,3 +371,5 @@
 {"n":371,"id":"usd_iqd_shops_baghdad","v":{"sell":166500,"buy":165500},"t":"2026-11-28T08:22:02.000Z","at":"2026-11-28T09:22:19.277Z","src":"Shafaq News (مسح السوق)","url":"https://shafaq.com/en/Economy/USD-IQD-exchange-rates-dip-in-Baghdad-and-Erbil-1","kind":"obs"}
 {"n":372,"id":"xau_usd","v":3650,"t":"2026-11-28T10:25:23.000Z","at":"2026-11-28T10:25:27.767Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":373,"id":"xag_usd","v":43.23,"t":"2026-11-28T10:25:21.000Z","at":"2026-11-28T10:25:27.767Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":374,"id":"xau_usd","v":3650,"t":"2026-11-28T11:21:56.000Z","at":"2026-11-28T11:22:18.483Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":375,"id":"xag_usd","v":43.23,"t":"2026-11-28T11:21:55.000Z","at":"2026-11-28T11:22:18.483Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
