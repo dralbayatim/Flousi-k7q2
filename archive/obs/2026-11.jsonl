@@ -388,3 +388,5 @@
 {"n":388,"id":"xag_usd","v":43.23,"t":"2026-11-28T15:20:55.000Z","at":"2026-11-28T15:21:09.850Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":389,"id":"xau_usd","v":3650,"t":"2026-11-28T16:22:56.000Z","at":"2026-11-28T16:23:18.563Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":390,"id":"xag_usd","v":43.23,"t":"2026-11-28T16:22:55.000Z","at":"2026-11-28T16:23:18.563Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":391,"id":"xau_usd","v":3650,"t":"2026-11-28T17:21:26.000Z","at":"2026-11-28T17:21:49.574Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":392,"id":"xag_usd","v":43.23,"t":"2026-11-28T17:21:25.000Z","at":"2026-11-28T17:21:49.574Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
