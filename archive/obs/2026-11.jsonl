@@ -386,3 +386,5 @@
 {"n":386,"id":"real10y","v":2.79,"t":"2026-11-27","at":"2026-11-28T14:30:33.794Z","src":"U.S. Department of the Treasury","url":"https://home.treasury.gov","kind":"obs"}
 {"n":387,"id":"xau_usd","v":3650,"t":"2026-11-28T15:20:56.000Z","at":"2026-11-28T15:21:09.850Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
 {"n":388,"id":"xag_usd","v":43.23,"t":"2026-11-28T15:20:55.000Z","at":"2026-11-28T15:21:09.850Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":389,"id":"xau_usd","v":3650,"t":"2026-11-28T16:22:56.000Z","at":"2026-11-28T16:23:18.563Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
+{"n":390,"id":"xag_usd","v":43.23,"t":"2026-11-28T16:22:55.000Z","at":"2026-11-28T16:23:18.563Z","src":"Gold-API","url":"https://gold-api.com","kind":"obs"}
